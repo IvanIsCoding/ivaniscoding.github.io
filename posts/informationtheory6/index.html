@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    
+
+
+    <head>
+    <link href="https://gmpg.org/xfn/11" rel="profile">
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="public" />
+<!-- Enable responsiveness on mobile devices -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.54.0" />
+
+    
+    
+    
+
+<title>Information Theory #6 - Amusement Park • Ivan&#39;s Blog</title>
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Information Theory #6 - Amusement Park"/>
+<meta name="twitter:description" content="Analysis of Amusement Park from the Japanese Open Contest 2017"/>
+
+<meta property="og:title" content="Information Theory #6 - Amusement Park" />
+<meta property="og:description" content="Analysis of Amusement Park from the Japanese Open Contest 2017" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ivaniscoding.github.io/posts/informationtheory6/" />
+<meta property="article:published_time" content="2018-08-28T14:00:00-03:00"/>
+<meta property="article:modified_time" content="2018-08-28T14:00:00-03:00"/><meta property="og:site_name" content="Ivan&#39;s blog" />
+
+
+    
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/scss/hyde-hyde.6a83d62c39a364f036df4db1ecd564645635d6c7fc182425cb501218fec485f5.css" integrity="sha256-aoPWLDmjZPA2302x7NVkZFY11sf8GCQly1ASGP7EhfU=">
+
+
+<link rel="stylesheet" href="/scss/print.2744dcbf8a0b2e74f8a50e4b34e5f441be7cf93cc7de27029121c6a09f9e77bc.css" integrity="sha256-J0Tcv4oLLnT4pQ5LNOX0Qb58&#43;TzH3icCkSHGoJ&#43;ed7w=" media="print">
+
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    
+
+</head>
+
+
+    <body class=" ">
+    
+<div class="sidebar">
+  <div class="container ">
+    <div class="sidebar-about">
+      <span class="site__title">
+        <a href="https://ivaniscoding.github.io/">Ivan&#39;s Blog</a>
+      </span>
+      
+      
+      <p class="site__description">
+        
+      </p>
+    </div>
+    <div class="collapsible-menu">
+      <input type="checkbox" id="menuToggle">
+      <label for="menuToggle">Ivan&#39;s Blog</label>
+      <div class="menu-content">
+        <div>
+	<ul class="sidebar-nav">
+		 
+		 
+			 
+				<li>
+					<a href="/posts/">
+						<span>Posts</span>
+					</a>
+				</li>
+			 
+		
+		</li>
+	</ul>
+</div>
+
+        <section class="social">
+	
+	
+	
+	<a href="https://github.com/ivaniscoding" rel="me"><i class="fab fa-github fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	
+	
+	<a href="https://linkedin.com/in/ivan-carvalho" rel="me"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	
+	
+	
+	
+	
+</section>
+
+      </div>
+    </div>
+    
+
+<div class="builtwith">
+Built with <a href="https://gohugo.io">Hugo</a> ❤️ <a href="https://github.com/htr3n/hyde-hyde">hyde-hyde</a>.
+</div>
+
+
+  </div>
+</div>
+
+        <div class="content container">
+            
+    <article>
+  <header>
+    <h1>Information Theory #6 - Amusement Park</h1>
+    
+    
+<div class="post__meta">
+    
+    
+      <i class="fas fa-calendar-alt"></i> Aug 28, 2018
+    
+    
+    
+      
+      
+          in
+          
+          
+              <a class="badge badge-category" href="/categories/information-theory">INFORMATION THEORY</a>
+              
+          
+      
+    
+    
+    
+      
+      
+          <br/>
+           <i class="fas fa-tags"></i>
+          
+          <a class="badge badge-tag" href="/tags/algorithms">algorithms</a>
+          
+      
+    
+    
+    <br/>
+    <i class="fas fa-clock"></i> 7 min read
+</div>
+
+
+  </header>
+  
+  
+  <div class="post">
+    
+
+<p>I am writing a series of posts about Information Theory problems. You may find the previous one <a href="/posts/informationtheory5/">here</a>.</p>
+
+<p>The problem we will analyze is Amusement Park from the Japanese Olympiad in Informatics Open Contest (JOI Open 2017). You may find the problem statement and a place to submit <a href="https://oj.uz/problem/view/JOI17_amusement_park">here</a>.</p>
+
+<p>A synthesis of the problem statement is : You are given a connected graph of N vertices and M edges (60 &lt;= N &lt;= 10000, M &lt;= 20000) . JOI-kun must tell the integer X ( 0 &lt;= X &lt;= 2^60 - 1) to IOI-chan, but he cannot do that directly. Instead, he will write either 0 or 1 in each vertex.  IOI-chan can read the integer written on the vertex currently at and move to any adjacent vertex. Help IOI-chan discover X by using the smallest possible number of movements. You must submit two files:</p>
+
+<ul>
+<li>One that given the structure of the graph and the integer X, writes 0 or 1 on each vertex. Note that JOI-kun does not know the starting vertex of IOI-chan.</li>
+<li>One that given a starting vertex and the graph structure, uses the least number of moves such that with the integers written on the visited vertices it can recover the integer X.</li>
+</ul>
+
+<p>The scoring of the subtasks is based on the maximum number of moves IOI-chan does. In order to score 100 points, you must find a solution that uses at most 120 moves.</p>
+
+<p>I will not discuss the first subtasks because I found a solution that in my opinion is conceptually simple (it is basically a DFS) and already scores 78 points going up to subtask 4. Thus, we will discuss the DFS idea and the final solution.</p>
+
+<h2 id="a-dfs-approach-78-points">A DFS approach : 78 points</h2>
+
+<p>There are some initial steps that are common to almost all approaches to this problem. They are necessary in order to solve the problem because they take care of the basic : how to send X with 0&rsquo;s and 1&rsquo;s</p>
+
+<p>The idea is : we will have to use the binary encoding of X to send it with 0&rsquo;s and 1&rsquo;s. The strategy will be as follows : we will assign for each vertex which of the 60 bits it represents; we must find a procedure that produces the same result for IOI-chan and JOI-kun, because we need to be sure that we are correctly receiving the message.</p>
+
+<p>The next step of this idea is : we need to find an efficient way of moving between the vertices such that we can recover the 60 bits quickly. When we get all the bits, we stop moving and report X. In order to achieve this, we have to also think about the way we assign the bit for each vertex, because this assignment heavily impacts in the number of movements.</p>
+
+<p>The final step is : it is easier to solve this problem on a tree. Because of the tree properties, it is simple to find a correct way to assign the bits to the vertices and it is less complicated to decide where to move compared to a general graph. Due to the fact that our graph is connected, we can always find a spanning tree of the graph and transform the general graph into a tree.</p>
+
+<p>An algorithm that finds a spanning tree and also finds an efficient way of choosing the bits is the Depth-First Search. Let&rsquo;s take a look :</p>
+
+<p><img src="/img/InformationTheory6/amusement.png" alt="DFS Tree" /></p>
+
+<p>We start the algorithm by doing the DFS from any vertex of the graph. There are two key ideas that make the algorithm efficient:</p>
+
+<p>If a vertex was the (i)-th vertex to be discovered by the DFS, we define its discovery time as (i - 1). The bit that we will assign for this vertex will be (i - 1) modulo 60.
+We keep the edges used to discover of a new vertex as the edges of our spanning tree. Thus, we build the tree as we assign the bits
+By doing that, the only remaining step is to find an efficient way to move in order to quickly discover all the 60 bits.</p>
+
+<p>However, the way we move will also be heavily inspired by the DFS. Suppose that we are currently at a vertex v and let T be the subtree of v considering that the tree is rooted at the starting vertex of the DFS. There are two cases:</p>
+
+<p>The size of T is bigger than or equal to 60. We just follow the DFS order and stop when all the 60 bits are found.
+The size of T is smaller than 60. We follow the DFS order and then return to the parent vertex of v, p. In p we do something similar but in a different order : instead of following the DFS from the first discovered child, we follow the DFS order from v and consider the array of children to be circular. Let&rsquo;s exemplify : if [1,2,3,4] was the ordering and you came from 3, them the order will be [3,4,2,1].</p>
+
+<p>This algorithm uses at most 160 movements and scores 78 points. It was harder to think and explain the algorithm then to implement it. You may find the partial solution here.</p>
+
+<h2 id="a-smart-subtree-approach-100-points">A smart subtree approach : 100 points</h2>
+
+<p>In the final solution, we will also stick to the idea of solving the problem on a tree and reducing a general graph to its spanning tree. However, we will tweak the moving part of our algorithm to be more efficient.</p>
+
+<p>From now on, when we talk about subtrees , think of them as a connected acyclic subgraph rather than a subtree of a rooted tree. Suppose that we have a subtree of exactly 60 vertices . If we run the DFS algorithm on this subtree, we will be able to find X with 120 moves or less for all the vertices of the subtree.</p>
+
+<p>If we could assign for each vertex a subtree of size 60 such that all the bits of X are represented in the subtree, then our problem is solved. Let&rsquo;s focus on finding a way of doing that.</p>
+
+<p>Suppose we have already found the spanning tree and found an arbitrary subtree T of size 60. For all vertices of the subtree, we assign T as its subtree. Then, we will try to assign a subtree to the neighbors of the vertices of the subtree that have not yet been assigned a subtree.</p>
+
+<p><img src="/img/InformationTheory6/amusement1.png" alt="Limited Subtree" /></p>
+
+<p>The idea is as follows. Let u be the vertex without an assigned subtree and v its neighbor that has been assigned the subtree T. To find subtree for u, we copy T and remove an arbitrary leaf of the tree that is not v. Then, we connect u to v in the new subtree T* and assign the bit of the removed leaf to u. The image above shows this idea for a smaller subtree : we pick any of the leaves (in this it was the one numbered 6, but it could be 5) and remove it. Then, we connect the new vertex to its neighbor in the subtree an assign the 6th bit to the new vertex.</p>
+
+<p>We must run the routine above until all vertices are assigned a subtree. Because the graph is connected, it will always be possible to assign a subtree to each vertex.</p>
+
+<p>In the decoding part as IOI-chan , we run the DFS idea from our previous algorithm in the subtree of the starting vertex. IOI-chan will make at most 120 moves.</p>
+
+<p>In my final implementation, I opted to use a BFS to generate a spanning tree instead of the DFS. Despite that, the algorithm is exactly the same as the one described above.</p>
+
+<script type="application/javascript" src="//gist.github.com/IvanIsCoding/f783667abfc69916405b6ffe4ace99c5.js"></script>
+
+  </div>
+  
+
+<div class="navigation navigation-single">
+    
+    <a href="/posts/informationtheory5/" class="navigation-prev">
+      <i aria-hidden="true" class="fa fa-chevron-left"></i>
+      <span class="navigation-tittle">Information Theory #5 - City</span>
+    </a>
+    
+    
+</div>
+
+
+  
+
+  
+    
+
+
+</article>
+
+
+        </div>
+        
+    
+<script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" integrity="sha384-GqVMZRt5Gn7tB9D9q7ONtcp4gtHIUEW/yG7h98J7IpE3kpi+srfFyyB/04OV6pG0" crossorigin="anonymous"></script>
+
+
+    
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+        
+    
+    <script type="text/javascript">
+        
+        hljs.initHighlightingOnLoad();
+    </script>
+    
+
+
+
+
+    
+
+
+
+    </body>
+</html>

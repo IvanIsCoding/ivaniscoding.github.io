@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Information Theory on Ivan&#39;s Blog</title>
+    <link>https://ivaniscoding.github.io/categories/information-theory/</link>
+    <description>Recent content in Information Theory on Ivan&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 28 Aug 2018 14:00:00 -0300</lastBuildDate>
+    
+	<atom:link href="https://ivaniscoding.github.io/categories/information-theory/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Information Theory #6 - Amusement Park</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory6/</link>
+      <pubDate>Tue, 28 Aug 2018 14:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory6/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is Amusement Park from the Japanese Olympiad in Informatics Open Contest (JOI Open 2017). You may find the problem statement and a place to submit here.
+A synthesis of the problem statement is : You are given a connected graph of N vertices and M edges (60 &amp;lt;= N &amp;lt;= 10000, M &amp;lt;= 20000) .</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #5 - City</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory5/</link>
+      <pubDate>Mon, 27 Aug 2018 22:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory5/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is City from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2017). You may find the problem statement and a place to submit here .
+A synthesis of the problem statement is : you are given a rooted tree of N vertices (N &amp;lt;= 250000) that has a depth that is at most 18.</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #4 - Airline Route Map</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory4/</link>
+      <pubDate>Sun, 26 Aug 2018 20:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory4/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is Airline Route Map from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2018). You may find the problem statement and a place to submit here .
+A synthesis of the problem statement is : Alice needs to send to Bob an undirected graph of N vertices (N &amp;lt;= 1000) and M edges (M &amp;lt;= N*(N-1)/2).</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #3 - Broken Device</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory3/</link>
+      <pubDate>Sat, 25 Aug 2018 12:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory3/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is Broken Device from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2017). You may find the problem statement and a place to submit here.
+A synthesis of the problem statement is : Anna wants to send a 60-bit integer to Bruno. She has a device that can send a sequence of 150 numbers that are either 0 or 1.</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #2 - Navigation</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory2/</link>
+      <pubDate>Fri, 24 Aug 2018 17:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory2/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is Navigation from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2015). You may find the problem statement and a place to submit here.
+A synthesis of the problem statement is : Anna lives in an island that is part of the IOI islands, that can be represented by an acyclic connected graph.</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #1 - Coins</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory1/</link>
+      <pubDate>Fri, 24 Aug 2018 13:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory1/</guid>
+      <description>Information Theory problems are not common and that is why I am writing about them.
+They generally consist of two parts : encoding and decoding. It seems to be simple in theory, but problem setters get very creative when adding restrictions that make simple things hard.
+Each problem is unique, however there are some aspects that seem to be shared by many problems:
+ It is important to know what you need to send It relevant to know which information will be available to both the encoder and decoder Binary encoding is an efficient way of sending data  The problem we will analyze is Coins from the Practice Section of the International Olympiad in Informatics (IOI 2017 Practice).</description>
+    </item>
+    
+  </channel>
+</rss>

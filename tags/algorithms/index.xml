@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Algorithms on Ivan&#39;s Blog</title>
+    <link>https://ivaniscoding.github.io/tags/algorithms/</link>
+    <description>Recent content in Algorithms on Ivan&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 28 Aug 2018 14:00:00 -0300</lastBuildDate>
+    
+	<atom:link href="https://ivaniscoding.github.io/tags/algorithms/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Information Theory #6 - Amusement Park</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory6/</link>
+      <pubDate>Tue, 28 Aug 2018 14:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory6/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is Amusement Park from the Japanese Olympiad in Informatics Open Contest (JOI Open 2017). You may find the problem statement and a place to submit here.
+A synthesis of the problem statement is : You are given a connected graph of N vertices and M edges (60 &amp;lt;= N &amp;lt;= 10000, M &amp;lt;= 20000) .</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #5 - City</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory5/</link>
+      <pubDate>Mon, 27 Aug 2018 22:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory5/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is City from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2017). You may find the problem statement and a place to submit here .
+A synthesis of the problem statement is : you are given a rooted tree of N vertices (N &amp;lt;= 250000) that has a depth that is at most 18.</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #4 - Airline Route Map</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory4/</link>
+      <pubDate>Sun, 26 Aug 2018 20:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory4/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is Airline Route Map from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2018). You may find the problem statement and a place to submit here .
+A synthesis of the problem statement is : Alice needs to send to Bob an undirected graph of N vertices (N &amp;lt;= 1000) and M edges (M &amp;lt;= N*(N-1)/2).</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #3 - Broken Device</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory3/</link>
+      <pubDate>Sat, 25 Aug 2018 12:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory3/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is Broken Device from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2017). You may find the problem statement and a place to submit here.
+A synthesis of the problem statement is : Anna wants to send a 60-bit integer to Bruno. She has a device that can send a sequence of 150 numbers that are either 0 or 1.</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #2 - Navigation</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory2/</link>
+      <pubDate>Fri, 24 Aug 2018 17:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory2/</guid>
+      <description>I am writing a series of posts about Information Theory problems. You may find the previous one here.
+The problem we will analyze is Navigation from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2015). You may find the problem statement and a place to submit here.
+A synthesis of the problem statement is : Anna lives in an island that is part of the IOI islands, that can be represented by an acyclic connected graph.</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #1 - Coins</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory1/</link>
+      <pubDate>Fri, 24 Aug 2018 13:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/informationtheory1/</guid>
+      <description>Information Theory problems are not common and that is why I am writing about them.
+They generally consist of two parts : encoding and decoding. It seems to be simple in theory, but problem setters get very creative when adding restrictions that make simple things hard.
+Each problem is unique, however there are some aspects that seem to be shared by many problems:
+ It is important to know what you need to send It relevant to know which information will be available to both the encoder and decoder Binary encoding is an efficient way of sending data  The problem we will analyze is Coins from the Practice Section of the International Olympiad in Informatics (IOI 2017 Practice).</description>
+    </item>
+    
+    <item>
+      <title>Divide and Conquer #4 - ICC</title>
+      <link>https://ivaniscoding.github.io/posts/divideandconquer4/</link>
+      <pubDate>Thu, 23 Aug 2018 18:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/divideandconquer4/</guid>
+      <description>This is the fourth post of a series that focuses on Divide and Conquer. If you want to check the previous one, click here.
+The problem we will analyze is ICC from the Central-European Olympiad in Informatics (CEOI 2016). You may find the problem statement here and a place to submit the solution here.
+A synthesis of the problem statement is : there are N cities numbered from 1 to N.</description>
+    </item>
+    
+    <item>
+      <title>Divide and Conquer #3 - Library</title>
+      <link>https://ivaniscoding.github.io/posts/divideandconquer3/</link>
+      <pubDate>Thu, 23 Aug 2018 13:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/divideandconquer3/</guid>
+      <description>This is the third post of a series that focuses on Divide and Conquer. If you want to check the previous one, click here.
+The problem we will analyze is Library from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2018). You may find the problem statement here and a place to submit here.
+A synthesis of the problem statement is : you have an array of size N (N &amp;lt;= 1000) that is a permutation of 1,2,3&amp;hellip; N.</description>
+    </item>
+    
+    <item>
+      <title>Divide and Conquer #2 - Cave</title>
+      <link>https://ivaniscoding.github.io/posts/divideandconquer2/</link>
+      <pubDate>Wed, 22 Aug 2018 11:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/divideandconquer2/</guid>
+      <description>This is the second post of a series that focuses on Divide and Conquer. If you want to check the previous one, click here.
+The problem we will analyze is Cave from the International Olympiad in Informatics (IOI 2013). You may find the problem statement here and a place to submit here.
+A synthesis of the problem statement is : you have N (1 &amp;lt;= N &amp;lt;= 5000) switches and doors.</description>
+    </item>
+    
+    <item>
+      <title>Divide and Conquer #1 - Carnival</title>
+      <link>https://ivaniscoding.github.io/posts/divideandconquer1/</link>
+      <pubDate>Tue, 21 Aug 2018 21:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/divideandconquer1/</guid>
+      <description>This is the first post of a series of posts about Divide and Conquer. The idea is to share this simple yet very powerful approach to solve some problems.
+This is by no means a complete tutorial about Divide and Conquer and I will assume that the reader is at least familiar to some of the key concepts of the technique and the well-known applications such as Merge Sort and Binary Search.</description>
+    </item>
+    
+  </channel>
+</rss>

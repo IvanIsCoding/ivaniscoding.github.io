@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Divide and Conquer on Ivan&#39;s Blog</title>
+    <link>https://ivaniscoding.github.io/categories/divide-and-conquer/</link>
+    <description>Recent content in Divide and Conquer on Ivan&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 23 Aug 2018 18:00:00 -0300</lastBuildDate>
+    
+	<atom:link href="https://ivaniscoding.github.io/categories/divide-and-conquer/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Divide and Conquer #4 - ICC</title>
+      <link>https://ivaniscoding.github.io/posts/divideandconquer4/</link>
+      <pubDate>Thu, 23 Aug 2018 18:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/divideandconquer4/</guid>
+      <description>This is the fourth post of a series that focuses on Divide and Conquer. If you want to check the previous one, click here.
+The problem we will analyze is ICC from the Central-European Olympiad in Informatics (CEOI 2016). You may find the problem statement here and a place to submit the solution here.
+A synthesis of the problem statement is : there are N cities numbered from 1 to N.</description>
+    </item>
+    
+    <item>
+      <title>Divide and Conquer #3 - Library</title>
+      <link>https://ivaniscoding.github.io/posts/divideandconquer3/</link>
+      <pubDate>Thu, 23 Aug 2018 13:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/divideandconquer3/</guid>
+      <description>This is the third post of a series that focuses on Divide and Conquer. If you want to check the previous one, click here.
+The problem we will analyze is Library from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2018). You may find the problem statement here and a place to submit here.
+A synthesis of the problem statement is : you have an array of size N (N &amp;lt;= 1000) that is a permutation of 1,2,3&amp;hellip; N.</description>
+    </item>
+    
+    <item>
+      <title>Divide and Conquer #2 - Cave</title>
+      <link>https://ivaniscoding.github.io/posts/divideandconquer2/</link>
+      <pubDate>Wed, 22 Aug 2018 11:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/divideandconquer2/</guid>
+      <description>This is the second post of a series that focuses on Divide and Conquer. If you want to check the previous one, click here.
+The problem we will analyze is Cave from the International Olympiad in Informatics (IOI 2013). You may find the problem statement here and a place to submit here.
+A synthesis of the problem statement is : you have N (1 &amp;lt;= N &amp;lt;= 5000) switches and doors.</description>
+    </item>
+    
+    <item>
+      <title>Divide and Conquer #1 - Carnival</title>
+      <link>https://ivaniscoding.github.io/posts/divideandconquer1/</link>
+      <pubDate>Tue, 21 Aug 2018 21:00:00 -0300</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/divideandconquer1/</guid>
+      <description>This is the first post of a series of posts about Divide and Conquer. The idea is to share this simple yet very powerful approach to solve some problems.
+This is by no means a complete tutorial about Divide and Conquer and I will assume that the reader is at least familiar to some of the key concepts of the technique and the well-known applications such as Merge Sort and Binary Search.</description>
+    </item>
+    
+  </channel>
+</rss>
