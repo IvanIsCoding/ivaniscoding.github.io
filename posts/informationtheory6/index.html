@@ -93,6 +93,14 @@
 					</a>
 				</li>
 			 
+		 
+			 
+				<li>
+					<a href="/about/">
+						<span>About</span>
+					</a>
+				</li>
+			 
 		
 		</li>
 	</ul>
@@ -209,14 +217,19 @@ Built with <a href="https://gohugo.io">Hugo</a> ❤️ <a href="https://github.c
 
 <p>We start the algorithm by doing the DFS from any vertex of the graph. There are two key ideas that make the algorithm efficient:</p>
 
-<p>If a vertex was the (i)-th vertex to be discovered by the DFS, we define its discovery time as (i - 1). The bit that we will assign for this vertex will be (i - 1) modulo 60.
-We keep the edges used to discover of a new vertex as the edges of our spanning tree. Thus, we build the tree as we assign the bits
-By doing that, the only remaining step is to find an efficient way to move in order to quickly discover all the 60 bits.</p>
+<ul>
+<li>If a vertex was the (i)-th vertex to be discovered by the DFS, we define its discovery time as (i - 1). The bit that we will assign for this vertex will be (i - 1) modulo 60.</li>
+<li>We keep the edges used to discover of a new vertex as the edges of our spanning tree. Thus, we build the tree as we assign the bits</li>
+</ul>
+
+<p>By doing that, the only remaining step is to find an efficient way to move in order to quickly discover all the 60 bits.</p>
 
 <p>However, the way we move will also be heavily inspired by the DFS. Suppose that we are currently at a vertex v and let T be the subtree of v considering that the tree is rooted at the starting vertex of the DFS. There are two cases:</p>
 
-<p>The size of T is bigger than or equal to 60. We just follow the DFS order and stop when all the 60 bits are found.
-The size of T is smaller than 60. We follow the DFS order and then return to the parent vertex of v, p. In p we do something similar but in a different order : instead of following the DFS from the first discovered child, we follow the DFS order from v and consider the array of children to be circular. Let&rsquo;s exemplify : if [1,2,3,4] was the ordering and you came from 3, them the order will be [3,4,2,1].</p>
+<ul>
+<li>The size of T is bigger than or equal to 60. We just follow the DFS order and stop when all the 60 bits are found.</li>
+<li>The size of T is smaller than 60. We follow the DFS order and then return to the parent vertex of v, p. In p we do something similar but in a different order : instead of following the DFS from the first discovered child, we follow the DFS order from v and consider the array of children to be circular. Let&rsquo;s exemplify : if [1,2,3,4] was the ordering and you came from 3, them the order will be [3,4,2,1].</li>
+</ul>
 
 <p>This algorithm uses at most 160 movements and scores 78 points. It was harder to think and explain the algorithm then to implement it. You may find the partial solution here.</p>
 
