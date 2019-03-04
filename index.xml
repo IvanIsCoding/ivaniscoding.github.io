@@ -6,10 +6,19 @@
     <description>Recent content on Ivan&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 07 Feb 2019 21:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Sun, 03 Mar 2019 10:00:00 -0800</lastBuildDate>
     
 	<atom:link href="https://ivaniscoding.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Divide-and-conquer Techniques #1 - All But One Trick</title>
+      <link>https://ivaniscoding.github.io/posts/dctrick1/</link>
+      <pubDate>Sun, 03 Mar 2019 10:00:00 -0800</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/dctrick1/</guid>
+      <description>This is a post about one very interesting Divide-and-conquer technique. I call this the &amp;ldquo;All but one&amp;rdquo; trick because that&amp;rsquo;s an accurate description of what it can be used for. I learned about this in the Brazilian ICPC Summer School in 2018, thanks to Tomasz Idziaszek and thought it would be a good addition to this blog. In this post, I will briefly explain the technique and show its application in one problem.</description>
+    </item>
     
     <item>
       <title>Bio</title>
