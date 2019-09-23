@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ivan&#39;s Blog</title>
+    <title>Ivan Carvalho</title>
     <link>https://ivaniscoding.github.io/</link>
-    <description>Recent content on Ivan&#39;s Blog</description>
+    <description>Recent content on Ivan Carvalho</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sun, 03 Mar 2019 10:00:00 -0800</lastBuildDate>
@@ -27,7 +27,8 @@
       
       <guid>https://ivaniscoding.github.io/about/</guid>
       <description>I am currently a student at The University of British Columbia, majoring in Computer Science. I am passionate about Computer Science and Mathematics. I am active participant in problem-solving competitions and I am also an active software developer, always working on projects and looking for challenges.
- I am currently looking for internships in software development positions.  Projects  SuSy Reminder Bot: A serverless Telegram bot to remind students of their incomplete assignments in University of Campinas&amp;rsquo; Submission System.</description>
+ I am currently looking for internships in software development positions.  Experience Opal-RT Software Development Intern
+May 2019 - August 2019</description>
     </item>
     
     <item>
