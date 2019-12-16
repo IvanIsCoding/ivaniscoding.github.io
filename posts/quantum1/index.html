@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    
+
+
+    <head>
+    <link href="https://gmpg.org/xfn/11" rel="profile">
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="public" />
+<!-- Enable responsiveness on mobile devices -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.55.6" />
+
+    
+    
+    
+
+<title>Quantum #1 - Uncomputation • Ivan Carvalho</title>
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Quantum #1 - Uncomputation"/>
+<meta name="twitter:description" content="Introduction to a base technique in quantum computing"/>
+
+<meta property="og:title" content="Quantum #1 - Uncomputation" />
+<meta property="og:description" content="Introduction to a base technique in quantum computing" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ivaniscoding.github.io/posts/quantum1/" />
+<meta property="article:published_time" content="2019-12-11T20:00:00-08:00"/>
+<meta property="article:modified_time" content="2019-12-11T20:00:00-08:00"/><meta property="og:site_name" content="Ivan Carvalho" />
+
+
+    
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/scss/hyde-hyde.6a83d62c39a364f036df4db1ecd564645635d6c7fc182425cb501218fec485f5.css" integrity="sha256-aoPWLDmjZPA2302x7NVkZFY11sf8GCQly1ASGP7EhfU=">
+
+
+<link rel="stylesheet" href="/scss/print.2744dcbf8a0b2e74f8a50e4b34e5f441be7cf93cc7de27029121c6a09f9e77bc.css" integrity="sha256-J0Tcv4oLLnT4pQ5LNOX0Qb58&#43;TzH3icCkSHGoJ&#43;ed7w=" media="print">
+
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    
+</head>
+
+
+    <body class="theme-base-0d layout-reverse">
+    
+<div class="sidebar">
+  <div class="container ">
+    <div class="sidebar-about">
+      <span class="site__title">
+        <a href="https://ivaniscoding.github.io/">Ivan Carvalho</a>
+      </span>
+      
+      
+      <p class="site__description">
+        
+      </p>
+    </div>
+    <div class="collapsible-menu">
+      <input type="checkbox" id="menuToggle">
+      <label for="menuToggle">Ivan Carvalho</label>
+      <div class="menu-content">
+        <div>
+	<ul class="sidebar-nav">
+		 
+		 
+			 
+				<li>
+					<a href="/posts/">
+						<span>Posts</span>
+					</a>
+				</li>
+			 
+		 
+			 
+				<li>
+					<a href="/about/index.html">
+						<span>About</span>
+					</a>
+				</li>
+			 
+		
+	</ul>
+</div>
+
+        <section class="social">
+	
+	
+	
+	<a href="https://github.com/ivaniscoding" rel="me"><i class="fab fa-github fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	
+	
+	
+	
+	<a href="https://linkedin.com/in/ivan-carvalho" rel="me"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	
+	
+	
+	
+	
+</section>
+
+      </div>
+    </div>
+    
+
+<div class="builtwith">
+Built with <a href="https://gohugo.io">Hugo</a> ❤️ <a href="https://github.com/htr3n/hyde-hyde">hyde-hyde</a>.
+</div>
+
+
+  </div>
+</div>
+
+        <div class="content container">
+            
+    
+<article>
+  <header>
+    <h1>Quantum #1 - Uncomputation</h1>
+    
+    
+<div class="post__meta">
+    
+    
+      <i class="fas fa-calendar-alt"></i> Dec 11, 2019
+    
+    
+    
+      
+      
+          in
+          
+          
+              <a class="badge badge-category" href="/categories/quantum">QUANTUM</a>
+              
+          
+      
+    
+    
+    
+      
+      
+          <br/>
+           <i class="fas fa-tags"></i>
+          
+          <a class="badge badge-tag" href="/tags/quantum">quantum</a>
+          
+      
+    
+    
+    <br/>
+    <i class="fas fa-clock"></i> 3 min read
+</div>
+
+
+  </header>
+  
+  
+  <div class="post">
+    <p>This is the first post of a series of posts about Quantum Computing with <a href="https://qiskit.org/">Qiskit</a>. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.</p>
+
+<p>The goal of this post is to teach Uncomputation. Uncomputation is a fancy name for &ldquo;cleaning&rdquo; temporary resources, in our case qubits. The reasons for using uncomputation are:</p>
+
+<ul>
+<li>Reuse resources</li>
+<li>Make measurements more accurate</li>
+</ul>
+
+<p>To introduce uncomputation, let&rsquo;s discuss an example with a classical gate: AND. The AND gate is a gate that takes two bits and is set to 1 if those two bits are 1, otherwise, it is 0. In a table, it looks like:</p>
+
+<table>
+<thead>
+<tr>
+<th>φ</th>
+<th>ψ</th>
+<th>φ AND ψ</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+<p>In quantum circuits, it is important to notice that we need an additional qubit to calculate the AND of two qubits. Hence, to compute |φ&gt; |ψ&gt; we need a third qubit initially set to |0&gt; that will store φ AND ψ. The quantum equivalent of the AND gate is the Toffoli gate, thus the circuit that computes the and of two qubits is:</p>
+
+<p><img src="/img/Quantum1/Q1C1.png" alt="Quantum AND" /></p>
+
+<p>Now, imagine we need to compute the AND of three qubits: |φ&gt;, |ψ&gt;, and |ξ&gt;. The process is very similar because φ AND ψ AND ξ = (φ AND ψ) AND ξ. However, notice that we will need an extra working qubit to compute the intermediary step, φ AND ψ. Thus, our system needs 2 extra qubits totaling 5 qubits. The following circuit implements what we described, where the result is stored in q4:</p>
+
+<p><img src="/img/Quantum1/Q1C2.png" alt="Quantum AND of three qubits" /></p>
+
+<p>One problem we have is that our working qubit, q3, still contains the information of φ AND ψ. This might not seem a problem, but it is. That qubit can interfere with the other qubits when measuring (quantum computers are still not perfect), and we are wasting a qubit that we can use in the future.</p>
+
+<p>Here is where Uncomputation enters: we are going to reverse the state computed in q3 to |0&gt;, so we can use it again. To do so, we need to find the inverse of our operation. The key idea of uncomputation is to apply an operation, use the result of the intermediary operation, and then reverse that operation.</p>
+
+<p>Fortunately, the inverse of a Toffoli gate is the Toffoli gate itself so if we connect a Toffoli gate from φ, ψ to q3 we always obtain |0&gt;. The circuit is:</p>
+
+<p><img src="/img/Quantum1/Q1C3.png" alt="Quantum AND of three qubits with uncomputation" /></p>
+
+<p>The fact that Uncomputation saves resources arises when we want to compute the AND of 4 qubits. Because of uncomputation, we can reuse one of the auxiliary qubits and hence we need 2 additional qubits, the same number of auxiliary qubits as before. The circuit is more complicated, but here it is where q4 contains the AND and q5 is |0&gt; after all operations:</p>
+
+<p><img src="/img/Quantum1/Q1C4.png" alt="Quantum AND of four qubits with uncomputation" /></p>
+
+<p>The Qiskit that implements the calculation of the AND of three qubits is provided bellow, building exactly the circuit we described:</p>
+
+<script type="application/javascript" src="//gist.github.com/IvanIsCoding/0fd6cc6a2a892dd9d3b59e59cfa0f2a2.js"></script>
+
+  </div>
+  
+
+
+  
+
+  
+    
+
+
+</article>
+
+
+        </div>
+        
+    
+
+  
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-135472875-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" integrity="sha384-GqVMZRt5Gn7tB9D9q7ONtcp4gtHIUEW/yG7h98J7IpE3kpi+srfFyyB/04OV6pG0" crossorigin="anonymous"></script>
+
+
+    
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+        
+    
+    <script type="text/javascript">
+        
+        hljs.initHighlightingOnLoad();
+    </script>
+    
+
+
+
+
+    
+
+
+
+    </body>
+</html>

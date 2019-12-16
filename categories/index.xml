@@ -6,10 +6,19 @@
     <description>Recent content in Categories on Ivan Carvalho</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 03 Mar 2019 10:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Wed, 11 Dec 2019 20:00:00 -0800</lastBuildDate>
     
 	<atom:link href="https://ivaniscoding.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Quantum</title>
+      <link>https://ivaniscoding.github.io/categories/quantum/</link>
+      <pubDate>Wed, 11 Dec 2019 20:00:00 -0800</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/categories/quantum/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Divide and Conquer</title>
