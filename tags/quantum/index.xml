@@ -6,10 +6,21 @@
     <description>Recent content in quantum on Ivan Carvalho</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 11 Dec 2019 20:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Sun, 22 Dec 2019 22:00:00 -0800</lastBuildDate>
     
 	<atom:link href="https://ivaniscoding.github.io/tags/quantum/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Quantum #2 - Teleportation</title>
+      <link>https://ivaniscoding.github.io/posts/quantum2/</link>
+      <pubDate>Sun, 22 Dec 2019 22:00:00 -0800</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/quantum2/</guid>
+      <description>This is the second post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
+The goal of this post is to discuss quantum teleportation, one of the most basic protocols for communication in quantum computing.
+Teleportation and the problem it solves Imagine that Alice has a qubit \(| \psi \rangle = \alpha | 0 \rangle + \beta | 1 \rangle\), where both \(\alpha\) and \(\beta\) are unknown.</description>
+    </item>
     
     <item>
       <title>Quantum #1 - Uncomputation</title>
