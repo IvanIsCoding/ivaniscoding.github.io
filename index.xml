@@ -6,10 +6,21 @@
     <description>Recent content on Ivan Carvalho</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 22 Dec 2019 22:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Mon, 23 Dec 2019 22:00:00 -0800</lastBuildDate>
     
 	<atom:link href="https://ivaniscoding.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Quantum #3 - Superdense Coding</title>
+      <link>https://ivaniscoding.github.io/posts/quantum3/</link>
+      <pubDate>Mon, 23 Dec 2019 22:00:00 -0800</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/quantum3/</guid>
+      <description>This is the third post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
+The goal of this post is to discuss superdense coding, which can be seen as the opposite of quantum teleportation.
+Sending bits with qubits Imagine that Alice wants to send two classical bits \(b_{0}b_{1}\) to Bob.</description>
+    </item>
     
     <item>
       <title>Quantum #2 - Teleportation</title>
