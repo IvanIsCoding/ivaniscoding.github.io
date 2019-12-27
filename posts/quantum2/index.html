@@ -228,7 +228,7 @@ Built with <a href="https://gohugo.io">Hugo</a> ❤️ <a href="https://github.c
 \]</span></p>
 <p>Secondly, we apply the Hadamard gate to the first qubit and we obtain:</p>
 <p><span class="math display">\[
-\rightarrow \frac{|00\rangle \otimes (\alpha|0 \rangle+\beta|1\rangle) + |01\rangle \otimes (\alpha|1 \rangle+\beta|0\rangle) + |10\rangle \otimes (\alpha|0 \rangle-\beta|1\rangle) + |11\rangle \otimes (\alpha|1 \rangle-\beta|0\rangle)}{2}
+\rightarrow \frac{|00\rangle (\alpha|0 \rangle+\beta|1\rangle) + |01\rangle (\alpha|1 \rangle+\beta|0\rangle) + |10\rangle (\alpha|0 \rangle-\beta|1\rangle) + |11\rangle (\alpha|1 \rangle-\beta|0\rangle)}{2}
 \]</span></p>
 <p>Thirdly, we measure the first two qubits, i.e. those that are with Alice, and send the result to Bob. Notice that depending on the outcome, we know exactly the state of third qubit. For example, we know that if the outcome of the measurement is <span class="math inline">\(10\)</span>, then the last qubit is <span class="math inline">\(\alpha|0 \rangle-\beta|1\rangle\)</span>.</p>
 <p>Lastly, we need to go from the qubit that we know now to <span class="math inline">\(|\psi\rangle\)</span>. Fortunately, that is simple. To achieve that, we need to apply the gates <span class="math inline">\(X\)</span> and <span class="math inline">\(Z\)</span> conditionally. The table below summarizes when we need to apply the gates:</p>

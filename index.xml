@@ -6,10 +6,20 @@
     <description>Recent content on Ivan Carvalho</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 23 Dec 2019 22:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Thu, 26 Dec 2019 18:00:00 -0800</lastBuildDate>
     
 	<atom:link href="https://ivaniscoding.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Quantum #4 - Deutsch-Jozsa (part 1)</title>
+      <link>https://ivaniscoding.github.io/posts/quantum4/</link>
+      <pubDate>Thu, 26 Dec 2019 18:00:00 -0800</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/quantum4/</guid>
+      <description>This is the fourth post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
+The goal of this post is to discuss the Deutsch-Jozsa algorithm, which was one of the very first quantum algorithms. Even though it solves a very artificial problem, its main purpose is to answer: is there an advantage in using quantum computers?</description>
+    </item>
     
     <item>
       <title>Quantum #3 - Superdense Coding</title>
