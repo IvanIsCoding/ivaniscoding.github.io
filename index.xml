@@ -6,10 +6,21 @@
     <description>Recent content on Ivan Carvalho</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 26 Dec 2019 18:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Sat, 28 Dec 2019 00:10:00 -0800</lastBuildDate>
     
 	<atom:link href="https://ivaniscoding.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Quantum #5 - Deutsch-Jozsa (part 2)</title>
+      <link>https://ivaniscoding.github.io/posts/quantum5/</link>
+      <pubDate>Sat, 28 Dec 2019 00:10:00 -0800</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/quantum5/</guid>
+      <description>This is the fifth post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
+The goal of this post is to continue the discussion of the Deutsch-Jozsa algorithm, starting off where we stopped on part 1.
+Deutsch-Jozsa problem After having introduced the Deutsch problem, we will now introduce the Deutsch-Jozsa which is a generalization of the Deutsch problem.</description>
+    </item>
     
     <item>
       <title>Quantum #4 - Deutsch-Jozsa (part 1)</title>
