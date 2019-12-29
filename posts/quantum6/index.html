@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    
+
+
+    <head>
+    <link href="https://gmpg.org/xfn/11" rel="profile">
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="public" />
+<!-- Enable responsiveness on mobile devices -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="generator" content="Hugo 0.55.6" />
+
+    
+    
+    
+
+<title>Quantum #6 - Bernstein-Vazirani • Ivan Carvalho</title>
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Quantum #6 - Bernstein-Vazirani"/>
+<meta name="twitter:description" content="Guessing a hidden string using quantum computers"/>
+
+<meta property="og:title" content="Quantum #6 - Bernstein-Vazirani" />
+<meta property="og:description" content="Guessing a hidden string using quantum computers" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ivaniscoding.github.io/posts/quantum6/" />
+<meta property="article:published_time" content="2019-12-28T20:10:00-08:00"/>
+<meta property="article:modified_time" content="2019-12-28T20:10:00-08:00"/><meta property="og:site_name" content="Ivan Carvalho" />
+
+
+    
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css">
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/scss/hyde-hyde.6a83d62c39a364f036df4db1ecd564645635d6c7fc182425cb501218fec485f5.css" integrity="sha256-aoPWLDmjZPA2302x7NVkZFY11sf8GCQly1ASGP7EhfU=">
+
+
+<link rel="stylesheet" href="/scss/print.2744dcbf8a0b2e74f8a50e4b34e5f441be7cf93cc7de27029121c6a09f9e77bc.css" integrity="sha256-J0Tcv4oLLnT4pQ5LNOX0Qb58&#43;TzH3icCkSHGoJ&#43;ed7w=" media="print">
+
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    
+</head>
+
+
+    <body class="theme-base-0d layout-reverse">
+    
+<div class="sidebar">
+  <div class="container ">
+    <div class="sidebar-about">
+      <span class="site__title">
+        <a href="https://ivaniscoding.github.io/">Ivan Carvalho</a>
+      </span>
+      
+      
+      <p class="site__description">
+        
+      </p>
+    </div>
+    <div class="collapsible-menu">
+      <input type="checkbox" id="menuToggle">
+      <label for="menuToggle">Ivan Carvalho</label>
+      <div class="menu-content">
+        <div>
+	<ul class="sidebar-nav">
+		 
+		 
+			 
+				<li>
+					<a href="/posts/">
+						<span>Posts</span>
+					</a>
+				</li>
+			 
+		 
+			 
+				<li>
+					<a href="/about/index.html">
+						<span>About</span>
+					</a>
+				</li>
+			 
+		
+	</ul>
+</div>
+
+        <section class="social">
+	
+	
+	
+	<a href="https://github.com/ivaniscoding" rel="me"><i class="fab fa-github fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	
+	
+	
+	
+	<a href="https://linkedin.com/in/ivan-carvalho" rel="me"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a>
+	
+	
+	
+	
+	
+	
+	
+	
+</section>
+
+      </div>
+    </div>
+    
+
+<div class="builtwith">
+Built with <a href="https://gohugo.io">Hugo</a> ❤️ <a href="https://github.com/htr3n/hyde-hyde">hyde-hyde</a>.
+</div>
+
+
+  </div>
+</div>
+
+        <div class="content container">
+            
+    
+<article>
+  <header>
+    <h1>Quantum #6 - Bernstein-Vazirani</h1>
+    
+    
+<div class="post__meta">
+    
+    
+      <i class="fas fa-calendar-alt"></i> Dec 28, 2019
+    
+    
+    
+      
+      
+          in
+          
+          
+              <a class="badge badge-category" href="/categories/quantum">QUANTUM</a>
+              
+          
+      
+    
+    
+    
+      
+      
+          <br/>
+           <i class="fas fa-tags"></i>
+          
+          <a class="badge badge-tag" href="/tags/quantum">quantum</a>
+          
+      
+    
+    
+    <br/>
+    <i class="fas fa-clock"></i> 6 min read
+</div>
+
+
+  </header>
+  
+  
+  <div class="post">
+    <p>This is the sixth post of a series of posts about Quantum Computing with <a href="https://qiskit.org/">Qiskit</a>. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.</p>
+<p>The goal of this post is to discuss how to discover a hidden string in a black box using Bernstein-Vazirani’s algorithm. There is also a connection between this algorithm and Deutsch-Jozsa’s algorithm, which was discussed in the last <a href="/posts/quantum5/">post</a>.</p>
+<h2 id="decoding-a-hidden-string">Decoding a hidden string</h2>
+<p>Imagine that you have a black box (or oracle) that implements a hidden function that takes n-bit strings and returns 0 or 1, that is <span class="math inline">\(f: \{0, 1\}^{n} \rightarrow \{0, 1\}\)</span>. The output of the function is determined by a hidden string <span class="math inline">\(s\)</span>, following the expression:</p>
+<p><span class="math display">\[
+f(x) = s \cdot x \mod 2
+\]</span></p>
+<p>How many queries are needed to discover <span class="math inline">\(s\)</span>?</p>
+<p>To clarify the notation used, by <span class="math inline">\(s \cdot x\)</span> we mean the bitwise dot product of <span class="math inline">\(s\)</span> and <span class="math inline">\(x\)</span>. Mathematically, if <span class="math inline">\(s = a_{0}a_{1}a_{2}...a_{n-1}\)</span> and <span class="math inline">\(x = b_{0}b_{1}b_{2}...b_{n-1}\)</span> then we define:</p>
+<p><span class="math display">\[
+s \cdot x = \sum_{0}^{n-1} a_{i}b_{i}
+\]</span></p>
+<p>From now on in the post, I will also write <span class="math inline">\(s \cdot x\)</span> instead of <span class="math inline">\(s \cdot x \mod 2\)</span> for convenience. Some authors even define <span class="math inline">\(s \cdot x\)</span> as the sum mod 2.</p>
+<h2 id="classical-approach">Classical approach</h2>
+<p>Before discussing the quantum solution to the problem, it is important to understand the classical solution. We can interpret <span class="math inline">\(f\)</span> as a function that computes the bitwise AND of <span class="math inline">\(s\)</span> and <span class="math inline">\(x\)</span>, and then counts the parity of turned on bits on <span class="math inline">\(s \wedge x\)</span>.</p>
+<p>Hence, when we are trying to discover <span class="math inline">\(s\)</span> by evaluating <span class="math inline">\(f(x)\)</span>, it is never advantageous to have <span class="math inline">\(x\)</span> with many bits turned on because we only obtain the parity of it.</p>
+<p>A good strategy then is to use <span class="math inline">\(x\)</span> with only one bit set on, that is <span class="math inline">\(x \in \{100..., 010..., 001.., ...\}\)</span>. The Python code below implements exactly that idea:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">def</span> guess_hidden_string(f, n):</a>
+<a class="sourceLine" id="cb1-2" title="2"></a>
+<a class="sourceLine" id="cb1-3" title="3">    s <span class="op">=</span> <span class="dv">0</span></a>
+<a class="sourceLine" id="cb1-4" title="4"></a>
+<a class="sourceLine" id="cb1-5" title="5">    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):</a>
+<a class="sourceLine" id="cb1-6" title="6">        result <span class="op">=</span> f(<span class="dv">2</span><span class="op">**</span>i)</a>
+<a class="sourceLine" id="cb1-7" title="7">        <span class="cf">if</span> result <span class="op">==</span> <span class="dv">1</span>:</a>
+<a class="sourceLine" id="cb1-8" title="8">            s <span class="op">+=</span> <span class="dv">2</span><span class="op">**</span>i</a>
+<a class="sourceLine" id="cb1-9" title="9"></a>
+<a class="sourceLine" id="cb1-10" title="10">    <span class="cf">return</span> s</a></code></pre></div>
+<p>This approach needs n queries to discover the n-bit hidden string, and overall <span class="math inline">\(O(n)\)</span> is the best we can achieve with classical computers. Can quantum computers do better?</p>
+<h2 id="implementing-the-quantum-oracle">Implementing the quantum oracle</h2>
+<p>Before we try to find a quantum solution, we will briefly discuss how to implement the quantum oracle because that step is needed to implement the actual algorithm.</p>
+<p>One key fact when implementing the oracle was discussed in the section before: <span class="math inline">\(f\)</span> can be interpreted as discussing the parity of set bits of the bitwise AND. Hence, we may write:</p>
+<p><span class="math display">\[
+f(x) = (\sum_{0}^{n-1} a_{i} \wedge b_{i}) \mod 2
+\]</span></p>
+<p>Recalling that the XOR operator (<span class="math inline">\(\oplus\)</span>) can be seen as the plus operator mod 2, we can go even further and write:</p>
+<p><span class="math display">\[
+f(x) = (a_{0} \wedge b_{0}) \oplus (a_{1} \wedge b_{1}) \oplus ... \oplus (a_{n-1} \wedge b_{n-1})
+\]</span></p>
+<p>The XOR operator is represented by the CNOT gate on quantum computing, because it takes <span class="math inline">\(|a\rangle\)</span> to <span class="math inline">\(|a \oplus b\rangle\)</span>. Thus, our quantum oracle looks like the following:</p>
+<p><img src="/img/Quantum6/Q6C0.png" /></p>
+<p>For every bit <span class="math inline">\(a_{i} = 1\)</span> in <span class="math inline">\(s\)</span>, we apply the CNOT gate from the i-th qubit to the working qubit. That happens because if <span class="math inline">\(a_{i} = 0\)</span>, then <span class="math inline">\(a_{i} \wedge b_{i} = 0\)</span> and <span class="math inline">\(x \oplus 0 = x\)</span> thus we can ignore it. CNOT gates are used because they are the equivalent of <span class="math inline">\(\oplus\)</span>, as discussed before.</p>
+<h2 id="bernstein-vazirani">Bernstein-Vazirani</h2>
+<p>This time, we will start by giving the solution to the problem. We will very computationally that it works and then justify it mathematically.</p>
+<p>The following circuit guesses the hidden string:</p>
+<p><img src="/img/Quantum5/Q5C0.png" /></p>
+<p>Firstly, we change the working qubit from <span class="math inline">\(|0\rangle\)</span> to <span class="math inline">\(|1\rangle\)</span> by using the X gate.</p>
+<p>Secondly, we apply Hadamard gates to the n qubits. That state is then given to the quantum oracle.</p>
+<p>In the next step, the oracle yields the <span class="math inline">\(f(x)\)</span> for the working qubit of each state, and that qubit is discarded afterward.</p>
+<p>To conclude the algorithm, we apply Hadamard gates again and measure the qubits. It is guaranteed that 100% of the measurements will be <span class="math inline">\(s\)</span>, the hidden string we were looking for. We will analyze later why <span class="math inline">\(|s\rangle\)</span> is the state that originates after querying the oracle.</p>
+<p>Notice that we discovered the hidden string using only one query to the oracle, compared to the <span class="math inline">\(O(n)\)</span> queries required by the classical algorithm.</p>
+<h2 id="implementing-the-bernstein-vazirani-algorithm">Implementing the Bernstein-Vazirani algorithm</h2>
+<p>We can verify that the Bernstein-Vazirani algorithm works using Qiskit and running an experiment: in the Jupyter notebook below, we try to guess a hidden string from a black box.</p>
+<script type="application/javascript" src="//gist.github.com/IvanIsCoding/b1b1c57d275e19823fc5a1156d7e5008.js"></script>
+<h1 id="analysis-why-the-circuit-works">Analysis: why the circuit works</h1>
+<p>The first step in the analysis is to notice that the circuit used in Bernstein-Vazirani’s algorithm is identical to the circuit in <a href="/posts/quantum5/">Deutsch-Jozsa’s algorithm</a>. That is surprising at first because one algorithm works to find a hidden string and the other to distinguish between balanced and constant functions.</p>
+<p>Now, we will use a result from the discussion on the last post, to remember that the state after querying the oracle is:</p>
+<p><span class="math display">\[
+|\psi\rangle = \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} (-1)^{f(x)}|x\rangle
+\]</span></p>
+<p>But this time, we know that our oracle is described by <span class="math inline">\(f(x) = s \cdot x\)</span>. Thus:</p>
+<p><span class="math display">\[
+|\psi\rangle = \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} (-1)^{s \cdot x}|x\rangle
+\]</span></p>
+<p>We will now claim that:</p>
+<p><span class="math display">\[
+H^{\otimes n} |\psi\rangle = |s\rangle
+\]</span></p>
+<p>That is, that applying the Hadamard gate to each qubit takes us from <span class="math inline">\(|\psi\rangle\)</span> to <span class="math inline">\(|s\rangle\)</span>.</p>
+<p>To prove so, we will work backwards. Because <span class="math inline">\(H\)</span> is the inverse gate of itself, then <span class="math inline">\(H^{\otimes n}\)</span> is the inverse of <span class="math inline">\(H^{\otimes n}\)</span>. Thus, proving our claim is equivalent to showing that:</p>
+<p><span class="math display">\[
+H^{\otimes n} |s\rangle = \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} (-1)^{s \cdot x}|x\rangle
+\]</span></p>
+<p>It would be useful to find a formula for <span class="math inline">\(H^{\otimes n} |s\rangle\)</span> . We can start by finding a formula for <span class="math inline">\(H\)</span>, that is:</p>
+<p><span class="math display">\[
+H |a\rangle = \frac{|0\rangle + (-1)^{a}|1\rangle}{\sqrt 2}
+\]</span></p>
+<p>The identity can be proved by verification of <span class="math inline">\(a = 0\)</span> and <span class="math inline">\(a = 1\)</span>. We can even go further and write:</p>
+<p><span class="math display">\[
+H |a\rangle = \frac{1}{\sqrt 2} \sum_{b \in \{0, 1\}} (-1)^{ab}|b\rangle
+\]</span></p>
+<p>Now that we have an identity for <span class="math inline">\(n = 1\)</span>, it would be useful to generalize for greater values of n. For <span class="math inline">\(n = 2\)</span>, we can think of the multiple qubits as tensor products and thus:</p>
+<p><span class="math display">\[
+H^{\otimes 2}|a,c\rangle = (\frac{1}{\sqrt 2} \sum_{b \in \{0, 1\}} (-1)^{ab}|b\rangle) \otimes (\frac{1}{\sqrt 2} \sum_{d \in \{0, 1\}} (-1)^{cd}|c\rangle)
+\]</span></p>
+<p>We may rewrite it in a formula closer to the <span class="math inline">\(s \cdot x\)</span> product we defined earlier, that is:</p>
+<p><span class="math display">\[
+H^{\otimes 2}|s\rangle = \frac{1}{(\sqrt 2)^{2}} \sum_{x \in \{0, 1\}^{2}} (-1)^{s_{0}x_{0} + s_{1}x_{1}}|x\rangle 
+\]</span></p>
+<p>Because of the cycle of powers of -1, <span class="math inline">\((-1)^{a} = (-1)^{a \mod 2}\)</span> and thus the -1 exponent is <span class="math inline">\(s \cdot x\)</span>! Therefore, we may generalize to all <span class="math inline">\(n\)</span> (the proof can be done by induction):</p>
+<p><span class="math display">\[
+H^{\otimes n}|s\rangle = \frac{1}{(\sqrt 2)^{n}} \sum_{x \in \{0, 1\}^{n}} (-1)^{s\cdot x}|x\rangle 
+\]</span></p>
+<p>Hence, our circuit works because it takes <span class="math inline">\(|\psi\rangle\)</span> to <span class="math inline">\(|s\rangle\)</span> due to the inverse nature of <span class="math inline">\(H^{\otimes n}\)</span>.</p>
+<p>The connection between Deutsch-Jozsa’s and Bernstein-Vazirani’s algorithm becomes clearer then:</p>
+<ul>
+<li><span class="math inline">\(f(x) = s \cdot x\)</span> is a balanced function (or constant if <span class="math inline">\(s\)</span> is all zeroes)!</li>
+<li>If a black box from Deutsch-Jozsa’s returns a state <span class="math inline">\(|s\rangle\)</span> with 100% chance, then the black box implements <span class="math inline">\(f(x) = s \cdot x\)</span></li>
+</ul>
+
+  </div>
+  
+
+
+  
+
+  
+    
+
+
+</article>
+
+
+        </div>
+        
+    
+
+  
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-135472875-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" integrity="sha384-GqVMZRt5Gn7tB9D9q7ONtcp4gtHIUEW/yG7h98J7IpE3kpi+srfFyyB/04OV6pG0" crossorigin="anonymous"></script>
+
+
+    
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+        
+    
+    <script type="text/javascript">
+        
+        hljs.initHighlightingOnLoad();
+    </script>
+    
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+ <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}]
+    });
+  });
+</script>
+
+
+
+    
+
+
+
+    </body>
+</html>
