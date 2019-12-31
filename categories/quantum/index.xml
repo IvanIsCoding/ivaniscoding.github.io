@@ -65,13 +65,13 @@ Teleportation and the problem it solves Imagine that Alice has a qubit \(| \psi 
     </item>
     
     <item>
-      <title>Quantum #1 - Uncomputation</title>
+      <title>Quantum #1 - Basic Quantum Computing</title>
       <link>https://ivaniscoding.github.io/posts/quantum1/</link>
       <pubDate>Wed, 11 Dec 2019 20:00:00 -0800</pubDate>
       
       <guid>https://ivaniscoding.github.io/posts/quantum1/</guid>
       <description>This is the first post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
-The goal of this post is to teach Uncomputation. Uncomputation is a fancy name for &amp;ldquo;cleaning&amp;rdquo; temporary resources, in our case qubits. The reasons for using uncomputation are:</description>
+The goal of this post is to introduce a more hands-on approach to quantum computing using Qiskit. For a friendly introduction to quantum computing in general, I recommend the essay Quantum computing for the very curious by Matuschak and Nielsen.</description>
     </item>
     
   </channel>
