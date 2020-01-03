@@ -6,10 +6,20 @@
     <description>Recent content in Posts on Ivan Carvalho</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 28 Dec 2019 20:10:00 -0800</lastBuildDate>
+    <lastBuildDate>Thu, 02 Jan 2020 16:10:00 -0800</lastBuildDate>
     
 	<atom:link href="https://ivaniscoding.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Quantum #7 - Grover</title>
+      <link>https://ivaniscoding.github.io/posts/quantum7/</link>
+      <pubDate>Thu, 02 Jan 2020 16:10:00 -0800</pubDate>
+      
+      <guid>https://ivaniscoding.github.io/posts/quantum7/</guid>
+      <description>This is the seventh post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
+The goal of this post is to discuss Grover’s algorithm. It is an algorithm to solve unstructured search in \(O(\sqrt N)\), which is a quadratic speedup over the classical \(O(N)\) solution.</description>
+    </item>
     
     <item>
       <title>Quantum #6 - Bernstein-Vazirani</title>
