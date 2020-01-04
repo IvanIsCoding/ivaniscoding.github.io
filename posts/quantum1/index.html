@@ -249,8 +249,8 @@
   
 
   <link rel="manifest" href="/index.webmanifest">
-  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
-  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+  <link rel="icon" type="image/png" href="/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_192x192_fill_lanczos_center_2.png">
 
   <link rel="canonical" href="https://ivaniscoding.github.io/posts/quantum1/">
 
@@ -268,8 +268,8 @@
   <meta property="og:site_name" content="Ivan Carvalho">
   <meta property="og:url" content="https://ivaniscoding.github.io/posts/quantum1/">
   <meta property="og:title" content="Quantum #1 - Basic Quantum Computing | Ivan Carvalho">
-  <meta property="og:description" content="Hands-on quantum computing with Qiskit"><meta property="og:image" content="https://ivaniscoding.github.io/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
-  <meta property="twitter:image" content="https://ivaniscoding.github.io/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  <meta property="og:description" content="Hands-on quantum computing with Qiskit"><meta property="og:image" content="https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
   
     
       <meta property="article:published_time" content="2019-12-11T20:00:00-08:00">
@@ -600,9 +600,9 @@ U = \begin{bmatrix} a &amp; b \\ c &amp; d\end{bmatrix}
 \]</span></p>
 <p>Notice that <span class="math inline">\(U\)</span> must preserve the length of <span class="math inline">\(|\psi\rangle\)</span> in order for <span class="math inline">\(|\phi\rangle\)</span> to be a valid qubit! Thus <span class="math inline">\(U\)</span> is a special type of matrix called a unitary matrix. Mathematically:</p>
 <p><span class="math display">\[
-UU^{\dag} = I
+UU^{\dagger} = I
 \]</span></p>
-<p>Where <span class="math inline">\(U^{\dag}\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate transpose</a>. It is important to see that <span class="math inline">\(U^{\dag}\)</span> can undo the transformation from <span class="math inline">\(U\)</span>: it takes <span class="math inline">\(|\phi\rangle\)</span> to <span class="math inline">\(|\psi\rangle\)</span>.</p>
+<p>Where <span class="math inline">\(U^{\dagger}\)</span> is the <a href="https://en.wikipedia.org/wiki/Conjugate_transpose">conjugate transpose</a>. It is important to see that <span class="math inline">\(U^{\dagger}\)</span> can undo the transformation from <span class="math inline">\(U\)</span>: it takes <span class="math inline">\(|\phi\rangle\)</span> to <span class="math inline">\(|\psi\rangle\)</span>.</p>
 <p>Because of the matrix multiplication property of the gates, applying multiple quantum gates such as <span class="math inline">\(U_{a}\)</span> and then <span class="math inline">\(U_{b}\)</span> is equivalent to applying a gate <span class="math inline">\(G\)</span> such that:</p>
 <p><span class="math display">\[
 G = U_{a}U_{b}
@@ -628,7 +628,7 @@ G = U_{a}U_{b}
 <p><span class="math display">\[
 X = \begin{bmatrix} 0 &amp; 1 \\ 1 &amp; 0\end{bmatrix}
 \]</span></p>
-<p>An important property of <span class="math inline">\(X\)</span> is that <span class="math inline">\(X = X^{\dag}\)</span>, thus <span class="math inline">\(X\)</span> is the inverse gate of itself! That means that if we apply twice the Pauli-X Gate to a qubit, we will still have the same qubit.</p>
+<p>An important property of <span class="math inline">\(X\)</span> is that <span class="math inline">\(X = X^{\dagger}\)</span>, thus <span class="math inline">\(X\)</span> is the inverse gate of itself! That means that if we apply twice the Pauli-X Gate to a qubit, we will still have the same qubit.</p>
 <h3 id="the-pauli-z-gate">The Pauli-Z gate</h3>
 <p>The Pauli-Z gate is a quantum gate that leaves the <span class="math inline">\(|0\rangle\)</span> component intact but flips the sign of the <span class="math inline">\(|1\rangle\)</span> component. Mathematically:</p>
 <p><span class="math display">\[
@@ -648,14 +648,14 @@ X = \begin{bmatrix} 0 &amp; 1 \\ 1 &amp; 0\end{bmatrix}
 <p><span class="math display">\[
 Z = \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; -1\end{bmatrix}
 \]</span></p>
-<p>An important property of <span class="math inline">\(Z\)</span> is that <span class="math inline">\(Z = Z^{\dag}\)</span>, thus <span class="math inline">\(Z\)</span> is the inverse gate of itself! That means that if we apply twice the Pauli-Z Gate to a qubit, we will still have the same qubit.</p>
+<p>An important property of <span class="math inline">\(Z\)</span> is that <span class="math inline">\(Z = Z^{\dagger}\)</span>, thus <span class="math inline">\(Z\)</span> is the inverse gate of itself! That means that if we apply twice the Pauli-Z Gate to a qubit, we will still have the same qubit.</p>
 <h3 id="the-pauli-y-gate">The Pauli-Y gate</h3>
 <p>The Pauli-Y gate is a gate that has only pure imaginary entries. It is similar to the <span class="math inline">\(X\)</span> gate but has its entries multiplied by <span class="math inline">\(i\)</span> and the top term is <span class="math inline">\(-i\)</span>. Mathematically, it acts as follows:</p>
 <p><span class="math display">\[
-|0\rangle \overset{Y}{\rightarrow} -i|1\rangle
+|0\rangle \overset{Y}{\rightarrow} i|1\rangle
 \]</span></p>
 <p><span class="math display">\[
-|1\rangle \overset{Y}{\rightarrow} i|0\rangle
+|1\rangle \overset{Y}{\rightarrow} -i|0\rangle
 \]</span></p>
 <p><span class="math display">\[
 \alpha|0\rangle + \beta|1\rangle \overset{Y}{\rightarrow} -i\beta|0\rangle + i\alpha|1\rangle
@@ -668,7 +668,7 @@ Z = \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; -1\end{bmatrix}
 <p><span class="math display">\[
 Y = \begin{bmatrix} 0 &amp; -i \\ i &amp; 0\end{bmatrix}
 \]</span></p>
-<p>An important property of <span class="math inline">\(Y\)</span> is that <span class="math inline">\(Y = Y^{\dag}\)</span>, thus <span class="math inline">\(Y\)</span> is the inverse gate of itself! That means that if we apply twice the Pauli-Y Gate to a qubit, we will still have the same qubit.</p>
+<p>An important property of <span class="math inline">\(Y\)</span> is that <span class="math inline">\(Y = Y^{\dagger}\)</span>, thus <span class="math inline">\(Y\)</span> is the inverse gate of itself! That means that if we apply twice the Pauli-Y Gate to a qubit, we will still have the same qubit.</p>
 <h3 id="the-hadamard-gate">The Hadamard gate</h3>
 <p>The Hadamard gate is a gate to generate superposition, and it is hard to find a classical equivalent of it: it is a quantum gate by nature. Given <span class="math inline">\(|0\rangle\)</span>, it generates a mix of <span class="math inline">\(|0\rangle\)</span> and <span class="math inline">\(|1\rangle\)</span>, and does the same for <span class="math inline">\(|1\rangle\)</span>. Mathematically:</p>
 <p><span class="math display">\[
@@ -695,7 +695,7 @@ Y = \begin{bmatrix} 0 &amp; -i \\ i &amp; 0\end{bmatrix}
 <p><span class="math display">\[
 H = \frac{1}{\sqrt 2}\begin{bmatrix} 1 &amp; 1 \\ 1 &amp; -1\end{bmatrix}
 \]</span></p>
-<p>An important property of <span class="math inline">\(H\)</span> is that <span class="math inline">\(H = H^{\dag}\)</span>, thus <span class="math inline">\(H\)</span> is the inverse gate of itself! That means that if we apply twice the Hadamard gate to a qubit, we will still have the same qubit.</p>
+<p>An important property of <span class="math inline">\(H\)</span> is that <span class="math inline">\(H = H^{\dagger}\)</span>, thus <span class="math inline">\(H\)</span> is the inverse gate of itself! That means that if we apply twice the Hadamard gate to a qubit, we will still have the same qubit.</p>
 <h2 id="executing-a-circuit-in-qiskit">Executing a circuit in Qiskit</h2>
 <p>In Qiskit, we need a backend to execute a quantum circuit. That backend might be either a real quantum computer or a simulator. The syntax to run a circuit is:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb7-1" title="1">job <span class="op">=</span> execute(circuit, backend, shots<span class="op">=</span>n_times_to_execute)</a></code></pre></div>
@@ -754,7 +754,7 @@ H = \frac{1}{\sqrt 2}\begin{bmatrix} 1 &amp; 1 \\ 1 &amp; -1\end{bmatrix}
 <h2 id="multiple-qubit-gates">Multiple-qubit gates</h2>
 <p>In the first gate section, we discussed gates that operated on a single qubit. In this section, we will discuss gates that operate on two or more qubits. They are still unitary gates:</p>
 <p><span class="math display">\[
-UU^{\dag} = I
+UU^{\dagger} = I
 \]</span></p>
 <p>Their dimensions, however, are different. A gate that operates on n qubits has dimensions of <span class="math inline">\(2^{n} \times 2^{n}\)</span>. It is also relevant to know how to write single-qubit gates for multiple qubit systems: they are written using the tensor product such as <span class="math inline">\(H \otimes Z\)</span>: in this example, we apply the Hadamard gate to the first qubit and the Pauli-Z gate to the second qubit.</p>
 <p>Again, there is an infinite number of multiple qubit gates. Some that deserve special attention and have a special place in Qiskit are:</p>
