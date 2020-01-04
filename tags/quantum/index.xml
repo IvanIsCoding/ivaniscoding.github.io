@@ -1,87 +1,865 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>quantum on Ivan Carvalho</title>
+    <title>quantum | Ivan Carvalho</title>
     <link>https://ivaniscoding.github.io/tags/quantum/</link>
-    <description>Recent content in quantum on Ivan Carvalho</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <lastBuildDate>Thu, 02 Jan 2020 16:10:00 -0800</lastBuildDate>
-    
-	<atom:link href="https://ivaniscoding.github.io/tags/quantum/index.xml" rel="self" type="application/rss+xml" />
-    
+      <atom:link href="https://ivaniscoding.github.io/tags/quantum/index.xml" rel="self" type="application/rss+xml" />
+    <description>quantum</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Thu, 02 Jan 2020 16:10:00 -0800</lastBuildDate>
+    <image>
+      <url>https://ivaniscoding.github.io/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>quantum</title>
+      <link>https://ivaniscoding.github.io/tags/quantum/</link>
+    </image>
     
     <item>
       <title>Quantum #7 - Grover</title>
       <link>https://ivaniscoding.github.io/posts/quantum7/</link>
       <pubDate>Thu, 02 Jan 2020 16:10:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/posts/quantum7/</guid>
-      <description>This is the seventh post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
-The goal of this post is to discuss Grover’s algorithm. It is an algorithm to solve unstructured search in \(O(\sqrt N)\), which is a quadratic speedup over the classical \(O(N)\) solution.</description>
+      <description>&lt;p&gt;This is the seventh post of a series of posts about Quantum Computing with &lt;a href=&#34;https://qiskit.org/&#34;&gt;Qiskit&lt;/a&gt;. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.&lt;/p&gt;
+&lt;p&gt;The goal of this post is to discuss Grover’s algorithm. It is an algorithm to solve unstructured search in &lt;span class=&#34;math inline&#34;&gt;\(O(\sqrt N)\)&lt;/span&gt;, which is a quadratic speedup over the classical &lt;span class=&#34;math inline&#34;&gt;\(O(N)\)&lt;/span&gt; solution.&lt;/p&gt;
+&lt;h2 id=&#34;unstructured-search&#34;&gt;Unstructured Search&lt;/h2&gt;
+&lt;p&gt;Imagine that you have a hard problem to solve such that your best-known solutions is to try all the possibilities. That problem could be:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Checking if two molecules are identical, i.e. solving &lt;a href=&#34;https://en.wikipedia.org/wiki/Graph_isomorphism_problem&#34;&gt;graph isomorphism&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Finding the shortest route that passes through all cities, the &lt;a href=&#34;https://en.wikipedia.org/wiki/Travelling_salesman_problem&#34;&gt;travelling salesman problem&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Classically, those are examples of unstructured search problems: the search space (i.e. possible solutions) has so little structure that the best strategy is just to try all possibilities.&lt;/p&gt;
+&lt;p&gt;The complexity of solving that problem depends on how big the search space is: if there are &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; elements to check, the algorithm needs to make &lt;span class=&#34;math inline&#34;&gt;\(O(N)\)&lt;/span&gt; to an oracle (i.e. the entity that verifies if a solution is valid). That is the best that can be done.&lt;/p&gt;
+&lt;p&gt;The quantum algorithm that will discuss today goes beyond: it can find the solution with &lt;span class=&#34;math inline&#34;&gt;\(O(\sqrt N)\)&lt;/span&gt; checks. Considering that there is no structure in the search space, Grover’s algorithm provides an impressive speedup. Moreover, unlike the last two quantum algorithms we discussed, an unstructured search is the component of many real-world problems. Thus, Grover’s algorithm has immediate applications.&lt;/p&gt;
+&lt;p&gt;For our discussion today, we will pick a specific flavor of the search problem: we will try to find a needle in a haystack.&lt;/p&gt;
+&lt;h3 id=&#34;needle-in-a-haystack&#34;&gt;Needle in a haystack&lt;/h3&gt;
+&lt;p&gt;Imagine that you have a search space with &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; elements, with &lt;span class=&#34;math inline&#34;&gt;\(N-1\)&lt;/span&gt; straws that are useless, and exactly one needle that we are looking for.&lt;/p&gt;
+&lt;p&gt;Mathematically, the problem is described by a function &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+f(x) = 1 \iff x = s
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+f(x) = 0 \iff x \neq s
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;In which &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt; is the solution string, i.e. the needle. Notice that &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; needs to be implemented by a quantum circuit, that we will call quantum oracle.&lt;/p&gt;
+&lt;h2 id=&#34;steps-of-the-algorithm&#34;&gt;Steps of the algorithm&lt;/h2&gt;
+&lt;p&gt;Now that we know the problem Grover’s algorithm solves, it is time to discuss it.&lt;/p&gt;
+&lt;h3 id=&#34;assumptions&#34;&gt;Assumptions&lt;/h3&gt;
+&lt;p&gt;On this discussion, we will assume two things that might not always be true in a search problem:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span class=&#34;math inline&#34;&gt;\(N = 2^{n}\)&lt;/span&gt;, that is &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; is a power of two&lt;/li&gt;
+&lt;li&gt;There is exactly one solution&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Those assumptions are to simplify the discussion. Even though they are not always true, it is not hard to make a problem respect them.&lt;/p&gt;
+&lt;p&gt;For the first assumption, if we are given a &lt;span class=&#34;math inline&#34;&gt;\(M\)&lt;/span&gt; that is not a power of two, we can just augment the search space to a &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; that is a power of two and have :&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+x &amp;gt; M \implies f(x) = 0
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;For the second assumption, Grover’s algorithm can still find a solution when there is multiple: it is just the number of iterations &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; that will change.&lt;/p&gt;
+&lt;h3 id=&#34;step-1&#34;&gt;Step 1&lt;/h3&gt;
+&lt;p&gt;Generate the superposition state:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}}|x\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;And initialize the ancilla qubit to &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle - |1\rangle}{\sqrt 2}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Notice that on this step, each possible state &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; will have an equal probability of measurement, which is basically guessing the solution. The critical insight from Grover’s algorithm comes on the next step, in which we will try to improve the chance of measuring the solution.&lt;/p&gt;
+&lt;h3 id=&#34;step-2&#34;&gt;Step 2&lt;/h3&gt;
+&lt;p&gt;Apply Grover’s iteration &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; times:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Query the oracle. This is sometimes also called reflection around the solution.&lt;/li&gt;
+&lt;li&gt;Invert about the mean. This is sometimes also called reflection around the superposition state.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The value &lt;span class=&#34;math inline&#34;&gt;\(K\)&lt;/span&gt; is given by &lt;span class=&#34;math inline&#34;&gt;\(K \approx \frac{\pi \sqrt N}{4}\)&lt;/span&gt;. Thus, the algorithm makes &lt;span class=&#34;math inline&#34;&gt;\(O(\sqrt N)\)&lt;/span&gt; queries to the oracle.&lt;/p&gt;
+&lt;h3 id=&#34;step-3&#34;&gt;Step 3&lt;/h3&gt;
+&lt;p&gt;Measure the qubits. &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt; will be the measurement with a high probability. A lower-bound for correctness is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+P = 1 - \frac{1}{N}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Hence, for very big &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; our algorithm will guess the solution with a very high chance.&lt;/p&gt;
+&lt;h2 id=&#34;grovers-iteration&#34;&gt;Grover’s iteration&lt;/h2&gt;
+&lt;p&gt;At each iteration, Grover’s algorithm has a goal: to increase the amplitude &lt;span class=&#34;math inline&#34;&gt;\(\alpha_{s}\)&lt;/span&gt; of the solution and to decrease the amplitude &lt;span class=&#34;math inline&#34;&gt;\(\alpha_{x}\)&lt;/span&gt; of the non-solutions. To achieve it, it performs two specific steps as we will discuss.&lt;/p&gt;
+&lt;h3 id=&#34;phase-kickback&#34;&gt;Phase kickback&lt;/h3&gt;
+&lt;p&gt;Consider that at an arbitrary iteration of the algorithm, we will have a state &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \sum_{x \in \{0, 1\}^{n}}\alpha_{x} |x\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Graphically, the amplitudes could be seen as:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum7/Amplitude_Start.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The first step of the Grover iteration is to query the oracle. The oracle will be a transformation &lt;span class=&#34;math inline&#34;&gt;\(|x\rangle|a\rangle \rightarrow |x\rangle|a \oplus f(x)\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;We will now reuse a trick that was first discussed in &lt;a href=&#34;https://ivaniscoding.github.io/posts/quantum4/&#34;&gt;Deutsch-Jozsa’s algorithm&lt;/a&gt;: because the ancilla is &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle - |1\rangle}{\sqrt 2}\)&lt;/span&gt;, then the phase will kickback in the form of a coefficient &lt;span class=&#34;math inline&#34;&gt;\((-1)^{f(x)}\)&lt;/span&gt;, and the ancilla will remain unchanged.&lt;/p&gt;
+&lt;p&gt;Hence, that yields:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+U_{\omega}|\psi\rangle = \sum_{x \in \{0, 1\}^{n}} (-1)^{f(x)} \alpha_{x} |x\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Notice that this time, only one amplitude is negative: that of the solution. Graphically, it can be seen as:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum7/Amplitude_Kickback.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The next step is to perform an inversion about the mean. The idea is that combining phase kickback with a mean inversion, we will make the amplitude of the solution grow while reducing the amplitude of nonsolutions.&lt;/p&gt;
+&lt;h3 id=&#34;inversion-about-the-mean&#34;&gt;Inversion about the mean&lt;/h3&gt;
+&lt;p&gt;An inversion about the mean is reflecting the terms of a sequence &lt;span class=&#34;math inline&#34;&gt;\(C\)&lt;/span&gt; according to the mean &lt;span class=&#34;math inline&#34;&gt;\(\overline{C}\)&lt;/span&gt;. That is, we will find a new sequence &lt;span class=&#34;math inline&#34;&gt;\(D\)&lt;/span&gt; such that each term is &lt;span class=&#34;math inline&#34;&gt;\(C_{i}\)&lt;/span&gt; reflected.&lt;/p&gt;
+&lt;p&gt;Imagine that you have an element &lt;span class=&#34;math inline&#34;&gt;\(C_{i}\)&lt;/span&gt;. We will find a new element &lt;span class=&#34;math inline&#34;&gt;\(D_{i}\)&lt;/span&gt; such that the distance between &lt;span class=&#34;math inline&#34;&gt;\(D_{i}\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\overline{C}\)&lt;/span&gt; is the same as the distance between &lt;span class=&#34;math inline&#34;&gt;\(C_{i}\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\overline{C}\)&lt;/span&gt;. Mathematically, that can be written as:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|D_{i} - \overline{C}| = |C_{i} - \overline{C}|
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Solving the equation and ignoring the case in which &lt;span class=&#34;math inline&#34;&gt;\(C_{i} = D_{i}\)&lt;/span&gt;, we obtain:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+D_{i} = 2\overline{C} - C_{i}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;After the mean inversion transformation, &lt;span class=&#34;math inline&#34;&gt;\(\overline{D} = \overline{C}\)&lt;/span&gt; holds as well.&lt;/p&gt;
+&lt;p&gt;At this point, you might be asking: what does mean inversion has to do with quantum computing? To answer that question, an example will do. Suppose that we have the sequence &lt;span class=&#34;math inline&#34;&gt;\(\{1, 1, 1, 1\}\)&lt;/span&gt; and we flip the sign of the third 1, that is we have:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+C = \{1, 1, -1, 1\}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The mean of this sequence is &lt;span class=&#34;math inline&#34;&gt;\(\frac{1}{2}\)&lt;/span&gt;. Now if we compute mean inversion using the formula given before, we obtain:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+D = \{0, 0, 2, 0\}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Something very interesting occurred: during the inversion, the only negative value of the sequence became the most positive while the old positives values diminished.&lt;/p&gt;
+&lt;p&gt;Hence, mean inversion combined with phase kickback is exactly what we were looking for: it is going to make &lt;span class=&#34;math inline&#34;&gt;\(\alpha_{s}\)&lt;/span&gt; increase and decrease &lt;span class=&#34;math inline&#34;&gt;\(\alpha_{x}\)&lt;/span&gt; of the nonsolutions.&lt;/p&gt;
+&lt;p&gt;Continuing the amplitude visualization we had before, mean inversion yields:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum7/Amplitude_Mean_Inverted.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Therefore, the idea is to perform phase kickback and mean inversion until &lt;span class=&#34;math inline&#34;&gt;\(\alpha_{s}\)&lt;/span&gt; is maximized. We will not discuss the math behind, but it turns out that &lt;span class=&#34;math inline&#34;&gt;\(\frac{\pi \sqrt N}{4}\)&lt;/span&gt; iterations suffice.&lt;/p&gt;
+&lt;h2 id=&#34;implementing-the-quantum-oracle&#34;&gt;Implementing the quantum oracle&lt;/h2&gt;
+&lt;p&gt;In real applications, the oracle would be a circuit that performs a meaningful computation: it could be solving the travelling salesman problem, trying to break an encryption key or just solving a hard problem in general.&lt;/p&gt;
+&lt;p&gt;For this example problem, we will emulate a real-world problem: we will have a function that has one value &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt; such that &lt;span class=&#34;math inline&#34;&gt;\(f(s) = 1\)&lt;/span&gt; and that &lt;span class=&#34;math inline&#34;&gt;\(f(x) = 0\)&lt;/span&gt; for all other &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Classically, it would look like:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb1&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-1&#34; title=&#34;1&#34;&gt;&lt;span class=&#34;kw&#34;&gt;def&lt;/span&gt; f(x):&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-2&#34; title=&#34;2&#34;&gt;    &lt;span class=&#34;cf&#34;&gt;if&lt;/span&gt; x &lt;span class=&#34;op&#34;&gt;==&lt;/span&gt; s:&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-3&#34; title=&#34;3&#34;&gt;        &lt;span class=&#34;cf&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;dv&#34;&gt;1&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-4&#34; title=&#34;4&#34;&gt;    &lt;span class=&#34;cf&#34;&gt;else&lt;/span&gt;:&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-5&#34; title=&#34;5&#34;&gt;        &lt;span class=&#34;cf&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;dv&#34;&gt;0&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The question now is: how does a quantum computer check that the state &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; is equal to &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt;? The answer is: we verify if the binary representation of &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; is identical to the binary representation of &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;To do so, we use a multi-qubit Toffoli gate: we AND the equality of each bit. Because of the AND property, &lt;span class=&#34;math inline&#34;&gt;\(f(x) = 1\)&lt;/span&gt; if and only if each bit of &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; is equal to &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt;, otherwise &lt;span class=&#34;math inline&#34;&gt;\(f(x) = 0\)&lt;/span&gt;. That implements exactly what we were looking for.&lt;/p&gt;
+&lt;p&gt;A factor to consider is that if a bit is 0, we need to NOT it so when the AND is done the result is 1. Hence, the circuit implementing &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; for a string &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt; looks like:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum7/Q7C0.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Notice that after applying the Toffoli, we do not want to change &lt;span class=&#34;math inline&#34;&gt;\(|x\rangle\)&lt;/span&gt; hence we apply NOT again on what was NOTed before.&lt;/p&gt;
+&lt;h2 id=&#34;implementing-inversion-about-mean&#34;&gt;Implementing inversion about mean&lt;/h2&gt;
+&lt;p&gt;To implement inversion about the mean, we will use the Grover diffusion operator. I will not discuss it much, but the operator can be written as:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\mathcal{D} = -H^{\otimes n}U_{s}H^{\otimes n}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The idea is to implement the formula &lt;span class=&#34;math inline&#34;&gt;\(2\overline{C} - C_{i}\)&lt;/span&gt; using matrix multiplication. It can be shown that &lt;span class=&#34;math inline&#34;&gt;\(\mathcal{D} = 2|+\rangle\langle+| - I\)&lt;/span&gt;, which is the matrix equivalent of the formula we found for mean inversion.&lt;/p&gt;
+&lt;p&gt;An element of &lt;span class=&#34;math inline&#34;&gt;\(\mathcal{D}\)&lt;/span&gt; we have not discussed yet is &lt;span class=&#34;math inline&#34;&gt;\(U_{s}\)&lt;/span&gt;: it is similar to the oracle &lt;span class=&#34;math inline&#34;&gt;\(U_{\omega}\)&lt;/span&gt;. It implements a function &lt;span class=&#34;math inline&#34;&gt;\(g(x)\)&lt;/span&gt; such that &lt;span class=&#34;math inline&#34;&gt;\(g(000...0) = 1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(g(x) = 0\)&lt;/span&gt; for all other &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Therefore, we also use a multi-qubit Toffoli gate to implement &lt;span class=&#34;math inline&#34;&gt;\(U_{s}\)&lt;/span&gt; which yields the following circuit for &lt;span class=&#34;math inline&#34;&gt;\(\mathcal{D}\)&lt;/span&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum7/Q7C1.png&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;implementing-grovers-algorithm&#34;&gt;Implementing Grover’s algorithm&lt;/h2&gt;
+&lt;p&gt;We can verify that Grover’s algorithm works using Qiskit and running an experiment: in the Jupyter notebook below, we try to find a needle in a haystack.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/089dc60e14775f2eca548e2f14930d94.js&#34;&gt;&lt;/script&gt;
+
+</description>
     </item>
     
     <item>
       <title>Quantum #6 - Bernstein-Vazirani</title>
       <link>https://ivaniscoding.github.io/posts/quantum6/</link>
       <pubDate>Sat, 28 Dec 2019 20:10:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/posts/quantum6/</guid>
-      <description>This is the sixth post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
-The goal of this post is to discuss how to discover a hidden string in a black box using Bernstein-Vazirani’s algorithm. There is also a connection between this algorithm and Deutsch-Jozsa’s algorithm, which was discussed in the last post.</description>
+      <description>&lt;p&gt;This is the sixth post of a series of posts about Quantum Computing with &lt;a href=&#34;https://qiskit.org/&#34;&gt;Qiskit&lt;/a&gt;. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.&lt;/p&gt;
+&lt;p&gt;The goal of this post is to discuss how to discover a hidden string in a black box using Bernstein-Vazirani’s algorithm. There is also a connection between this algorithm and Deutsch-Jozsa’s algorithm, which was discussed in the last &lt;a href=&#34;https://ivaniscoding.github.io/posts/quantum5/&#34;&gt;post&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;decoding-a-hidden-string&#34;&gt;Decoding a hidden string&lt;/h2&gt;
+&lt;p&gt;Imagine that you have a black box (or oracle) that implements a hidden function that takes n-bit strings and returns 0 or 1, that is &lt;span class=&#34;math inline&#34;&gt;\(f: \{0, 1\}^{n} \rightarrow \{0, 1\}\)&lt;/span&gt;. The output of the function is determined by a hidden string &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt;, following the expression:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+f(x) = s \cdot x \mod 2
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;How many queries are needed to discover &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt;?&lt;/p&gt;
+&lt;p&gt;To clarify the notation used, by &lt;span class=&#34;math inline&#34;&gt;\(s \cdot x\)&lt;/span&gt; we mean the bitwise dot product of &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;. Mathematically, if &lt;span class=&#34;math inline&#34;&gt;\(s = a_{0}a_{1}a_{2}...a_{n-1}\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(x = b_{0}b_{1}b_{2}...b_{n-1}\)&lt;/span&gt; then we define:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+s \cdot x = \sum_{0}^{n-1} a_{i}b_{i}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;From now on in the post, I will also write &lt;span class=&#34;math inline&#34;&gt;\(s \cdot x\)&lt;/span&gt; instead of &lt;span class=&#34;math inline&#34;&gt;\(s \cdot x \mod 2\)&lt;/span&gt; for convenience. Some authors even define &lt;span class=&#34;math inline&#34;&gt;\(s \cdot x\)&lt;/span&gt; as the sum mod 2.&lt;/p&gt;
+&lt;h2 id=&#34;classical-approach&#34;&gt;Classical approach&lt;/h2&gt;
+&lt;p&gt;Before discussing the quantum solution to the problem, it is important to understand the classical solution. We can interpret &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; as a function that computes the bitwise AND of &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;, and then counts the parity of turned on bits on &lt;span class=&#34;math inline&#34;&gt;\(s \wedge x\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Hence, when we are trying to discover &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt; by evaluating &lt;span class=&#34;math inline&#34;&gt;\(f(x)\)&lt;/span&gt;, it is never advantageous to have &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; with many bits turned on because we only obtain the parity of it.&lt;/p&gt;
+&lt;p&gt;A good strategy then is to use &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; with only one bit set on, that is &lt;span class=&#34;math inline&#34;&gt;\(x \in \{100..., 010..., 001.., ...\}\)&lt;/span&gt;. The Python code below implements exactly that idea:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb1&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-1&#34; title=&#34;1&#34;&gt;&lt;span class=&#34;kw&#34;&gt;def&lt;/span&gt; guess_hidden_string(f, n):&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-2&#34; title=&#34;2&#34;&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-3&#34; title=&#34;3&#34;&gt;    s &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;dv&#34;&gt;0&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-4&#34; title=&#34;4&#34;&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-5&#34; title=&#34;5&#34;&gt;    &lt;span class=&#34;cf&#34;&gt;for&lt;/span&gt; i &lt;span class=&#34;kw&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;bu&#34;&gt;range&lt;/span&gt;(n):&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-6&#34; title=&#34;6&#34;&gt;        result &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; f(&lt;span class=&#34;dv&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;**&lt;/span&gt;i)&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-7&#34; title=&#34;7&#34;&gt;        &lt;span class=&#34;cf&#34;&gt;if&lt;/span&gt; result &lt;span class=&#34;op&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;dv&#34;&gt;1&lt;/span&gt;:&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-8&#34; title=&#34;8&#34;&gt;            s &lt;span class=&#34;op&#34;&gt;+=&lt;/span&gt; &lt;span class=&#34;dv&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;**&lt;/span&gt;i&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-9&#34; title=&#34;9&#34;&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-10&#34; title=&#34;10&#34;&gt;    &lt;span class=&#34;cf&#34;&gt;return&lt;/span&gt; s&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This approach needs n queries to discover the n-bit hidden string, and overall &lt;span class=&#34;math inline&#34;&gt;\(O(n)\)&lt;/span&gt; is the best we can achieve with classical computers. Can quantum computers do better?&lt;/p&gt;
+&lt;h2 id=&#34;implementing-the-quantum-oracle&#34;&gt;Implementing the quantum oracle&lt;/h2&gt;
+&lt;p&gt;Before we try to find a quantum solution, we will briefly discuss how to implement the quantum oracle because that step is needed to implement the actual algorithm.&lt;/p&gt;
+&lt;p&gt;One key fact when implementing the oracle was discussed in the section before: &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; can be interpreted as discussing the parity of set bits of the bitwise AND. Hence, we may write:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+f(x) = (\sum_{0}^{n-1} a_{i} \wedge b_{i}) \mod 2
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Recalling that the XOR operator (&lt;span class=&#34;math inline&#34;&gt;\(\oplus\)&lt;/span&gt;) can be seen as the plus operator mod 2, we can go even further and write:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+f(x) = (a_{0} \wedge b_{0}) \oplus (a_{1} \wedge b_{1}) \oplus ... \oplus (a_{n-1} \wedge b_{n-1})
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The XOR operator is represented by the CNOT gate on quantum computing, because it takes &lt;span class=&#34;math inline&#34;&gt;\(|a\rangle\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(|a \oplus b\rangle\)&lt;/span&gt;. Thus, our quantum oracle looks like the following:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum6/Q6C0.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;For every bit &lt;span class=&#34;math inline&#34;&gt;\(a_{i} = 1\)&lt;/span&gt; in &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt;, we apply the CNOT gate from the i-th qubit to the working qubit. That happens because if &lt;span class=&#34;math inline&#34;&gt;\(a_{i} = 0\)&lt;/span&gt;, then &lt;span class=&#34;math inline&#34;&gt;\(a_{i} \wedge b_{i} = 0\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(x \oplus 0 = x\)&lt;/span&gt; thus we can ignore it. CNOT gates are used because they are the equivalent of &lt;span class=&#34;math inline&#34;&gt;\(\oplus\)&lt;/span&gt;, as discussed before.&lt;/p&gt;
+&lt;h2 id=&#34;bernstein-vazirani&#34;&gt;Bernstein-Vazirani&lt;/h2&gt;
+&lt;p&gt;This time, we will start by giving the solution to the problem. We will very computationally that it works and then justify it mathematically.&lt;/p&gt;
+&lt;p&gt;The following circuit guesses the hidden string:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum5/Q5C0.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Firstly, we change the working qubit from &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt; by using the X gate.&lt;/p&gt;
+&lt;p&gt;Secondly, we apply Hadamard gates to the n qubits. That state is then given to the quantum oracle.&lt;/p&gt;
+&lt;p&gt;In the next step, the oracle yields the &lt;span class=&#34;math inline&#34;&gt;\(f(x)\)&lt;/span&gt; for the working qubit of each state, and that qubit is discarded afterward.&lt;/p&gt;
+&lt;p&gt;To conclude the algorithm, we apply Hadamard gates again and measure the qubits. It is guaranteed that 100% of the measurements will be &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt;, the hidden string we were looking for. We will analyze later why &lt;span class=&#34;math inline&#34;&gt;\(|s\rangle\)&lt;/span&gt; is the state that originates after querying the oracle.&lt;/p&gt;
+&lt;p&gt;Notice that we discovered the hidden string using only one query to the oracle, compared to the &lt;span class=&#34;math inline&#34;&gt;\(O(n)\)&lt;/span&gt; queries required by the classical algorithm.&lt;/p&gt;
+&lt;h2 id=&#34;implementing-the-bernstein-vazirani-algorithm&#34;&gt;Implementing the Bernstein-Vazirani algorithm&lt;/h2&gt;
+&lt;p&gt;We can verify that the Bernstein-Vazirani algorithm works using Qiskit and running an experiment: in the Jupyter notebook below, we try to guess a hidden string from a black box.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/b1b1c57d275e19823fc5a1156d7e5008.js&#34;&gt;&lt;/script&gt;
+
+&lt;h1 id=&#34;analysis-why-the-circuit-works&#34;&gt;Analysis: why the circuit works&lt;/h1&gt;
+&lt;p&gt;The first step in the analysis is to notice that the circuit used in Bernstein-Vazirani’s algorithm is identical to the circuit in &lt;a href=&#34;https://ivaniscoding.github.io/posts/quantum5/&#34;&gt;Deutsch-Jozsa’s algorithm&lt;/a&gt;. That is surprising at first because one algorithm works to find a hidden string and the other to distinguish between balanced and constant functions.&lt;/p&gt;
+&lt;p&gt;Now, we will use a result from the discussion on the last post, to remember that the state after querying the oracle is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} (-1)^{f(x)}|x\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;But this time, we know that our oracle is described by &lt;span class=&#34;math inline&#34;&gt;\(f(x) = s \cdot x\)&lt;/span&gt;. Thus:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} (-1)^{s \cdot x}|x\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We will now claim that:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+H^{\otimes n} |\psi\rangle = |s\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;That is, that applying the Hadamard gate to each qubit takes us from &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(|s\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;To prove so, we will work backwards. Because &lt;span class=&#34;math inline&#34;&gt;\(H\)&lt;/span&gt; is the inverse gate of itself, then &lt;span class=&#34;math inline&#34;&gt;\(H^{\otimes n}\)&lt;/span&gt; is the inverse of &lt;span class=&#34;math inline&#34;&gt;\(H^{\otimes n}\)&lt;/span&gt;. Thus, proving our claim is equivalent to showing that:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+H^{\otimes n} |s\rangle = \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} (-1)^{s \cdot x}|x\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;It would be useful to find a formula for &lt;span class=&#34;math inline&#34;&gt;\(H^{\otimes n} |s\rangle\)&lt;/span&gt; . We can start by finding a formula for &lt;span class=&#34;math inline&#34;&gt;\(H\)&lt;/span&gt;, that is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+H |a\rangle = \frac{|0\rangle + (-1)^{a}|1\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The identity can be proved by verification of &lt;span class=&#34;math inline&#34;&gt;\(a = 0\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(a = 1\)&lt;/span&gt;. We can even go further and write:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+H |a\rangle = \frac{1}{\sqrt 2} \sum_{b \in \{0, 1\}} (-1)^{ab}|b\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Now that we have an identity for &lt;span class=&#34;math inline&#34;&gt;\(n = 1\)&lt;/span&gt;, it would be useful to generalize for greater values of n. For &lt;span class=&#34;math inline&#34;&gt;\(n = 2\)&lt;/span&gt;, we can think of the multiple qubits as tensor products and thus:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+H^{\otimes 2}|a,c\rangle = (\frac{1}{\sqrt 2} \sum_{b \in \{0, 1\}} (-1)^{ab}|b\rangle) \otimes (\frac{1}{\sqrt 2} \sum_{d \in \{0, 1\}} (-1)^{cd}|c\rangle)
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We may rewrite it in a formula closer to the &lt;span class=&#34;math inline&#34;&gt;\(s \cdot x\)&lt;/span&gt; product we defined earlier, that is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+H^{\otimes 2}|s\rangle = \frac{1}{(\sqrt 2)^{2}} \sum_{x \in \{0, 1\}^{2}} (-1)^{s_{0}x_{0} + s_{1}x_{1}}|x\rangle 
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Because of the cycle of powers of -1, &lt;span class=&#34;math inline&#34;&gt;\((-1)^{a} = (-1)^{a \mod 2}\)&lt;/span&gt; and thus the -1 exponent is &lt;span class=&#34;math inline&#34;&gt;\(s \cdot x\)&lt;/span&gt;! Therefore, we may generalize to all &lt;span class=&#34;math inline&#34;&gt;\(n\)&lt;/span&gt; (the proof can be done by induction):&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+H^{\otimes n}|s\rangle = \frac{1}{(\sqrt 2)^{n}} \sum_{x \in \{0, 1\}^{n}} (-1)^{s\cdot x}|x\rangle 
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Hence, our circuit works because it takes &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(|s\rangle\)&lt;/span&gt; due to the inverse nature of &lt;span class=&#34;math inline&#34;&gt;\(H^{\otimes n}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;The connection between Deutsch-Jozsa’s and Bernstein-Vazirani’s algorithm becomes clearer then:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span class=&#34;math inline&#34;&gt;\(f(x) = s \cdot x\)&lt;/span&gt; is a balanced function (or constant if &lt;span class=&#34;math inline&#34;&gt;\(s\)&lt;/span&gt; is all zeroes)!&lt;/li&gt;
+&lt;li&gt;If a black box from Deutsch-Jozsa’s returns a state &lt;span class=&#34;math inline&#34;&gt;\(|s\rangle\)&lt;/span&gt; with 100% chance, then the black box implements &lt;span class=&#34;math inline&#34;&gt;\(f(x) = s \cdot x\)&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
     </item>
     
     <item>
       <title>Quantum #5 - Deutsch-Jozsa (part 2)</title>
       <link>https://ivaniscoding.github.io/posts/quantum5/</link>
       <pubDate>Sat, 28 Dec 2019 00:10:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/posts/quantum5/</guid>
-      <description>This is the fifth post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
-The goal of this post is to continue the discussion of the Deutsch-Jozsa algorithm, starting off where we stopped on part 1.
-Deutsch-Jozsa problem After having introduced the Deutsch problem, we will now introduce the Deutsch-Jozsa which is a generalization of the Deutsch problem.</description>
+      <description>&lt;p&gt;This is the fifth post of a series of posts about Quantum Computing with &lt;a href=&#34;https://qiskit.org/&#34;&gt;Qiskit&lt;/a&gt;. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.&lt;/p&gt;
+&lt;p&gt;The goal of this post is to continue the discussion of the Deutsch-Jozsa algorithm, starting off where we stopped on &lt;a href=&#34;https://ivaniscoding.github.io/posts/quantum4/&#34;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;deutsch-jozsa-problem&#34;&gt;Deutsch-Jozsa problem&lt;/h2&gt;
+&lt;p&gt;After having introduced the Deutsch problem, we will now introduce the Deutsch-Jozsa which is a generalization of the Deutsch problem. In particular, the Deutsch problem is the case of Deutsch-Jozsa with &lt;span class=&#34;math inline&#34;&gt;\(n = 1\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Imagine that you have a black box that implements a function from n-bit strings (e.g. 11010) to 0 or 1, that is &lt;span class=&#34;math inline&#34;&gt;\(f : \{0, 1 \}^{n} \rightarrow \{0, 1\}\)&lt;/span&gt;. It is guaranteed that &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; is either a balanced or a constant function. You can make a query to the black box with a value &lt;span class=&#34;math inline&#34;&gt;\(v\)&lt;/span&gt;, and the black box will return &lt;span class=&#34;math inline&#34;&gt;\(f(v)\)&lt;/span&gt;. How many queries are needed to decide if the function is constant or balanced?&lt;/p&gt;
+&lt;p&gt;Just remembering definitions, a function is balanced when the number of values that have &lt;span class=&#34;math inline&#34;&gt;\(f(v) = 0\)&lt;/span&gt; is equal to the number of values that have &lt;span class=&#34;math inline&#34;&gt;\(f(v) = 1\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;This time, we have way more than 4 possible functions, more precisely &lt;span class=&#34;math inline&#34;&gt;\(2(\binom{2^{n}}{2^{n-1}} + 1)\)&lt;/span&gt;. Our classical strategy also needs more queries to classify the function. To deterministically determine the type of the function, we need &lt;span class=&#34;math inline&#34;&gt;\(O(2^{n})\)&lt;/span&gt; queries because the worst case is when we obtain &lt;span class=&#34;math inline&#34;&gt;\(2^{n-1}\)&lt;/span&gt; of 0s (or 1, it is symmetric) and still need an additional query to distinguish between balanced or constant.&lt;/p&gt;
+&lt;p&gt;From a perspective using classical computers, that is (deterministically) the best we can do. A question that arises is: can quantum computers do better? It can be shown that yes, they can. And the speedup is impressive.&lt;/p&gt;
+&lt;h2 id=&#34;generalazing-the-solution-for-multiple-bits&#34;&gt;Generalazing the solution for multiple bits&lt;/h2&gt;
+&lt;p&gt;We now need to try to generalize our solution from &lt;span class=&#34;math inline&#34;&gt;\(n = 1\)&lt;/span&gt; to larger values of &lt;span class=&#34;math inline&#34;&gt;\(n\)&lt;/span&gt;. It is worth trying the same solution but now using multiple bits, i.e. to apply a Hadamard to every qubit to generate all possible values, evaluate using the black box, and lastly apply Hadamard gates before measuring. The circuit we obtain looks like:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum5/Q5C0.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We now need to decide if the circuit provides criteria similar to the previous solution to differentiate between. It is helpful to expand the math to analyze that. After applying the Hadamard gates we have:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = |00...0\rangle|0\rangle \rightarrow H^{\otimes N}|\psi\rangle \otimes (\frac{|0\rangle - |1\rangle}{\sqrt 2})
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\rightarrow \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} |x\rangle \otimes (\frac{|0\rangle - |1\rangle}{\sqrt 2})
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We then send the input to the blackbox, that yields:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\rightarrow \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} |x\rangle \otimes (\frac{|0 \oplus f(x)\rangle - |1 \oplus f(x)\rangle}{\sqrt 2})
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\rightarrow \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} (-1)^{f(x)}|x\rangle \otimes (\frac{|0\rangle - |1\rangle}{\sqrt 2})
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Like in the last analysis, we used the identity &lt;span class=&#34;math inline&#34;&gt;\(|0 \oplus a \rangle - |1 \oplus a \rangle = (-1)^{a}(|0\rangle - |1\rangle)\)&lt;/span&gt;. We also obtained a similar result: the last qubit does not change, so measuring it is useless and we will not worry about it afterwards.&lt;/p&gt;
+&lt;p&gt;Given that now we have a mathematical expression representing the state of the qubits, we can analyse the two possible cases before measuring.&lt;/p&gt;
+&lt;h1 id=&#34;constant-case&#34;&gt;Constant case&lt;/h1&gt;
+&lt;p&gt;If &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; is constant, then all the &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; in the sum before will have the same sign, which can be summarized as:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \pm \frac{1}{\sqrt 2 ^ {n}}\sum_{x \in \{0, 1\}^{n}} |x\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Notice that multiplying the whole expression by -1 does not affect the measurements because it is a global phase change. The state that happens on the balanced case after applying the black box is then:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = (\frac{|0\rangle + |1\rangle}{\sqrt 2})^{\otimes n}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Notice that when we apply the Hadamard gates before measuring, each &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle + |1\rangle}{\sqrt 2}\)&lt;/span&gt; becomes &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; and therefore the final state is &lt;span class=&#34;math inline&#34;&gt;\(|00...0\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Hence, we are sure that if &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; is constant then all measurements will always be 0.&lt;/p&gt;
+&lt;h2 id=&#34;balanced-case&#34;&gt;Balanced case&lt;/h2&gt;
+&lt;p&gt;We now need to analyse the other case, when there is no guarantee that all &lt;span class=&#34;math inline&#34;&gt;\(|x\rangle\)&lt;/span&gt; will have the same sign. Indeed, we do not know anything about &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; (just that the number of 0s and 1s is the same) so it is difficult to know the exact probability of an arbitrary state &lt;span class=&#34;math inline&#34;&gt;\(|x\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;One thing we know though is that &lt;span class=&#34;math inline&#34;&gt;\(|00...0\rangle\)&lt;/span&gt; is always the output of the other case, i.e. the constant case. We may then ask: what is the probability that this case, the balanced case, will output &lt;span class=&#34;math inline&#34;&gt;\(|00...0\rangle\)&lt;/span&gt;?&lt;/p&gt;
+&lt;p&gt;To analyze that we need to calculate the coefficient &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; of &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle = \alpha|00...0\rangle + ...\)&lt;/span&gt; after applying all the Hadamard gates, which can be seen as multiplying by &lt;span class=&#34;math inline&#34;&gt;\(H^{\otimes n}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;One key property of &lt;span class=&#34;math inline&#34;&gt;\(H^{\otimes n}\)&lt;/span&gt; is that the first line, the line that will give the &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; of the final &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt;, has constant terms i.e. they are equal. More exactly, all terms of the first line of &lt;span class=&#34;math inline&#34;&gt;\(H^{\otimes n}\)&lt;/span&gt; are &lt;span class=&#34;math inline&#34;&gt;\((\sqrt 2) ^ {-n}\)&lt;/span&gt;. This fact can be shown by induction and I will just use it, not prove it.&lt;/p&gt;
+&lt;p&gt;Given that all terms of the first line are &lt;span class=&#34;math inline&#34;&gt;\((\sqrt 2) ^ {-n}\)&lt;/span&gt;, the &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; we obtain is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\alpha = \frac{1}{\sqrt 2 ^ {n}} \frac{1}{\sqrt 2 ^ {n}} \sum_{x \in \{0, 1\}^{n}} (-1)^{f(x)}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Now the fact that the function is balanced becomes crucial. Because the number of &lt;span class=&#34;math inline&#34;&gt;\(f(x) = 0\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(f(x) = 1\)&lt;/span&gt; are equal, the sum above is zero! Hence, &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; is zero and therefore there is no &lt;span class=&#34;math inline&#34;&gt;\(|00...0\rangle\)&lt;/span&gt; component in the final state. Because of that, we are guaranteed that not all measurements will be 0, which means that at least one of the measurements will be 1.&lt;/p&gt;
+&lt;p&gt;Thus, the circuit we used provides criteria to classify &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If all the measurements are 0, then &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; is constant&lt;/li&gt;
+&lt;li&gt;If at least one of the measurements is 1, then &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; is balanced&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The problem has been solved! The most impressive fact is that only 1 query was used, instead of &lt;span class=&#34;math inline&#34;&gt;\(O(2^{n})\)&lt;/span&gt; queries. That is an exponential speedup.&lt;/p&gt;
+&lt;h2 id=&#34;implementing-the-deutsch-jozsa-algorithm&#34;&gt;Implementing the Deutsch-Jozsa algorithm&lt;/h2&gt;
+&lt;p&gt;We can verify that the Deutsch-Jozsa algorithm works using Qiskit and running an experiment: in the Jupyter notebook below, we try three cases for the black box and verify that our algorithm predicts correctly that it is balanced or constant.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/e73a21c814f4288e188d4eec502c87e6.js&#34;&gt;&lt;/script&gt;
+
+&lt;h1 id=&#34;so-what&#34;&gt;So what?&lt;/h1&gt;
+&lt;p&gt;You might ask: what is the point of the Deutsch-Jozsa algorithm? The algorithm solves a very artificial and useless problem. It has very little practical applications.&lt;/p&gt;
+&lt;p&gt;The algorithm, in my personal opinion, exemplifies the beauty of quantum computing: it provides an exponential speedup! Not only the speedup is impressive, but it is also unachievable by classical computers. It is one of the first algorithms from a yet-to-be-explored field.&lt;/p&gt;
+&lt;p&gt;It also exemplifies the less beautiful aspects of it. As of now, quantum computing… is useless. The Deutsch-Jozsa problem is a toy problem to show that two complexity classes for algorithms are different, and that is it. No applications. Not to mention that with Noisy Quantum Computers even running simple algorithms like Deutsch-Jozsa can have errors (qubits and gates are still not perfect).&lt;/p&gt;
+&lt;p&gt;However, the algorithm still has historical importance and inspired other algorithms that have more practical applications, like Shor’s algorithm for factorizing numbers. Hence, it is still important to study the problem.&lt;/p&gt;
+&lt;h1 id=&#34;a-randomized-approach&#34;&gt;A randomized approach&lt;/h1&gt;
+&lt;p&gt;In the initial discussion, we highlighted the deterministic factor. As a side note, we can have a probabilistic algorithm that solves the problem most of the time with an error rate &lt;span class=&#34;math inline&#34;&gt;\(\epsilon\)&lt;/span&gt;. If &lt;span class=&#34;math inline&#34;&gt;\(k\)&lt;/span&gt; queries are made to the black box, &lt;span class=&#34;math inline&#34;&gt;\(\epsilon = 2^{-(k - 1)}\)&lt;/span&gt;. Because the decrease in &lt;span class=&#34;math inline&#34;&gt;\(\epsilon\)&lt;/span&gt; is exponential, with a constant and small value of &lt;span class=&#34;math inline&#34;&gt;\(k\)&lt;/span&gt; we can classify with great confidence. Below is Python code implementing that idea (&lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; is the function, &lt;span class=&#34;math inline&#34;&gt;\(n\)&lt;/span&gt; is the number of bits and &lt;span class=&#34;math inline&#34;&gt;\(k\)&lt;/span&gt; is the number of tries before we stop).&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb1&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-1&#34; title=&#34;1&#34;&gt;&lt;span class=&#34;im&#34;&gt;from&lt;/span&gt; random &lt;span class=&#34;im&#34;&gt;import&lt;/span&gt; randint&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-2&#34; title=&#34;2&#34;&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-3&#34; title=&#34;3&#34;&gt;&lt;span class=&#34;kw&#34;&gt;def&lt;/span&gt; balanced_or_constant(f, n, k):&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-4&#34; title=&#34;4&#34;&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-5&#34; title=&#34;5&#34;&gt;    first_guess &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; f(randint(&lt;span class=&#34;dv&#34;&gt;0&lt;/span&gt;, &lt;span class=&#34;dv&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;**&lt;/span&gt;n &lt;span class=&#34;op&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;dv&#34;&gt;1&lt;/span&gt;))&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-6&#34; title=&#34;6&#34;&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-7&#34; title=&#34;7&#34;&gt;    &lt;span class=&#34;cf&#34;&gt;for&lt;/span&gt; i &lt;span class=&#34;kw&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;bu&#34;&gt;range&lt;/span&gt;(k&lt;span class=&#34;dv&#34;&gt;-1&lt;/span&gt;):&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-8&#34; title=&#34;8&#34;&gt;        guess &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; f(randint(&lt;span class=&#34;dv&#34;&gt;0&lt;/span&gt;, &lt;span class=&#34;dv&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;**&lt;/span&gt;n &lt;span class=&#34;op&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;dv&#34;&gt;1&lt;/span&gt;))&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-9&#34; title=&#34;9&#34;&gt;        &lt;span class=&#34;cf&#34;&gt;if&lt;/span&gt; guess &lt;span class=&#34;op&#34;&gt;!=&lt;/span&gt; first_guess:&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-10&#34; title=&#34;10&#34;&gt;            &lt;span class=&#34;cf&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;balanced&amp;quot;&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-11&#34; title=&#34;11&#34;&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-12&#34; title=&#34;12&#34;&gt;    &lt;span class=&#34;cf&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;constant&amp;quot;&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</description>
     </item>
     
     <item>
       <title>Quantum #4 - Deutsch-Jozsa (part 1)</title>
       <link>https://ivaniscoding.github.io/posts/quantum4/</link>
       <pubDate>Thu, 26 Dec 2019 18:00:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/posts/quantum4/</guid>
-      <description>This is the fourth post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
-The goal of this post is to discuss the Deutsch-Jozsa algorithm, which was one of the very first quantum algorithms. Even though it solves a very artificial problem, its main purpose is to answer: is there an advantage in using quantum computers?</description>
+      <description>&lt;p&gt;This is the fourth post of a series of posts about Quantum Computing with &lt;a href=&#34;https://qiskit.org/&#34;&gt;Qiskit&lt;/a&gt;. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.&lt;/p&gt;
+&lt;p&gt;The goal of this post is to discuss the Deutsch-Jozsa algorithm, which was one of the very first quantum algorithms. Even though it solves a very artificial problem, its main purpose is to answer: is there an advantage in using quantum computers? The answer is yes.&lt;/p&gt;
+&lt;h2 id=&#34;deutsch-problem&#34;&gt;Deutsch problem&lt;/h2&gt;
+&lt;p&gt;Before diving into the Deutsch-Jozsa algorithm, let’s discuss the Deutsch problem which is a special case solved by the algorithm. It is a problem that can be summarized as:&lt;/p&gt;
+&lt;p&gt;Imagine that you have a black box that implements a function &lt;span class=&#34;math inline&#34;&gt;\(f : \{0, 1 \} \rightarrow \{0, 1\}\)&lt;/span&gt;. You can make a query to the black box with a value &lt;span class=&#34;math inline&#34;&gt;\(v\)&lt;/span&gt;, and the black box will return &lt;span class=&#34;math inline&#34;&gt;\(f(v)\)&lt;/span&gt;. How many queries are needed to decide if the function is constant or balanced? A balanced function is when the number of values that have &lt;span class=&#34;math inline&#34;&gt;\(f(v) = 0\)&lt;/span&gt; is equal to the number of values that have &lt;span class=&#34;math inline&#34;&gt;\(f(v) = 1\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;There are four possible &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; functions, all listed below:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;Function&lt;/th&gt;
+&lt;th&gt;Values&lt;/th&gt;
+&lt;th&gt;Classification&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(f_{0}\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(f(0) = 0\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(f(1) = 0\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;Constant&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(f_{1}\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(f(0) = 0\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(f(1) = 1\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;Balanced&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(f_{2}\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(f(0) = 1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(f(1) = 0\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;Balanced&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(f_{3}\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(f(0) = 1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(f(1) = 1\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;Constant&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;It turns out that to classify the function implemented by the black box, we need to use two queries. When we do one query, we go from four possible functions to two functions, one which will be balanced and the other constant. Thus, we need an additional query to decide which one it is, totaling two queries.&lt;/p&gt;
+&lt;p&gt;From a perspective using classical computers, that is the best we can do. A question that arises is: can quantum computers do better? It can be shown yes, they can.&lt;/p&gt;
+&lt;h2 id=&#34;quantum-black-box&#34;&gt;Quantum black box&lt;/h2&gt;
+&lt;p&gt;Before we continue, it is important to discuss what a quantum black box is. It acts similarly to the classical black box we had before: it takes qubits and spits the result. Because the black box implements a function that might not have a unitary matrix and quantum circuits are composed only of unitary matrices, we need to use a working qubit to store the result of the black box.&lt;/p&gt;
+&lt;p&gt;Thus, we define the black box as a transformation &lt;span class=&#34;math inline&#34;&gt;\(|v\rangle|0\rangle \rightarrow |v\rangle|f(v)\rangle\)&lt;/span&gt;, or even more detailed &lt;span class=&#34;math inline&#34;&gt;\(|v\rangle|w\rangle \rightarrow |v\rangle|w \oplus f(v)\rangle\)&lt;/span&gt; to handle the case with 1 (&lt;span class=&#34;math inline&#34;&gt;\(\oplus\)&lt;/span&gt; is the XOR operator).&lt;/p&gt;
+&lt;p&gt;An interesting aspect of the quantum black box is that it allows us to achieve something that would be impossible with a classical computer: ask &lt;span class=&#34;math inline&#34;&gt;\(f(0)\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(f(1)\)&lt;/span&gt; at the same time! How? Well, consider a state with a superposition such as &lt;span class=&#34;math inline&#34;&gt;\(\frac{(|0\rangle + |1\rangle)}{\sqrt 2}\)&lt;/span&gt;. If we give that qubit to the black box, a part of our working qubit will have &lt;span class=&#34;math inline&#34;&gt;\(f(0)\)&lt;/span&gt; and the other will have &lt;span class=&#34;math inline&#34;&gt;\(f(1)\)&lt;/span&gt;. Maybe then, we can find a clever way to recover both at the same time and classify the function with only one query!&lt;/p&gt;
+&lt;p&gt;One concern that might come now: is it even fair to compare a quantum black box to a classical black box? The answer is: it is reasonable. Even with a quantum black box, classical computers still need 2 queries because they cannot exploit superpositions, hence it is reasonable to compare.&lt;/p&gt;
+&lt;h1 id=&#34;exploiting-superposition&#34;&gt;Exploiting superposition&lt;/h1&gt;
+&lt;p&gt;Now that we know that we need to use superposition in our solution, it is tempting to use a circuit like the following:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum4/Q4C0.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In this circuit, we generate a superposition, then apply the black box and after we measure our result. It is a very simple circuit and the core ideas of the real solution are on it. Even though it seems promising, it fails. It cannot differentiate balanced functions.&lt;/p&gt;
+&lt;p&gt;To understand why, consider the case for constant. If the value is always 0, our measure for the qubit will also be always zero. If it is 1, similarly, it will always be one. But for balanced, we have 50% for each case so in practice we cannot differentiate constant and balanced functions.&lt;/p&gt;
+&lt;p&gt;We could try to measure the balanced case by, let’s say, applying a Hadamard gate :&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum4/Q4C1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;This solves the problem for balanced functions: now, due to the Hadamard gate, they will always output the same measurement 100% of the time. But our constant functions will now measure 50% of the times 0 and 50% of the times 1, so we still have the same problem as before. We need a more elaborate solution.&lt;/p&gt;
+&lt;h2 id=&#34;deutsch-algorithm&#34;&gt;Deutsch algorithm&lt;/h2&gt;
+&lt;p&gt;We will now analyze the circuit that the following circuit solves the problem:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum4/Q4C2.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;To understand why, we can expand the algebra of the circuit. We have the following state after applying the &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; and Hadamard gates:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \frac{|0\rangle + |1\rangle}{\sqrt 2} \otimes \frac{|0\rangle - |1\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;After applying the black box, we obtain:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\rightarrow \frac{|0\rangle (|0 \oplus f(0)\rangle - |1 \oplus f(0)\rangle)}{2} + \frac{|1\rangle (|0 \oplus f(1)\rangle - |1 \oplus f(1)\rangle)}{2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We are then going to use the following identity to help rewrite our expression in a convenient way:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|0 \oplus a \rangle - |1 \oplus a \rangle = (-1)^{a}(|0\rangle - |1\rangle)
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We can verify that the expression is valid when &lt;span class=&#34;math inline&#34;&gt;\(a\)&lt;/span&gt; is 0 or 1. Therefore, we get:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\rightarrow \frac{(-1)^{f(0)}|0\rangle (|0\rangle - |1\rangle)}{2} + \frac{(-1)^{f(1)}|1\rangle (|0\rangle - |1\rangle)}{2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\rightarrow \frac{(-1)^{f(0)}|0\rangle + (-1)^{f(1)}|1\rangle}{\sqrt 2} \otimes \frac{|0\rangle - |1\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;This form is convenient because it tells us two things. The first is that the second qubit does not change, so measuring it is useless. The second is that the first qubit depends on the classification of the function:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; is constant, the qubit will be &lt;span class=&#34;math inline&#34;&gt;\((\pm 1)\frac{|0\rangle + |1\rangle}{\sqrt 2}\)&lt;/span&gt;. Because having a minus sign does not matter (it is a global phase change), we can say that the qubit will always be &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle + |1\rangle}{\sqrt 2}\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;If &lt;span class=&#34;math inline&#34;&gt;\(f\)&lt;/span&gt; is balanced, the qubit will be &lt;span class=&#34;math inline&#34;&gt;\((\pm 1)\frac{|0\rangle - |1\rangle}{\sqrt 2}\)&lt;/span&gt;. Because having a minus sign does not matter (it is a global phase change), we can say that the qubit will always be &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle - |1\rangle}{\sqrt 2}\)&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To differentiate between &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle + |1\rangle}{\sqrt 2}\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle - |1\rangle}{\sqrt 2}\)&lt;/span&gt;, we need to apply a Hadamard gate. The first case will become a &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; and the second case will become &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt;, so using the circuit we presented before we can decide using the rule:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If the measurement of the first qubit is &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt;, we have a constant function&lt;/li&gt;
+&lt;li&gt;Otherwise, if the measurement of the qubit is &lt;span class=&#34;math inline&#34;&gt;\(1\)&lt;/span&gt;, we have a balanced function&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The problem has been solved! With just one query, an achievement that would be impossible with classical computers.&lt;/p&gt;
+&lt;h2 id=&#34;implementing-the-deutsch-algorithm&#34;&gt;Implementing the Deutsch algorithm&lt;/h2&gt;
+&lt;p&gt;We can verify that the Deutsch algorithm works using Qiskit and running an experiment: in the Jupyter notebook below, we try the four possible cases for the black box and verify that our algorithm predicts correctly that it is balanced or constant.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/8fa8bbaa6c9d3dad16b3bf60e69d5087.js&#34;&gt;&lt;/script&gt;
+
+&lt;h1 id=&#34;next-step&#34;&gt;Next step&lt;/h1&gt;
+&lt;p&gt;The next step is to generalize the problem from 1-bit functions to n-bit functions, and that is what will happen in the second part of the blog post about the Deutsch-Jozsa algorithm.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>Quantum #3 - Superdense Coding</title>
       <link>https://ivaniscoding.github.io/posts/quantum3/</link>
       <pubDate>Mon, 23 Dec 2019 22:00:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/posts/quantum3/</guid>
-      <description>This is the third post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
-The goal of this post is to discuss superdense coding, which can be seen as the opposite of quantum teleportation.
-Sending bits with qubits Imagine that Alice wants to send two classical bits \(b_{0}b_{1}\) to Bob.</description>
+      <description>&lt;p&gt;This is the third post of a series of posts about Quantum Computing with &lt;a href=&#34;https://qiskit.org/&#34;&gt;Qiskit&lt;/a&gt;. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.&lt;/p&gt;
+&lt;p&gt;The goal of this post is to discuss superdense coding, which can be seen as the opposite of &lt;a href=&#34;https://ivaniscoding.github.io/posts/quantum2/&#34;&gt;quantum teleportation&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;sending-bits-with-qubits&#34;&gt;Sending bits with qubits&lt;/h2&gt;
+&lt;p&gt;Imagine that Alice wants to send two classical bits &lt;span class=&#34;math inline&#34;&gt;\(b_{0}b_{1}\)&lt;/span&gt; to Bob. Alice could do that in more standard ways, but instead, Alice chooses to send a qubit to Bob. Is there a way we can guarantee that Bob will &lt;em&gt;always&lt;/em&gt; decode &lt;span class=&#34;math inline&#34;&gt;\(b_{0}b_{1}\)&lt;/span&gt;? The answer is yes, and to communicate in such a non-standard way, Alice and Bob just need to follow an algorithm that is called Superdense Coding:&lt;/p&gt;
+&lt;ol type=&#34;1&#34;&gt;
+&lt;li&gt;Entangle Alice’s and Bob’s qubit&lt;/li&gt;
+&lt;li&gt;Encode the bits Alice wants to send using quantum gates, and then send the qubit to Bob&lt;/li&gt;
+&lt;li&gt;Apply the same gates from the entanglement procedure, but in inverted order&lt;/li&gt;
+&lt;li&gt;Measure the two qubits&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Notice that superdense coding can be seen as the opposite of teleportation. In teleportation, we share an entangled state and send two classical bits to recover a qubit. Superdense coding, on the other hand, uses an entangled state and sends a qubit to recover two classical bits. Thus, the processes are complementary.&lt;/p&gt;
+&lt;h2 id=&#34;preparing-the-bell-state&#34;&gt;Preparing the Bell state&lt;/h2&gt;
+&lt;p&gt;The first step of the algorithm is to prepare the entangled state &lt;span class=&#34;math inline&#34;&gt;\(\vert\Phi^{+}\rangle\)&lt;/span&gt;, one of the Bell states. We discussed that on the &lt;a href=&#34;https://ivaniscoding.github.io/posts/quantum2/&#34;&gt;quantum teleportation&lt;/a&gt;, so if you want a detailed explanation I encourage you to check it out there. What we need to remember is that we work with the state:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\vert\Phi^{+}\rangle = \frac{\vert 00 \rangle + \vert 11 \rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;That is generated by the circuit:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum2/Q2C0.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;After generating &lt;span class=&#34;math inline&#34;&gt;\(\vert\Phi^{+}\rangle\)&lt;/span&gt;, we send one of the qubits to Alice and the other one to Bob.&lt;/p&gt;
+&lt;h2 id=&#34;encoding-classical-information-on-a-qubit&#34;&gt;Encoding classical information on a qubit&lt;/h2&gt;
+&lt;p&gt;Now that Alice has one of the qubits of &lt;span class=&#34;math inline&#34;&gt;\(\vert\Phi^{+}\rangle\)&lt;/span&gt;, she can try to encode &lt;span class=&#34;math inline&#34;&gt;\(b_{0}b_{1}\)&lt;/span&gt; into the qubit by applying quantum gates.&lt;/p&gt;
+&lt;p&gt;To do so, she needs to find a clever way of applying a gate that after applying the inverted entanglement again, will give Bob the bits we were trying to send, i.e. the measurement of the first qubit will always be &lt;span class=&#34;math inline&#34;&gt;\(b_{0}\)&lt;/span&gt; and the second will always be &lt;span class=&#34;math inline&#34;&gt;\(b_{1}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;To make it clearer, let’s take for example the &lt;span class=&#34;math inline&#34;&gt;\(|00\rangle\)&lt;/span&gt; case. We need to find a gate &lt;span class=&#34;math inline&#34;&gt;\(G\)&lt;/span&gt; such that:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+(H \otimes I)(CNOT)(G \otimes I)\vert\Phi^{+}\rangle = |00\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We can then write the &lt;span class=&#34;math inline&#34;&gt;\(G\)&lt;/span&gt; matrix in the function of 4 unknown variables and recall that &lt;span class=&#34;math inline&#34;&gt;\(G G^{\dagger} = I\)&lt;/span&gt; to solve for &lt;span class=&#34;math inline&#34;&gt;\(G\)&lt;/span&gt;. It turns out that for &lt;span class=&#34;math inline&#34;&gt;\(|00\rangle\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(G = I\)&lt;/span&gt;. That makes sense because applying the inverted entanglement circuit on the &lt;span class=&#34;math inline&#34;&gt;\(\vert\Phi^{+}\rangle\)&lt;/span&gt; untangles it.&lt;/p&gt;
+&lt;p&gt;We would need to do the same for &lt;span class=&#34;math inline&#34;&gt;\(|01\rangle\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(|10\rangle\)&lt;/span&gt;, and &lt;span class=&#34;math inline&#34;&gt;\(|11\rangle\)&lt;/span&gt;. The table below summarizes the results we would get:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;&lt;span class=&#34;math inline&#34;&gt;\(b_{0}b_{1}\)&lt;/span&gt;&lt;/th&gt;
+&lt;th&gt;Gate to apply&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(00\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(I\)&lt;/span&gt; (no gates)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(01\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(11\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; and then &lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;One curious connection to notice between quantum teleportation and superdense coding is that the table to apply the gates based on the bits is identical for both algorithms.&lt;/p&gt;
+&lt;h2 id=&#34;decoding-classical-information-from-a-qubit&#34;&gt;Decoding classical information from a qubit&lt;/h2&gt;
+&lt;p&gt;After Alice is done encoding, she sends her qubit to Bob. Bob applies then the same gates we used to generate&lt;span class=&#34;math inline&#34;&gt;\(\vert\Phi^{+}\rangle\)&lt;/span&gt; but in inverted order. That is, we apply the CNOT gate and then Hadamard gate on the first qubit as in the circuit below:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum3/Q3C0.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Then, Bob measures the qubits. Because of the way we designed the gates in the last section, we are sure that the measurement of the first qubit will be &lt;span class=&#34;math inline&#34;&gt;\(b_{0}\)&lt;/span&gt; and the second will be &lt;span class=&#34;math inline&#34;&gt;\(b_{1}\)&lt;/span&gt;. Hence, Bob has successfully received two bits of classical information! With just 1 qubit.&lt;/p&gt;
+&lt;h2 id=&#34;verifying-superdense-coding-computationally&#34;&gt;Verifying superdense coding computationally&lt;/h2&gt;
+&lt;p&gt;We can verify that superdense coding works using Qiskit and running an experiment: in the Jupyter notebook below, we try the 4 different cases of bits that we can send.&lt;/p&gt;
+&lt;p&gt;Every step explained above is done, and the results match our prediction.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/9254c3b34f837e0b233e148939da833a.js&#34;&gt;&lt;/script&gt;
+
+</description>
     </item>
     
     <item>
       <title>Quantum #2 - Teleportation</title>
       <link>https://ivaniscoding.github.io/posts/quantum2/</link>
       <pubDate>Sun, 22 Dec 2019 22:00:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/posts/quantum2/</guid>
-      <description>This is the second post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
-The goal of this post is to discuss quantum teleportation, one of the most basic protocols for communication in quantum computing.
-Teleportation and the problem it solves Imagine that Alice has a qubit \(| \psi \rangle = \alpha | 0 \rangle + \beta | 1 \rangle\), where both \(\alpha\) and \(\beta\) are unknown.</description>
+      <description>&lt;p&gt;This is the second post of a series of posts about Quantum Computing with &lt;a href=&#34;https://qiskit.org/&#34;&gt;Qiskit&lt;/a&gt;. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.&lt;/p&gt;
+&lt;p&gt;The goal of this post is to discuss quantum teleportation, one of the most basic protocols for communication in quantum computing.&lt;/p&gt;
+&lt;h2 id=&#34;teleportation-and-the-problem-it-solves&#34;&gt;Teleportation and the problem it solves&lt;/h2&gt;
+&lt;p&gt;Imagine that Alice has a qubit &lt;span class=&#34;math inline&#34;&gt;\(| \psi \rangle = \alpha | 0 \rangle + \beta | 1 \rangle\)&lt;/span&gt;, where both &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\beta\)&lt;/span&gt; are unknown. Alice needs to send the qubit to Bob that is located somewhere far away. How does Alice do that?&lt;/p&gt;
+&lt;p&gt;One simple answer could be to measure &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\beta\)&lt;/span&gt; and send the information. However, that does not work because:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;We may need an infinite amount of bits to represent &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\beta\)&lt;/span&gt; (e.g. think about encoding &lt;span class=&#34;math inline&#34;&gt;\(\pi\)&lt;/span&gt; in binary, it has an infinite length)&lt;/li&gt;
+&lt;li&gt;Every time we measure a qubit, it becomes either &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; or &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt; and all its information is lost.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Having ruled out measurement, we may ask: is it even possible to send &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt;? The answer is, surprisingly, yes. To do so, we need two extra qubits, one for Alice and one for Bob, and to follow a simple algorithm:&lt;/p&gt;
+&lt;ol type=&#34;1&#34;&gt;
+&lt;li&gt;Entangle Alice’s and Bob’s qubit&lt;/li&gt;
+&lt;li&gt;Apply a CNOT gate with &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt; as the control qubit and Alice’s qubit as the target&lt;/li&gt;
+&lt;li&gt;Apply a Hadamard gate to &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt; and measure it, and measure Alice’s qubit&lt;/li&gt;
+&lt;li&gt;Send the measurements to Bob through a &lt;em&gt;classical&lt;/em&gt; communication channel&lt;/li&gt;
+&lt;li&gt;Apply (or not) a &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; and/or &lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt; gate based on the measurements&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;It may look like a lot to process at once, but if broken down, teleportation can make sense.&lt;/p&gt;
+&lt;h2 id=&#34;preparing-the-bell-state&#34;&gt;Preparing the Bell state&lt;/h2&gt;
+&lt;p&gt;The first step of the algorithm is to prepare the entangled state &lt;span class=&#34;math inline&#34;&gt;\(\vert\Phi^{+}\rangle\)&lt;/span&gt;, one of the Bell states. The Bell states are the most entangled and commonly appear in many quantum algorithms. Out of the for Bell states, the one we are looking is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\vert\Phi^{+}\rangle = \frac{\vert 00 \rangle + \vert 11 \rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To do so, we start with the two-qubit state &lt;span class=&#34;math inline&#34;&gt;\(\vert 00 \rangle\)&lt;/span&gt;, and use a Hadamard gate on the first qubit.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\vert 00 \rangle \rightarrow (\frac{\vert 0 \rangle + \vert 1 \rangle}{\sqrt 2}) \otimes \vert 0 \rangle = \frac{\vert 00 \rangle + \vert 10 \rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Notice that the state we are right now is very close to our goal. We just need to have &lt;span class=&#34;math inline&#34;&gt;\(|11\rangle\)&lt;/span&gt; instead of &lt;span class=&#34;math inline&#34;&gt;\(|10\rangle\)&lt;/span&gt;, so we use a CNOT with the first qubit as control and second as the target. Nothing happens to &lt;span class=&#34;math inline&#34;&gt;\(|00\rangle\)&lt;/span&gt; because the control qubit is $|0$, but &lt;span class=&#34;math inline&#34;&gt;\(|10\rangle\)&lt;/span&gt; becomes &lt;span class=&#34;math inline&#34;&gt;\(|11\rangle\)&lt;/span&gt; because the control qubit is &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt;. Overall:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\vert 00 \rangle \rightarrow \frac{\vert 00 \rangle + \vert 10 \rangle}{\sqrt 2} \rightarrow \frac{\vert 00 \rangle + \vert 11 \rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The circuit that performs this step looks like:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum2/Q2C0.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;You may ask: how do we perform the entanglement if the qubits are far apart? That is indeed a good question. The first answer to this question would be to entangle the qubits when they are together with Alice and then split them apart, sending one to Bob. In my opinion, this answer violates the essence of teleportation: we do not want to send qubits to Bob.&lt;/p&gt;
+&lt;p&gt;The second answer is: assume we can do it at long distances. We have not been discussing the plausibility to have a qubit or apply the gates, so we will leave for physicists to figure out how to physically achieve the entanglement.&lt;/p&gt;
+&lt;h2 id=&#34;teleportation-procedure&#34;&gt;Teleportation procedure&lt;/h2&gt;
+&lt;p&gt;Now that we know how to generate &lt;span class=&#34;math inline&#34;&gt;\(|\Phi^{+}\rangle\)&lt;/span&gt;, we have everything we need to do quantum teleportation. Considering our three-qubit system, we start with &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle \otimes |\Phi^{+}\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Firstly, we apply a CNOT gate with &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt; as the control, and Alice’s entangled qubit as the target. That yields:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\frac{\alpha|000\rangle + \alpha|011\rangle + \beta|100\rangle + \beta|111\rangle}{\sqrt 2} \rightarrow \frac{\alpha|000\rangle + \alpha|011\rangle + \beta|110\rangle + \beta|101\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Secondly, we apply the Hadamard gate to the first qubit and we obtain:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\rightarrow \frac{|00\rangle (\alpha|0 \rangle+\beta|1\rangle) + |01\rangle (\alpha|1 \rangle+\beta|0\rangle) + |10\rangle (\alpha|0 \rangle-\beta|1\rangle) + |11\rangle (\alpha|1 \rangle-\beta|0\rangle)}{2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Thirdly, we measure the first two qubits, i.e. those that are with Alice, and send the result to Bob. Notice that depending on the outcome, we know exactly the state of third qubit. For example, we know that if the outcome of the measurement is &lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt;, then the last qubit is &lt;span class=&#34;math inline&#34;&gt;\(\alpha|0 \rangle-\beta|1\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Lastly, we need to go from the qubit that we know now to &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt;. Fortunately, that is simple. To achieve that, we need to apply the gates &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt; conditionally. The table below summarizes when we need to apply the gates:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;Outcome&lt;/th&gt;
+&lt;th&gt;Gate to apply&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(00\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(I\)&lt;/span&gt; (no gates)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(01\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(10\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(11\)&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; and then &lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Even though the math might have looked complicated, the final circuit is simple. The last part of applying gates conditionally can be done by applying a Controlled X gate (which is another name for CNOT), and also applying a Controlled Z gate. Hence, the circuit that performs all 4 steps is:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum2/Q2C1.png&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;verifying-computationally-that-the-procedure-works&#34;&gt;Verifying computationally that the procedure works&lt;/h2&gt;
+&lt;p&gt;We can verify that quantum teleportation works using Qiskit and running an experiment: in the Jupyter notebook bellow, we try to teleport &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle = \frac{\sqrt 3}{2}|0\rangle + \frac{1}{2}|1\rangle\)&lt;/span&gt; and analyse the results.&lt;/p&gt;
+&lt;p&gt;Every step explained above is done, and the results match our prediction.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/988251a65389706b0e067a0a0c42a579.js&#34;&gt;&lt;/script&gt;
+
+</description>
     </item>
     
     <item>
       <title>Quantum #1 - Basic Quantum Computing</title>
       <link>https://ivaniscoding.github.io/posts/quantum1/</link>
       <pubDate>Wed, 11 Dec 2019 20:00:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/posts/quantum1/</guid>
-      <description>This is the first post of a series of posts about Quantum Computing with Qiskit. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.
-The goal of this post is to introduce a more hands-on approach to quantum computing using Qiskit. For a friendly introduction to quantum computing in general, I recommend the essay Quantum computing for the very curious by Matuschak and Nielsen.</description>
+      <description>&lt;p&gt;This is the first post of a series of posts about Quantum Computing with &lt;a href=&#34;https://qiskit.org/&#34;&gt;Qiskit&lt;/a&gt;. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.&lt;/p&gt;
+&lt;p&gt;The goal of this post is to introduce a more hands-on approach to quantum computing using Qiskit. For a friendly introduction to quantum computing in general, I recommend the essay &lt;a href=&#34;https://quantum.country/qcvc&#34;&gt;Quantum computing for the very curious&lt;/a&gt; by Matuschak and Nielsen.&lt;/p&gt;
+&lt;h2 id=&#34;the-qubit&#34;&gt;The qubit&lt;/h2&gt;
+&lt;p&gt;Quantum computers are made of qubits like classical computers are made of bits. However, qubits vectors and thus they have components. There are two very important qubits &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt; that relate to their classical 0 and 1 counterparts. In vector notation, they are:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|0\rangle = \begin{bmatrix}1 \\ 0\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|1\rangle = \begin{bmatrix}0 \\ 1\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;In general, every qubit &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt; has a &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; component and a &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt; component, that is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \alpha|0\rangle + \beta|1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We can also write that superposition (or linear combination) in the matrix form.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \begin{bmatrix}\alpha \\ \beta\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;It is important to remember that &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\beta\)&lt;/span&gt; may be complex numbers! Thus, the imaginary number &lt;span class=&#34;math inline&#34;&gt;\(i\)&lt;/span&gt; may appear in the components. For example, following qubit is valid:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \begin{bmatrix}\frac{1 + i}{\sqrt 2} \\ 0\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Lastly, one key factor for qubits is that they are unitary vectors that is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|| |\psi\rangle || = 1
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Thus, we may visualize a qubit as a 3d vector in a sphere of radius 1:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum1/BlocSphere.png&#34; /&gt;&lt;/p&gt;
+&lt;h2 id=&#34;quantum-gates-quantum-circuits&#34;&gt;Quantum gates &amp;amp; Quantum Circuits&lt;/h2&gt;
+&lt;p&gt;A quantum circuit is a collection of qubits and classical bits. The building blocks of quantum circuits are quantum gates: they modify qubits and allow quantum computing to achieve arbitrary qubit states as we discussed before.&lt;/p&gt;
+&lt;p&gt;In Qiskit, a quantum circuit can be initialized by:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb1&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-1&#34; title=&#34;1&#34;&gt;&lt;span class=&#34;im&#34;&gt;from&lt;/span&gt; qiskit &lt;span class=&#34;im&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;*&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb1-2&#34; title=&#34;2&#34;&gt;circuit &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; QuantumCircuit(n_qubits, n_classical_bits)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In general, a gate &lt;span class=&#34;math inline&#34;&gt;\(U\)&lt;/span&gt; can be added to a circuit by:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb2&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb2-1&#34; title=&#34;1&#34;&gt;circuit.u(target_qubit)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;A fact to notice is that there is an infinite number of qubit gates! A gate is any device that takes a qubit &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt; and outputs another valid qubit &lt;span class=&#34;math inline&#34;&gt;\(|\phi\rangle\)&lt;/span&gt;. In general, we have that a gate &lt;span class=&#34;math inline&#34;&gt;\(U\)&lt;/span&gt; can be represented by a matrix:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+U = \begin{bmatrix} a &amp;amp; b \\ c &amp;amp; d\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;By applying the gate &lt;span class=&#34;math inline&#34;&gt;\(U\)&lt;/span&gt; to a qubit &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\)&lt;/span&gt;, we obtain:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\phi\rangle = U|\psi\rangle = (a\cdot\alpha + b\cdot\beta)|0\rangle + (c\cdot\alpha + d\cdot\beta)|1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Notice that &lt;span class=&#34;math inline&#34;&gt;\(U\)&lt;/span&gt; must preserve the length of &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt; in order for &lt;span class=&#34;math inline&#34;&gt;\(|\phi\rangle\)&lt;/span&gt; to be a valid qubit! Thus &lt;span class=&#34;math inline&#34;&gt;\(U\)&lt;/span&gt; is a special type of matrix called a unitary matrix. Mathematically:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+UU^{\dag} = I
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Where &lt;span class=&#34;math inline&#34;&gt;\(U^{\dag}\)&lt;/span&gt; is the &lt;a href=&#34;https://en.wikipedia.org/wiki/Conjugate_transpose&#34;&gt;conjugate transpose&lt;/a&gt;. It is important to see that &lt;span class=&#34;math inline&#34;&gt;\(U^{\dag}\)&lt;/span&gt; can undo the transformation from &lt;span class=&#34;math inline&#34;&gt;\(U\)&lt;/span&gt;: it takes &lt;span class=&#34;math inline&#34;&gt;\(|\phi\rangle\)&lt;/span&gt; to &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Because of the matrix multiplication property of the gates, applying multiple quantum gates such as &lt;span class=&#34;math inline&#34;&gt;\(U_{a}\)&lt;/span&gt; and then &lt;span class=&#34;math inline&#34;&gt;\(U_{b}\)&lt;/span&gt; is equivalent to applying a gate &lt;span class=&#34;math inline&#34;&gt;\(G\)&lt;/span&gt; such that:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+G = U_{a}U_{b}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;It is important to notice that gate composition also implies gate decomposition. The quantum gate you are applying might be a synthesis of other easier to implement gates in real life such that &lt;span class=&#34;math inline&#34;&gt;\(G = U_{a}U_{b}U_{c}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Even though there is an infinite amount of gates, some are very famous because they are more used than others and have a special place in quantum computing and Qiskit. They are:&lt;/p&gt;
+&lt;h3 id=&#34;the-pauli-x-gate&#34;&gt;The Pauli-X gate&lt;/h3&gt;
+&lt;p&gt;The Pauli-X gate is the quantum equivalent of the NOT gate, that is it takes 0 to 1 and 1 to 0. Mathematically:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|0\rangle \overset{X}{\rightarrow} |1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|1\rangle \overset{X}{\rightarrow} |0\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\alpha|0\rangle + \beta|1\rangle \overset{X}{\rightarrow} \beta|0\rangle + \alpha|1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To use the Pauli-X gate in Qiskit, it suffices to write:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb3&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb3-1&#34; title=&#34;1&#34;&gt;circuit.x(target_qubit)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Graphically, the gate is represented as:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum1/XGate.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Because &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; is a gate, it can be written as a matrix as we discussed before:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+X = \begin{bmatrix} 0 &amp;amp; 1 \\ 1 &amp;amp; 0\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;An important property of &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; is that &lt;span class=&#34;math inline&#34;&gt;\(X = X^{\dag}\)&lt;/span&gt;, thus &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; is the inverse gate of itself! That means that if we apply twice the Pauli-X Gate to a qubit, we will still have the same qubit.&lt;/p&gt;
+&lt;h3 id=&#34;the-pauli-z-gate&#34;&gt;The Pauli-Z gate&lt;/h3&gt;
+&lt;p&gt;The Pauli-Z gate is a quantum gate that leaves the &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; component intact but flips the sign of the &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt; component. Mathematically:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|0\rangle \overset{Z}{\rightarrow} |0\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|1\rangle \overset{Z}{\rightarrow} -|1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\alpha|0\rangle + \beta|1\rangle \overset{Z}{\rightarrow} \alpha|0\rangle - \beta|1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To use the Pauli-Z gate in Qiskit, it suffices to write:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb4&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb4-1&#34; title=&#34;1&#34;&gt;circuit.z(target_qubit)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Graphically, the gate is represented as:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum1/ZGate.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The matrix representation of &lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt; is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+Z = \begin{bmatrix} 1 &amp;amp; 0 \\ 0 &amp;amp; -1\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;An important property of &lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt; is that &lt;span class=&#34;math inline&#34;&gt;\(Z = Z^{\dag}\)&lt;/span&gt;, thus &lt;span class=&#34;math inline&#34;&gt;\(Z\)&lt;/span&gt; is the inverse gate of itself! That means that if we apply twice the Pauli-Z Gate to a qubit, we will still have the same qubit.&lt;/p&gt;
+&lt;h3 id=&#34;the-pauli-y-gate&#34;&gt;The Pauli-Y gate&lt;/h3&gt;
+&lt;p&gt;The Pauli-Y gate is a gate that has only pure imaginary entries. It is similar to the &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; gate but has its entries multiplied by &lt;span class=&#34;math inline&#34;&gt;\(i\)&lt;/span&gt; and the top term is &lt;span class=&#34;math inline&#34;&gt;\(-i\)&lt;/span&gt;. Mathematically, it acts as follows:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|0\rangle \overset{Y}{\rightarrow} -i|1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|1\rangle \overset{Y}{\rightarrow} i|0\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\alpha|0\rangle + \beta|1\rangle \overset{Y}{\rightarrow} -i\beta|0\rangle + i\alpha|1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To use the Pauli-Y gate in Qiskit, it suffices to write:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb5&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb5-1&#34; title=&#34;1&#34;&gt;circuit.y(target_qubit)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Graphically, the gate is represented as:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum1/YGate.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The matrix representation of &lt;span class=&#34;math inline&#34;&gt;\(Y\)&lt;/span&gt; is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+Y = \begin{bmatrix} 0 &amp;amp; -i \\ i &amp;amp; 0\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;An important property of &lt;span class=&#34;math inline&#34;&gt;\(Y\)&lt;/span&gt; is that &lt;span class=&#34;math inline&#34;&gt;\(Y = Y^{\dag}\)&lt;/span&gt;, thus &lt;span class=&#34;math inline&#34;&gt;\(Y\)&lt;/span&gt; is the inverse gate of itself! That means that if we apply twice the Pauli-Y Gate to a qubit, we will still have the same qubit.&lt;/p&gt;
+&lt;h3 id=&#34;the-hadamard-gate&#34;&gt;The Hadamard gate&lt;/h3&gt;
+&lt;p&gt;The Hadamard gate is a gate to generate superposition, and it is hard to find a classical equivalent of it: it is a quantum gate by nature. Given &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt;, it generates a mix of &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt;, and does the same for &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt;. Mathematically:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|0\rangle \overset{H}{\rightarrow} \frac{|0\rangle + |1\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|1\rangle \overset{H}{\rightarrow} \frac{|0\rangle - |1\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\alpha|0\rangle + \beta|1\rangle \overset{H}{\rightarrow} \frac{(\alpha + \beta)}{\sqrt 2}|0\rangle + \frac{(\alpha - \beta)}{\sqrt 2}|1\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Notice that &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle + |1\rangle}{\sqrt 2}\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\frac{|0\rangle - |1\rangle}{\sqrt 2}\)&lt;/span&gt; are so important because they can be seen as an alternative basis, that they deserve their own symbols:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|+\rangle= \frac{|0\rangle + |1\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|-\rangle= \frac{|0\rangle - |1\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To use the Hadamard gate in Qiskit, it suffices to write:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb6&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb6-1&#34; title=&#34;1&#34;&gt;circuit.h(target_qubit)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Graphically, the gate is represented as:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum1/HGate.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The matrix reprenstation of the Hadamard gate is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+H = \frac{1}{\sqrt 2}\begin{bmatrix} 1 &amp;amp; 1 \\ 1 &amp;amp; -1\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;An important property of &lt;span class=&#34;math inline&#34;&gt;\(H\)&lt;/span&gt; is that &lt;span class=&#34;math inline&#34;&gt;\(H = H^{\dag}\)&lt;/span&gt;, thus &lt;span class=&#34;math inline&#34;&gt;\(H\)&lt;/span&gt; is the inverse gate of itself! That means that if we apply twice the Hadamard gate to a qubit, we will still have the same qubit.&lt;/p&gt;
+&lt;h2 id=&#34;executing-a-circuit-in-qiskit&#34;&gt;Executing a circuit in Qiskit&lt;/h2&gt;
+&lt;p&gt;In Qiskit, we need a backend to execute a quantum circuit. That backend might be either a real quantum computer or a simulator. The syntax to run a circuit is:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb7&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb7-1&#34; title=&#34;1&#34;&gt;job &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; execute(circuit, backend, shots&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;n_times_to_execute)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;There are three key simulators in Qiskit that you must be aware of:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;qasm_simulator:&lt;/em&gt; simulates the circuit and performs measurements&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;unitary_simulator:&lt;/em&gt; simulates the circuit and outputs the unitary matrix that represents it&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;statevector_simulator:&lt;/em&gt; simulates the circuit and outputs the state of the qubit&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The syntax to obtain the specific backend with the simulator we want is:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb8&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb8-1&#34; title=&#34;1&#34;&gt;simulator &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; Aer.get_backend(backend_name)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Notice that after running the circuit either in a simulator in a real device, we would want the results! The code snippet below describes how to obtain it:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb9&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb9-1&#34; title=&#34;1&#34;&gt;result &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; job.result()&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb9-2&#34; title=&#34;2&#34;&gt;result.get_unitary()  &lt;span class=&#34;co&#34;&gt;# if the backend is unitary_simulator&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb9-3&#34; title=&#34;3&#34;&gt;result.get_statevecor() &lt;span class=&#34;co&#34;&gt;# if the backend  is statevector_simulator&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Jupyter notebooks exemplifying the process are given below:&lt;/p&gt;
+&lt;p&gt;&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/47754335e473c34203300387ba1e4ba5.js&#34;&gt;&lt;/script&gt;
+ &lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/3aa86987a0bed84d09796bc19228bd73.js&#34;&gt;&lt;/script&gt;
+&lt;/p&gt;
+&lt;h2 id=&#34;measurements&#34;&gt;Measurements&lt;/h2&gt;
+&lt;p&gt;Even though qubits are a superposition of &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt;, when a measurement is made, the output will be either 0 or 1. For a given qubit &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\)&lt;/span&gt;, there is a &lt;span class=&#34;math inline&#34;&gt;\(|\alpha^{2}|\)&lt;/span&gt; probability that the measurement will be 0 and a &lt;span class=&#34;math inline&#34;&gt;\(|\beta^{2}|\)&lt;/span&gt; probability that the measurement will be 1.&lt;/p&gt;
+&lt;p&gt;Because the sum of the probabilities of all events is equal to one, we may write:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\alpha^{2}| + |\beta^{2}| = 1
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;In Qiskit, a measurement can be made using the following syntax:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb10&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb10-1&#34; title=&#34;1&#34;&gt;circuit.measure(target_qubit, target_classical_bit)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;After executing the job in a real quantum computer or in a simulator, the obtained measurements will be available in a dictionary where the key is the measurement and the value is the count of the measurements:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb11&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb11-1&#34; title=&#34;1&#34;&gt;result &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; job.result()&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb11-2&#34; title=&#34;2&#34;&gt;measurement_counts &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; result.get_counts()&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In general, it is also useful to visualize the measurements using a histogram. That can be done through:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb12&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb12-1&#34; title=&#34;1&#34;&gt;&lt;span class=&#34;im&#34;&gt;from&lt;/span&gt; qiskit.visualization &lt;span class=&#34;im&#34;&gt;import&lt;/span&gt; plot_histogram&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb12-2&#34; title=&#34;2&#34;&gt;plot_histogram(measurement_counts)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;A Jupyter notebook exemplifying the measurement process is given below:&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/8a86d679f371f7d87341f985f43d40f6.js&#34;&gt;&lt;/script&gt;
+
+&lt;h2 id=&#34;multiple-qubits&#34;&gt;Multiple qubits&lt;/h2&gt;
+&lt;p&gt;So far we have discussed only systems with exactly one qubit! However, quantum circuits are generally composed of multiple qubits. For example, for a two-qubit system, there are four states: &lt;span class=&#34;math inline&#34;&gt;\(|00\rangle\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(|01\rangle\)&lt;/span&gt;, &lt;span class=&#34;math inline&#34;&gt;\(|10\rangle\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(|11\rangle\)&lt;/span&gt;. A 2-qubit system can be described then as:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle = \alpha|00\rangle + \beta|01\rangle + \gamma|10\rangle + \delta|11\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;A system of n qubits will have &lt;span class=&#34;math inline&#34;&gt;\(2^{n}\)&lt;/span&gt; states, hence using the ket notation is more convenient than writing matrices with &lt;span class=&#34;math inline&#34;&gt;\(2^{n}\)&lt;/span&gt; entries.&lt;/p&gt;
+&lt;p&gt;For multiple qubit system, it is also common to use the tensor product (&lt;span class=&#34;math inline&#34;&gt;\(\otimes\)&lt;/span&gt;) to describe the state. If &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\)&lt;/span&gt; is a single qubit and &lt;span class=&#34;math inline&#34;&gt;\(|\phi\rangle\)&lt;/span&gt; is a qubit, then we define:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle \otimes |\phi\rangle = \begin{bmatrix}\alpha|\phi\rangle \\ \beta|\phi\rangle\end{bmatrix}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Sometimes also written &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle|\phi\rangle\)&lt;/span&gt;. Notice that &lt;span class=&#34;math inline&#34;&gt;\(|00\rangle = |0\rangle \otimes |0\rangle\)&lt;/span&gt;. The same apply for more qubits: &lt;span class=&#34;math inline&#34;&gt;\(|011\rangle = |0\rangle \otimes |1\rangle \otimes |1\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;To make it clearer, an example is useful. If &lt;span class=&#34;math inline&#34;&gt;\(|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(|\phi\rangle = \gamma|0\rangle + \delta|1\rangle\)&lt;/span&gt;, then:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\psi\rangle \otimes |\phi\rangle = \alpha\gamma|00\rangle + \alpha\delta|01\rangle + \beta\gamma|10\rangle + \beta\delta|11\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;One last remark is: not every state can be written as a tensor product of qubits! Those states are called entangled. An example of an entangled state is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|\Phi^{+}\rangle = \frac{|00\rangle + |11\rangle}{\sqrt 2}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;h2 id=&#34;multiple-qubit-gates&#34;&gt;Multiple-qubit gates&lt;/h2&gt;
+&lt;p&gt;In the first gate section, we discussed gates that operated on a single qubit. In this section, we will discuss gates that operate on two or more qubits. They are still unitary gates:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+UU^{\dag} = I
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Their dimensions, however, are different. A gate that operates on n qubits has dimensions of &lt;span class=&#34;math inline&#34;&gt;\(2^{n} \times 2^{n}\)&lt;/span&gt;. It is also relevant to know how to write single-qubit gates for multiple qubit systems: they are written using the tensor product such as &lt;span class=&#34;math inline&#34;&gt;\(H \otimes Z\)&lt;/span&gt;: in this example, we apply the Hadamard gate to the first qubit and the Pauli-Z gate to the second qubit.&lt;/p&gt;
+&lt;p&gt;Again, there is an infinite number of multiple qubit gates. Some that deserve special attention and have a special place in Qiskit are:&lt;/p&gt;
+&lt;h3 id=&#34;controlled-not-gate&#34;&gt;Controlled NOT gate&lt;/h3&gt;
+&lt;p&gt;The Controlled NOT gate applies the NOT gate (Pauli-X gate) to a target qubit based on a control qubit. If the control qubit is 1, then &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; is applied to the target. Otherwise, the target is not affected. Mathematically, considering the first qubit as control and the second one as a target:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|00\rangle \overset{CX}\rightarrow |00\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|01\rangle \overset{CX}\rightarrow |01\rangle 
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|10\rangle \overset{CX}\rightarrow |11\rangle 
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|11\rangle \overset{CX}\rightarrow |10\rangle 
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+\alpha|00\rangle + \beta|01\rangle + \gamma|10\rangle + \delta|11\rangle \overset{CX}\rightarrow \alpha|00\rangle + \beta|01\rangle + \delta|10\rangle + \gamma|11\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To use the CNOT gate in Qiskit, it suffices to write:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb13&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb13-1&#34; title=&#34;1&#34;&gt;circuit.cx(control, target)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Graphically, it looks like:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum1/CXGate.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Because of the properties of the &lt;span class=&#34;math inline&#34;&gt;\(X\)&lt;/span&gt; gate, the CNOT gate is the inverse of itself. Hence, if we apply twice CNOT to the same two qubits, the target qubit will not change.&lt;/p&gt;
+&lt;p&gt;In addition, it is worth mentioning that any gate can be made conditional using CNOT. Thus, there also exists the Controlled Z and Controlled Y gates. In Qiskit, they are available through:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb14&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb14-1&#34; title=&#34;1&#34;&gt;circuit.cz(control, target)&lt;/a&gt;
+&lt;a class=&#34;sourceLine&#34; id=&#34;cb14-2&#34; title=&#34;2&#34;&gt;circuit.cy(control, target)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;toffoli-gate&#34;&gt;Toffoli gate&lt;/h3&gt;
+&lt;p&gt;The Toffoli gate is the quantum equivalent of the logical AND gate. Even though it computes &lt;span class=&#34;math inline&#34;&gt;\(a \wedge b\)&lt;/span&gt;, it needs an extra qubit: &lt;span class=&#34;math inline&#34;&gt;\(|a\rangle|b\rangle \rightarrow |a\rangle|a \wedge b\rangle\)&lt;/span&gt; is not described by an unitary matrix. Thus, the Toffoli gates uses an extra qubit such that &lt;span class=&#34;math inline&#34;&gt;\(|a\rangle|b\rangle|0\rangle \rightarrow |a\rangle|b\rangle|a \wedge b\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Because we need to handle the case when the working qubit is &lt;span class=&#34;math inline&#34;&gt;\(|1\rangle\)&lt;/span&gt;, the Toffoli gate is described by:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+|a\rangle|b\rangle|c\rangle \overset{CCX}\rightarrow |a\rangle|b\rangle|c \oplus (a \wedge b)\rangle
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To use the Toffoli gate in Qiskit, it suffices to write:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb15&#34;&gt;&lt;pre class=&#34;sourceCode python&#34;&gt;&lt;code class=&#34;sourceCode python&#34;&gt;&lt;a class=&#34;sourceLine&#34; id=&#34;cb15-1&#34; title=&#34;1&#34;&gt;circuit.ccx(control_a, control_b, target_qubit)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Graphically, it looks like:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum1/Q1C1.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Because of the properties of &lt;span class=&#34;math inline&#34;&gt;\(\oplus\)&lt;/span&gt;, the Toffoli is the inverse of itself. Thus, if we apply twice the Toffoli gate to the same 3 qubits, the working qubit will not change.&lt;/p&gt;
+&lt;p&gt;To consolidate those ideas, here is a Jupyter notebook that uses multiple-qubit gates:&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/89356c91607ed73fec75f7b0db33cf25.js&#34;&gt;&lt;/script&gt;
+
+&lt;h2 id=&#34;uncomputation&#34;&gt;Uncomputation&lt;/h2&gt;
+&lt;p&gt;As we discussed in the previous session, we have seen that for calculating the AND of qubits &lt;span class=&#34;math inline&#34;&gt;\(|a\rangle\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(|b\rangle\)&lt;/span&gt;, we need a working qubit to store &lt;span class=&#34;math inline&#34;&gt;\(|a \wedge b\rangle\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;It turns out that sometimes, to compute a generic function &lt;span class=&#34;math inline&#34;&gt;\(f(a, b)\)&lt;/span&gt;, we may need even more working qubits to store intermediate results.&lt;/p&gt;
+&lt;p&gt;For example, imagine that you want to compute &lt;span class=&#34;math inline&#34;&gt;\(a \wedge b \wedge c\)&lt;/span&gt;, the AND of three variables. You would need a qubit to compute &lt;span class=&#34;math inline&#34;&gt;\(a \wedge b\)&lt;/span&gt; and then another qubit to compute &lt;span class=&#34;math inline&#34;&gt;\((a \wedge b) \wedge c\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Notice that we have very little interest in saving &lt;span class=&#34;math inline&#34;&gt;\(a \wedge b\)&lt;/span&gt;. In general, it is a good idea to clean the results (i.e. to reverse the qubit to &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt;), because:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;We want to reuse resources&lt;/li&gt;
+&lt;li&gt;It makes measurements more accurate (more qubits = more complex systems = harder measurements)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That process of cleaning is called uncomputation.&lt;/p&gt;
+&lt;p&gt;Because &lt;span class=&#34;math inline&#34;&gt;\((a \wedge b) \oplus (a \wedge b) = 0\)&lt;/span&gt;, that is the inverse of the Toffoli gate is the Toffoli gate itself, then we may build the following circuit to calculate the AND of three qubits using uncomputation:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/Quantum1/Q1C3.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In the circuit above, we use an intermediary qubit &lt;span class=&#34;math inline&#34;&gt;\(|a \wedge b \rangle\)&lt;/span&gt; to help us achieve &lt;span class=&#34;math inline&#34;&gt;\(|a \wedge b \wedge c\rangle\)&lt;/span&gt;, and then immediately clean it afterward. That way, the intermediary qubit goes back to &lt;span class=&#34;math inline&#34;&gt;\(|0\rangle\)&lt;/span&gt; and can be reused later if necessary.&lt;/p&gt;
+&lt;p&gt;The Qiskit code that implements the calculation of the AND of three qubits is provided bellow, building exactly the circuit we described:&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/0fd6cc6a2a892dd9d3b59e59cfa0f2a2.js&#34;&gt;&lt;/script&gt;
+
+</description>
     </item>
     
   </channel>

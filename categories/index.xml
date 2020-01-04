@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Categories on Ivan Carvalho</title>
+    <title>Categories | Ivan Carvalho</title>
     <link>https://ivaniscoding.github.io/categories/</link>
-    <description>Recent content in Categories on Ivan Carvalho</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <lastBuildDate>Thu, 02 Jan 2020 16:10:00 -0800</lastBuildDate>
-    
-	<atom:link href="https://ivaniscoding.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
-    
+      <atom:link href="https://ivaniscoding.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <description>Categories</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Thu, 02 Jan 2020 16:10:00 -0800</lastBuildDate>
+    <image>
+      <url>https://ivaniscoding.github.io/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>Categories</title>
+      <link>https://ivaniscoding.github.io/categories/</link>
+    </image>
     
     <item>
       <title>Quantum</title>
       <link>https://ivaniscoding.github.io/categories/quantum/</link>
       <pubDate>Thu, 02 Jan 2020 16:10:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/categories/quantum/</guid>
       <description></description>
     </item>
@@ -24,7 +24,6 @@
       <title>Divide and Conquer</title>
       <link>https://ivaniscoding.github.io/categories/divide-and-conquer/</link>
       <pubDate>Sun, 03 Mar 2019 10:00:00 -0800</pubDate>
-      
       <guid>https://ivaniscoding.github.io/categories/divide-and-conquer/</guid>
       <description></description>
     </item>
@@ -33,7 +32,6 @@
       <title>Information Theory</title>
       <link>https://ivaniscoding.github.io/categories/information-theory/</link>
       <pubDate>Tue, 28 Aug 2018 14:00:00 -0300</pubDate>
-      
       <guid>https://ivaniscoding.github.io/categories/information-theory/</guid>
       <description></description>
     </item>

@@ -1,317 +1,825 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
     
     
+    
+  
+  
+
+  <meta name="author" content="Ivan Carvalho">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Analysis of Carnival from the Central-European Olympiad in Informatics 2014">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://ivaniscoding.github.io/posts/divideandconquer1/">
+
+  
 
 
-    <head>
-    <link href="https://gmpg.org/xfn/11" rel="profile">
-    <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta http-equiv="Cache-Control" content="public" />
-<!-- Enable responsiveness on mobile devices -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<meta name="generator" content="Hugo 0.55.6" />
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
     
     
     
+      
+    
+    
+      
+      
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/atom-one-dark.min.css" crossorigin="anonymous" title="hl-light">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/atom-one-dark.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+      
+    
 
-<title>Divide and Conquer #1 - Carnival • Ivan Carvalho</title>
-
-
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Divide and Conquer #1 - Carnival"/>
-<meta name="twitter:description" content="Analysis of Carnival from the Central-European Olympiad in Informatics 2014"/>
-
-<meta property="og:title" content="Divide and Conquer #1 - Carnival" />
-<meta property="og:description" content="Analysis of Carnival from the Central-European Olympiad in Informatics 2014" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://ivaniscoding.github.io/posts/divideandconquer1/" />
-<meta property="article:published_time" content="2018-08-21T21:00:00-03:00"/>
-<meta property="article:modified_time" content="2018-08-21T21:00:00-03:00"/><meta property="og:site_name" content="Ivan Carvalho" />
-
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
 
     
 
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css">
-
-
-
-
-
-
-
-
-<link rel="stylesheet" href="/scss/hyde-hyde.6a83d62c39a364f036df4db1ecd564645635d6c7fc182425cb501218fec485f5.css" integrity="sha256-aoPWLDmjZPA2302x7NVkZFY11sf8GCQly1ASGP7EhfU=">
-
-
-<link rel="stylesheet" href="/scss/print.2744dcbf8a0b2e74f8a50e4b34e5f441be7cf93cc7de27029121c6a09f9e77bc.css" integrity="sha256-J0Tcv4oLLnT4pQ5LNOX0Qb58&#43;TzH3icCkSHGoJ&#43;ed7w=" media="print">
-
-
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <!-- Icons -->
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
-    <link rel="shortcut icon" href="/favicon.png">
     
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-135472875-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'UA-135472875-1', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://ivaniscoding.github.io/posts/divideandconquer1/">
+
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Ivan Carvalho">
+  <meta property="og:url" content="https://ivaniscoding.github.io/posts/divideandconquer1/">
+  <meta property="og:title" content="Divide and Conquer #1 - Carnival | Ivan Carvalho">
+  <meta property="og:description" content="Analysis of Carnival from the Central-European Olympiad in Informatics 2014"><meta property="og:image" content="https://ivaniscoding.github.io/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://ivaniscoding.github.io/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2018-08-21T21:00:00-03:00">
+    
+    <meta property="article:modified_time" content="2018-08-21T21:00:00-03:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Divide and Conquer #1 - Carnival | Ivan Carvalho</title>
+
 </head>
 
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
 
-    <body class="theme-base-0d layout-reverse">
-    
-<div class="sidebar">
-  <div class="container ">
-    <div class="sidebar-about">
-      <span class="site__title">
-        <a href="https://ivaniscoding.github.io/">Ivan Carvalho</a>
-      </span>
-      
-      
-      <p class="site__description">
-        
-      </p>
-    </div>
-    <div class="collapsible-menu">
-      <input type="checkbox" id="menuToggle">
-      <label for="menuToggle">Ivan Carvalho</label>
-      <div class="menu-content">
-        <div>
-	<ul class="sidebar-nav">
-		 
-		 
-			 
-				<li>
-					<a href="/posts/">
-						<span>Posts</span>
-					</a>
-				</li>
-			 
-		 
-			 
-				<li>
-					<a href="/about/index.html">
-						<span>About</span>
-					</a>
-				</li>
-			 
-		
-	</ul>
-</div>
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
 
-        <section class="social">
-	
-	
-	
-	<a href="https://github.com/ivaniscoding" rel="me"><i class="fab fa-github fa-lg" aria-hidden="true"></i></a>
-	
-	
-	
-	
-	
-	
-	
-	<a href="https://linkedin.com/in/ivan-carvalho" rel="me"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a>
-	
-	
-	
-	
-	
-	
-	
-	
-</section>
-
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
       </div>
+
+      <div id="search-box">
+        
+        
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Ivan Carvalho</a>
     </div>
     
 
-<div class="builtwith">
-Built with <a href="https://gohugo.io">Hugo</a> ❤️ <a href="https://github.com/htr3n/hyde-hyde">hyde-hyde</a>.
-</div>
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
 
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Ivan Carvalho</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+
+      
+
+      
+
+    </ul>
 
   </div>
-</div>
-
-        <div class="content container">
-            
-    
-<article>
-  <header>
-    <h1>Divide and Conquer #1 - Carnival</h1>
-    
-    
-<div class="post__meta">
-    
-    
-      <i class="fas fa-calendar-alt"></i> Aug 21, 2018
-    
-    
-    
-      
-      
-          in
-          
-          
-              <a class="badge badge-category" href="/categories/divide-and-conquer">DIVIDE AND CONQUER</a>
-              
-          
-      
-    
-    
-    
-      
-      
-          <br/>
-           <i class="fas fa-tags"></i>
-          
-          <a class="badge badge-tag" href="/tags/algorithms">algorithms</a>
-          
-      
-    
-    
-    <br/>
-    <i class="fas fa-clock"></i> 5 min read
-</div>
+</nav>
 
 
-  </header>
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
   
   
-  <div class="post">
+  
+<div class="article-container pt-3">
+  <h1>Divide and Conquer #1 - Carnival</h1>
+
+  
+
+  
     
 
-<p>This is the first post of a series of posts about Divide and Conquer. The idea is to share this simple yet very powerful approach to solve some problems.</p>
 
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Aug 21, 2018
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/divide-and-conquer/">Divide and Conquer</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>This is the first post of a series of posts about Divide and Conquer. The idea is to share this simple yet very powerful approach to solve some problems.</p>
 <p>This is by no means a complete tutorial about Divide and Conquer and I will assume that the reader is at least familiar to some of the key concepts of the technique and the well-known applications such as <a href="https://en.wikipedia.org/wiki/Merge_sort">Merge Sort</a> and <a href="https://en.wikipedia.org/wiki/Binary_search">Binary Search</a>.</p>
-
 <p>The problem we will analyze is Carnival from the Central-European Olympiad in Informatics (CEOI 2014). You may find the problem statement <a href="http://ceoi2014.informatik-olympiade.de/wp-content/uploads/2014/06/carnival.pdf">here</a> and a place to submit the solution <a href="https://oj.uz/problem/view/CEOI14_carnival">here</a>.</p>
-
 <p>After reading the problem statement it seems very smart to model it with a graph:</p>
-
-<p><img src="/img/DivideAndConquer1/teste.png" alt="Testing" /></p>
-
+<p><img src="/img/DivideAndConquer1/teste.png" alt="Testing"></p>
 <ul>
 <li>Every person is represented as a vertex in our graph.</li>
 <li>Every costume is represented by a color in our graph. Each vertex has only one color.</li>
 <li>Every vertex is part of a connected component of vertex with the same color. This connected component is a clique.</li>
 <li>When we organize a party, we query the number of distinct colors of the set of vertices we chose.</li>
 </ul>
-
 <p>Modeling the problem with the graph helps us arrive at the first partial solution:</p>
-
-<h2 id="o-n-2-queries-20-points">O(N^2) queries : 20 points</h2>
-
+<h2 id="on2-queries--20-points">O(N^2) queries : 20 points</h2>
 <p>A direct approach to solve the problem is to discover all the edges of the graph. To discover if there is an edge between two vertices, we organize a party with these two vertices. If there are two costumes, then they are of different colors and there is no edge. Otherwise, they share the same color and there is an edge between them.</p>
-
-<h2 id="optimized-o-n-2-100-points">Optimized O(N^2) : 100 points</h2>
-
+<h2 id="optimized-on2--100-points">Optimized O(N^2) : 100 points</h2>
 <p>There are some optimizations to make the previous solution work faster.</p>
-
 <p>The first idea is to choose a head to each component we know so far and always ask questions with it . Because of the clique property, it does not matter which pair of vertices we query : any of them will  do the work. This saves lots of questions</p>
-
 <p>The second idea is to add vertices gradually. We will first query 1, then 2, 3 and so on. This allow us to the following query : organize a party with the H heads we know so far and the i-th vertex we are adding. If in this party there are H + 1 costumes, then we know that the i-th vertex has no edge to any of those heads and is therefore a head of its own component. In the other case there will be H costumes and we need to query all the possible edges to discover the component of the i-th vertex.</p>
-
-<p><img src="/img/DivideAndConquer1/etapa0.png" alt="First Step" /></p>
-
+<p><img src="/img/DivideAndConquer1/etapa0.png" alt="First Step"></p>
 <p>To make it clearer , see this example : we are adding vertex 6 and we know there are 4 head nodes : 1,3,4,5. If we organize the party and there are 5 costumes, then vertex 6 must have a color different from the other 4 vertices. In the other case, with 4 costumes, 6 must have the same color of one of those vertices. In that case, we find the color of 6 by testing an edge with each head.</p>
-
 <p>The number of queries is still quadratic because of the case were the i-th vertex is not a new head. However, the constant is heavily reduced. This probably was not the intended solution, but it works.</p>
-
-<h2 id="o-n-sqrt-n-100-points">O(N*sqrt(N)) : 100 points</h2>
-
-<p><img src="/img/DivideAndConquer1/bucket.png" alt="Splitting the nodes into buckets" /></p>
-
+<h2 id="onsqrtn--100-points">O(N*sqrt(N)) : 100 points</h2>
+<p><img src="/img/DivideAndConquer1/bucket.png" alt="Splitting the nodes into buckets"></p>
 <p>An idea to optimize the previous solution is to group the heads into buckets. We do the first query with all the H heads to discover wether the i-th vertex is a new head or not in the same way as before.</p>
-
 <p>But the second part changes. Instead of manually testing all edges with the heads, we group them into B buckets with H/B per bucket. Then we organized parties with the i-th vertex and all heads of each bucket. If there are H/B + 1 costumes, then we proceed to the next bucket. Otherwise, we test the edge with all the heads of this bucket.</p>
-
 <p>This gives B + H/B queries per vertex. The value of the that minimizes this sum is sqrt(H). Therefore we achieve the complexity of O(N*sqrt(N)), better than the last one.</p>
-
-<h2 id="o-n-log-n-100-points">O(N*log(N)) : 100 points</h2>
-
+<h2 id="onlogn--100-points">O(N*log(N)) : 100 points</h2>
 <p>The title of this post includes &ldquo;Divide and Conquer&rdquo; and so far none of the solutions used it, so at some moment D&amp;C must appear. This is the moment!</p>
-
 <p>The principle we will use is the same from the previous solutions. However, we will use it way more efficiently.  The idea of querying <strong>H</strong> heads plus the i-th vertex and deciding wether or not there is a edge based on the answer will be our base.</p>
-
 <p>To start, we do the now usual query with all heads like in the previous solution.</p>
-
 <p>If there is an edge, then we start to use D&amp;C. The &ldquo;Divide&rdquo; part of our algorithm will be to partition our set of heads in two halves, L and R and querying the heads of L and the i-th vertex.</p>
-
-<p><img src="/img/DivideAndConquer1/etapa1.png" alt="Splitting the node into halves" /></p>
-
+<p><img src="/img/DivideAndConquer1/etapa1.png" alt="Splitting the node into halves"></p>
 <p>The &ldquo;Conquer&rdquo; part of our algorithm is based on the result of our query and the fact that there is only one edge between the i-th vertex and the whole set. If that edge is on the set <strong>L</strong>, then we can discard all the heads of <strong>R</strong>. If that edge is not on that set, then it must be on <strong>R</strong>,because there is exactly one edge so we discard all heads of <strong>L</strong>.</p>
-
-<p>Let&rsquo;s make another example with adding 6 , knowing heads 1,3,4,5. We split the heads in {1,3} and {4,5} and do the query {1,3,6}. Suppose we received that there are 3 colors in the set. Then there is no edge between 6 and {1,3} and we now solve the problem with the set {4,5}.</p>
-
-<p><img src="/img/DivideAndConquer1/etapa3.png" alt="Next step of halving the set" /></p>
-
+<p>Let's make another example with adding 6 , knowing heads 1,3,4,5. We split the heads in {1,3} and {4,5} and do the query {1,3,6}. Suppose we received that there are 3 colors in the set. Then there is no edge between 6 and {1,3} and we now solve the problem with the set {4,5}.</p>
+<p><img src="/img/DivideAndConquer1/etapa3.png" alt="Next step of halving the set"></p>
 <p>If we continue to do the procedure of discarding a half in each iteration, we will eventually reach our base case : the set has only one element. Therefore , there must be an edge between the i-th vertex and the last element.</p>
-
 <p>If we want to analyze the complexity , we must think about the depth of the recursion we designed. In each iteration, we discard <strong>H/2</strong> heads so the depth will be at most <strong>log2(H)</strong>. Thus the overall number of queries is <strong>O(N*log(N))</strong>.</p>
-
 <p>My implementation of this idea:</p>
+<script type="application/javascript" src="https://gist.github.com/IvanIsCoding/c297207d7b297eb4ba829502125121f7.js"></script>
 
-<script type="application/javascript" src="//gist.github.com/IvanIsCoding/c297207d7b297eb4ba829502125121f7.js"></script>
+
+    </div>
+
+    
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/algorithms/">algorithms</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="https://ivaniscoding.github.io/">Ivan Carvalho</a></h5>
+      <h6 class="card-subtitle">Software Developer</h6>
+      <p class="card-text">Python enthusiast, competitive programmer, quantum computing apprentice. Always looking for a challenge.</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/ivan-carvalho/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/IvanIsCoding" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <script src="/js/academic.min.e5c8525332f417fe3589df9a6b25b6c4.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
 
   </div>
   
 
-
   
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  
-    
-
-
-</article>
-
-
-        </div>
-        
-    
-
-  
-  
-<script type="application/javascript">
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-135472875-1', 'auto');
-	
-	ga('send', 'pageview');
-}
-</script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
-
-
-<script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" integrity="sha384-GqVMZRt5Gn7tB9D9q7ONtcp4gtHIUEW/yG7h98J7IpE3kpi+srfFyyB/04OV6pG0" crossorigin="anonymous"></script>
-
-
-    
-    
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
-        
-    
-    <script type="text/javascript">
-        
-        hljs.initHighlightingOnLoad();
-    </script>
-    
-
-
-
-
-
-    
-
-
-
-    </body>
+</body>
 </html>
