@@ -985,78 +985,6 @@ a lot of computations are wasted because many times we have almost the same stat
     </item>
     
     <item>
-      <title>Bio</title>
-      <link>https://ivaniscoding.github.io/about/</link>
-      <pubDate>Thu, 07 Feb 2019 21:00:00 -0600</pubDate>
-      <guid>https://ivaniscoding.github.io/about/</guid>
-      <description>&lt;ul&gt;
-&lt;li&gt;I am currently a student at The University of British Columbia, majoring in Computer Science.&lt;/li&gt;
-&lt;li&gt;I am also a teaching assistant for &lt;a href=&#34;https://people.ok.ubc.ca/abdalmoh/teaching/121/&#34;&gt;COSC 121 - Computer Programming II&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;I am an active participant in problem-solving competitions and I am also an active software developer, always working on projects and looking for challenges.&lt;/li&gt;
-&lt;li&gt;Interests: Distributed systems, cloud computing, optimization, quantum computing&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;skills&#34;&gt;Skills&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Technologies​: Python, C++, Java, SQL, Go, Qiskit, Scikit-learn, Git, AWS&lt;/li&gt;
-&lt;li&gt;Techniques​: Agile Methodology (Scrum), Test-driven development, Algorithm Design, Database Design&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;experience&#34;&gt;Experience&lt;/h2&gt;
-&lt;h3 id=&#34;opal-rt&#34;&gt;Opal-RT&lt;/h3&gt;
-&lt;p&gt;&lt;em&gt;Software Development Intern&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Montréal, QC - May 2019 to August 2019&lt;/em&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Built a database solution for storing representations of electric circuits and manipulating them in a diverse range of formats (JSON, CSV, XML, and other proprietary formats)&lt;/li&gt;
-&lt;li&gt;Refactored the codebase to improve performance and scalability. Operations that would take several seconds were optimized to a fraction of a second&lt;/li&gt;
-&lt;li&gt;Created a workflow to efficiently migrate data to future versions of the database, always keeping retrocompatibility&lt;/li&gt;
-&lt;li&gt;Technologies: Python, PostgreSQL, Java&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;projects&#34;&gt;Projects&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/IvanIsCoding/Quantum&#34;&gt;Quantum&lt;/a&gt;: A collection of quantum circuits and quantum algorithms in Python using Qiskit.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/IvanIsCoding/MassPostage&#34;&gt;MassPostage&lt;/a&gt;: A mail merge app in Go to automate generating personalized email campaigns.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://t.me/LembradorSuSyBot&#34;&gt;SuSy Reminder Bot&lt;/a&gt;: A serverless Telegram bot to remind students of their incomplete assignments in &lt;a href=&#34;http://www.ic.unicamp.br/~susy/&#34;&gt;University of Campinas&amp;rsquo; Submission System&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://devpost.com/software/lightningtraffic&#34;&gt;Traffic Lights AI&lt;/a&gt;: A Trafic Lights Simulator developed during nwHacks 2019.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/IvanIsCoding/OlympiadSolutions&#34;&gt;Olympiad Solutions&lt;/a&gt;: My solutions to more than 1500 algorithmic problems.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/IvanIsCoding/TestadorSusy&#34;&gt;SuSy Tester&lt;/a&gt;: An automated assignment checker in Python for University of Campinas&amp;rsquo; Submission System.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;programming-competitions&#34;&gt;Programming Competitions&lt;/h2&gt;
-&lt;h3 id=&#34;icpc-north-america-championship&#34;&gt;ICPC North America Championship&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;I qualified for the first-ever &lt;a href=&#34;http://nac.icpc.global/&#34;&gt;ICPC North America Championship&lt;/a&gt; that will happen at Georgia Tech, Atlanta.&lt;/li&gt;
-&lt;li&gt;My team is among the 55 best teams in North America that qualified for ICPC NAC.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;icpc-pacific-northwest-regional&#34;&gt;ICPC Pacific Northwest Regional:&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;I represented UBC at &lt;a href=&#34;http://acmicpc-pacnw.org/&#34;&gt;ICPC PacNW&lt;/a&gt;, the qualifier stage for the biggest programming competition in the world. 153 teams of university students from the West Coast participated in the contest.&lt;/li&gt;
-&lt;li&gt;My team ranked &lt;a href=&#34;http://acmicpc-pacnw.org/scoreboard/2019/group11.html&#34;&gt;2nd&lt;/a&gt; in Canada and &lt;a href=&#34;http://acmicpc-pacnw.org/scoreboard/2019/index1.html&#34;&gt;6th&lt;/a&gt; overall in Division 1.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;30th-international-olympiad-in-informatics&#34;&gt;30th International Olympiad in Informatics:&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;I represented Brazil at &lt;a href=&#34;https://ioinformatics.org/&#34;&gt;IOI&lt;/a&gt;, the most prestigious Computer Science competition for high school students. The event was held at Tsukuba, Japan and received contestants from 87 different countries.&lt;/li&gt;
-&lt;li&gt;I ranked &lt;a href=&#34;http://stats.ioinformatics.org/people/6465&#34;&gt;171st&lt;/a&gt; among 335 competitors.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;ibero-american-informatics-contest-ciic&#34;&gt;Ibero-American Informatics Contest (CIIC)&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;I represented Brazil twice at CIIC, a programming competition for students from Latin America, Portugal and Spain. Invited contestants are finalists from their countries&amp;rsquo; olympiads. I won a gold and a silver medal.&lt;/li&gt;
-&lt;li&gt;I ranked &lt;a href=&#34;https://web.archive.org/web/20190126192923/https://olimpiada.ic.unicamp.br/noticias/2018/sep/10/brasil-tem-desempenho-excepcional-na-competicao-ib/&#34;&gt;1st&lt;/a&gt; among 104 competitors in 2018 and &lt;a href=&#34;https://web.archive.org/web/20180914231335/https://olimpiada.ic.unicamp.br/competicoes/ciic/&#34;&gt;19th&lt;/a&gt; among 96 in 2018.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;brazilian-olympiad-in-informatics-obi&#34;&gt;Brazilian Olympiad in Informatics (OBI)&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;I was a finalist twice in OBI, the biggest Computer Science competition in Brazil. The Olympiad is organized by the University of Campinas and finalists are invited to take a week of advanced courses there. I won two gold medals in two participations.&lt;/li&gt;
-&lt;li&gt;I ranked &lt;a href=&#34;https://web.archive.org/web/20171204134938/http://olimpiada.ic.unicamp.br/noticias/qmerito/programacao2&#34;&gt;1st&lt;/a&gt; among 2886 competitors in 2017 and &lt;a href=&#34;https://web.archive.org/web/20161024041151/http://olimpiada.ic.unicamp.br/noticias/qmerito/programacao2&#34;&gt;4th&lt;/a&gt; among 2556 in 2016.&lt;/li&gt;
-&lt;li&gt;I also won a third gold medal in a separate division for university students in 2018. I ranked &lt;a href=&#34;https://web.archive.org/web/20190101201620/https://olimpiada.ic.unicamp.br/resultados/qmerito/pu/&#34;&gt;2nd&lt;/a&gt; among 1821 competitors.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;languages&#34;&gt;Languages&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;🇧🇷 Portuguese: Native&lt;/li&gt;
-&lt;li&gt;🇨🇦 English: Fluent&lt;/li&gt;
-&lt;li&gt;🇫🇷 French: Fluent&lt;/li&gt;
-&lt;li&gt;🇮🇹 Italian: Fluent&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Information Theory #6 - Amusement Park</title>
       <link>https://ivaniscoding.github.io/posts/informationtheory6/</link>
       <pubDate>Tue, 28 Aug 2018 14:00:00 -0300</pubDate>
@@ -1538,6 +1466,23 @@ The scoring is based on the number of extra vertices you sent. The final subtask
       <pubDate>Tue, 01 May 2018 00:00:00 +0000</pubDate>
       <guid>https://ivaniscoding.github.io/project/susy_tester/</guid>
       <description></description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://ivaniscoding.github.io/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/about/</guid>
+      <description>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;https://ivaniscoding.github.io/&lt;/title&gt;
+    &lt;link rel=&#34;canonical&#34; href=&#34;{{ .Site.BaseURL }}&#34;/&gt;
+    &lt;meta name=&#34;robots&#34; content=&#34;noindex&#34;&gt;
+    &lt;meta http-equiv=&#34;content-type&#34; content=&#34;text/html; charset=utf-8&#34;/&gt;
+    &lt;meta http-equiv=&#34;refresh&#34; content=&#34;0; url={{ .Site.BaseURL }}&#34;/&gt;
+  &lt;/head&gt;
+&lt;/html&gt;</description>
     </item>
     
   </channel>
