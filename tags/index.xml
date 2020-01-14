@@ -5,7 +5,7 @@
     <link>https://ivaniscoding.github.io/tags/</link>
       <atom:link href="https://ivaniscoding.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <description>Tags</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Thu, 02 Jan 2020 16:10:00 -0800</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 12 Jan 2020 00:00:00 +0000</lastBuildDate>
     <image>
       <url>https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png</url>
       <title>Tags</title>
@@ -13,18 +13,18 @@
     </image>
     
     <item>
-      <title>quantum</title>
-      <link>https://ivaniscoding.github.io/tags/quantum/</link>
-      <pubDate>Thu, 02 Jan 2020 16:10:00 -0800</pubDate>
-      <guid>https://ivaniscoding.github.io/tags/quantum/</guid>
+      <title>Demo</title>
+      <link>https://ivaniscoding.github.io/tags/demo/</link>
+      <pubDate>Sun, 12 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/tags/demo/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Demo</title>
-      <link>https://ivaniscoding.github.io/tags/demo/</link>
-      <pubDate>Wed, 01 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>https://ivaniscoding.github.io/tags/demo/</guid>
+      <title>quantum</title>
+      <link>https://ivaniscoding.github.io/tags/quantum/</link>
+      <pubDate>Thu, 02 Jan 2020 16:10:00 -0800</pubDate>
+      <guid>https://ivaniscoding.github.io/tags/quantum/</guid>
       <description></description>
     </item>
     

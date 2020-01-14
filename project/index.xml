@@ -5,12 +5,20 @@
     <link>https://ivaniscoding.github.io/project/</link>
       <atom:link href="https://ivaniscoding.github.io/project/index.xml" rel="self" type="application/rss+xml" />
     <description>Projects</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Wed, 01 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 12 Jan 2020 00:00:00 +0000</lastBuildDate>
     <image>
       <url>https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png</url>
       <title>Projects</title>
       <link>https://ivaniscoding.github.io/project/</link>
     </image>
+    
+    <item>
+      <title>Quantomoku</title>
+      <link>https://ivaniscoding.github.io/project/quantomoku/</link>
+      <pubDate>Sun, 12 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/quantomoku/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Quantum</title>
@@ -49,14 +57,6 @@
       <link>https://ivaniscoding.github.io/project/olympiad_solutions/</link>
       <pubDate>Fri, 01 Jun 2018 00:00:00 +0000</pubDate>
       <guid>https://ivaniscoding.github.io/project/olympiad_solutions/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>SuSy Tester</title>
-      <link>https://ivaniscoding.github.io/project/susy_tester/</link>
-      <pubDate>Tue, 01 May 2018 00:00:00 +0000</pubDate>
-      <guid>https://ivaniscoding.github.io/project/susy_tester/</guid>
       <description></description>
     </item>
     
