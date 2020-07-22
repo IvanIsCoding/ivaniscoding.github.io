@@ -5,12 +5,99 @@
     <link>https://ivaniscoding.github.io/</link>
       <atom:link href="https://ivaniscoding.github.io/index.xml" rel="self" type="application/rss+xml" />
     <description>Ivan Carvalho</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Fri, 06 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Tue, 21 Jul 2020 12:00:00 -0800</lastBuildDate>
     <image>
       <url>https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png</url>
       <title>Ivan Carvalho</title>
       <link>https://ivaniscoding.github.io/</link>
     </image>
+    
+    <item>
+      <title>Quantum #8 - Mathematics Behind Shor&#39;s Algorithm</title>
+      <link>https://ivaniscoding.github.io/posts/quantum8/</link>
+      <pubDate>Tue, 21 Jul 2020 12:00:00 -0800</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/quantum8/</guid>
+      <description>&lt;p&gt;This is the eighth post of a series of posts about Quantum Computing with &lt;a href=&#34;https://qiskit.org/&#34;&gt;Qiskit&lt;/a&gt;. The area is very new and the SDK is changing constantly, but hopefully, the series can help you learn a bit about quantum and help me reinforce a couple concepts.&lt;/p&gt;
+&lt;p&gt;The goal of this post is to discuss Shor’s algorithm, an algorithm that can factorize big numbers quickly. For an integer &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt;, Shor’s algorithm can find a factor of it in &lt;span class=&#34;math inline&#34;&gt;\(O((\log_{} N)^{3})\)&lt;/span&gt; which is an almost exponential speedup over classical algorithms. This algorithm brought a lot of interest into building quantum computers, because if an ideal quantum computer could be built, then the widely used public-key cryptography RSA scheme could be broken.&lt;/p&gt;
+&lt;h2 id=&#34;a-hybrid-algorithm&#34;&gt;A hybrid algorithm&lt;/h2&gt;
+&lt;p&gt;Shor’s algorithm is hybrid becasuse it mixes a classical part and a quantum part. In this blog post, we will discuss the mathematics behind the classical part and assume the quantum part as a black box. Later on, we will see that the speed up from Shor’s algorithm comes from the quantum part, where it solves the order finding problem i.e. finding the smallest &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; such that &lt;span class=&#34;math inline&#34;&gt;\(a^{r} \equiv 1 \pmod N\)&lt;/span&gt; faster than classical computers.&lt;/p&gt;
+&lt;p&gt;Firstly, we need to define what the algorithm does. It solves the factorization problem: given an intenger &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt;, find two integers greater than one &lt;span class=&#34;math inline&#34;&gt;\(P\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(Q\)&lt;/span&gt; such that &lt;span class=&#34;math inline&#34;&gt;\(PQ = N\)&lt;/span&gt;, or state that &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; is prime.&lt;/p&gt;
+&lt;p&gt;Secondly, we need to define what the input of the algorithm is: it is &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt;, an odd integer that is neither a prime nor the power of a prime. These assumptions are necessary for the algorithm to work, and when they are not respected factorizing is still easy.&lt;/p&gt;
+&lt;p&gt;If &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; is even, we can pick &lt;span class=&#34;math inline&#34;&gt;\(P = 2\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(Q = N/2\)&lt;/span&gt; so the even case is straightforward.&lt;/p&gt;
+&lt;p&gt;If &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; is prime, we can check with primality tests such as &lt;a href=&#34;https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test&#34;&gt;Miller-Rabin’s&lt;/a&gt; for primality in a reasonable time complexity so this case is also easier than solving general factorization.&lt;/p&gt;
+&lt;p&gt;If &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; is the power of a prime, we can check for every &lt;span class=&#34;math inline&#34;&gt;\(2 \leq k \leq \log_{3}N\)&lt;/span&gt; if &lt;span class=&#34;math inline&#34;&gt;\(N^{1/k}\)&lt;/span&gt; is an integer. If it is, then &lt;span class=&#34;math inline&#34;&gt;\(P = N^{1/k}\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(Q = N^{(k-1)/k}\)&lt;/span&gt; is a solution and the case for powers of primes is solved.&lt;/p&gt;
+&lt;p&gt;Let’s now analyse the case when &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; is odd, not a prime nor the power of a prime that happens on the algorithm.&lt;/p&gt;
+&lt;h2 id=&#34;math-concepts-behind-shors-algorithm&#34;&gt;Math concepts behind Shor’s algorithm&lt;/h2&gt;
+&lt;p&gt;To understand Shor’s algorithm, first we need to review modular arithmetic. We use the &lt;a href=&#34;https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/the-quotient-remainder-theorem&#34;&gt;quotient-remainder theorem&lt;/a&gt; to write :&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+a = N \cdot k + r \iff a \equiv r \pmod N \iff N \mid (a - r)
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Then, we need to recall that if &lt;span class=&#34;math inline&#34;&gt;\(a\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; are coprime, i.e. &lt;span class=&#34;math inline&#34;&gt;\(\gcd(a, N) = 1\)&lt;/span&gt;, there is a number &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; such that:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+a^{r} \equiv 1 \pmod N
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Notice that the number &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; we defined so far is not unique: for example, if we take &lt;span class=&#34;math inline&#34;&gt;\(t = 2r\)&lt;/span&gt;, then we have &lt;span class=&#34;math inline&#34;&gt;\(a^{t} \equiv 1\)&lt;/span&gt; as well.&lt;/p&gt;
+&lt;p&gt;To prove that &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; exists, mathematicians generally use &lt;span class=&#34;math inline&#34;&gt;\(\phi(N)\)&lt;/span&gt;, the &lt;a href=&#34;https://en.wikipedia.org/wiki/Euler%27s_totient_function&#34;&gt;Euler’s totient function&lt;/a&gt; of &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt;. However, for Shor’s algorithm, we are not interested in an arbitrary &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt;: we want to find the smallest &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Why focus on the smallest &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; if it is easy to compute &lt;span class=&#34;math inline&#34;&gt;\(\phi(N)\)&lt;/span&gt;? The fact is that the smallest &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; has a nice property that is key in our analysis. First, let’s rewrite our equation:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+a^{r} - 1 \equiv 0 \pmod N \iff
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+(a^{r/2} + 1)(a^{r/2} - 1) \equiv 0 \pmod N \iff
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+N \mid (a^{r/2} + 1)(a^{r/2} - 1)
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Here, we assumed that &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; is even, and that will be a requirement for our algorithm to work. Notice that &lt;span class=&#34;math inline&#34;&gt;\(N \nmid (a^{r/2} - 1)\)&lt;/span&gt;, because that would imply &lt;span class=&#34;math inline&#34;&gt;\(a^{r/2} \equiv 1\)&lt;/span&gt; and violate our condition that &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; was the smallest. Thus, the prime factors of &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; are distributed among &lt;span class=&#34;math inline&#34;&gt;\(a^{r/2} - 1\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(a^{r/2} + 1\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;There are two cases. In the first one, we’re out of luck: if &lt;span class=&#34;math inline&#34;&gt;\(N \mid (a^{r/2} + 1)\)&lt;/span&gt;, then it might be that all the factors are on &lt;span class=&#34;math inline&#34;&gt;\(a^{r/2} + 1\)&lt;/span&gt; and we can conclude nothing about the prime factorization of &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;In the second case, &lt;span class=&#34;math inline&#34;&gt;\(N \nmid (a^{r/2} + 1)\)&lt;/span&gt; and we can make a conclusion: because &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt; divides the product but not the numbers individually, at least one of &lt;span class=&#34;math inline&#34;&gt;\(\gcd(N, a^{r/2} + 1)\)&lt;/span&gt; or &lt;span class=&#34;math inline&#34;&gt;\(\gcd(N, a^{r/2} - 1)\)&lt;/span&gt; will be a non trivial factor of &lt;span class=&#34;math inline&#34;&gt;\(N\)&lt;/span&gt;. Our factorization is done.&lt;/p&gt;
+&lt;p&gt;Thus, if finding &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; is done quickly, we can try multiple values for &lt;span class=&#34;math inline&#34;&gt;\(a\)&lt;/span&gt; until we found one that yields a factor. It can be shown that the probability that &lt;span class=&#34;math inline&#34;&gt;\(a\)&lt;/span&gt; works is at least &lt;span class=&#34;math inline&#34;&gt;\(1/2\)&lt;/span&gt;, so with few attempts for &lt;span class=&#34;math inline&#34;&gt;\(a\)&lt;/span&gt; we will find a factor.&lt;/p&gt;
+&lt;h2 id=&#34;algorithm-and-quantum-subroutine&#34;&gt;Algorithm and quantum subroutine&lt;/h2&gt;
+&lt;p&gt;Given the math concepts behind Shor’s algorithm, we can write the pseudo-code for the algorithm. Notice that in this step we are not worrying about the implementation of other parts of the algorithm: we assume that the classical parts of &lt;span class=&#34;math inline&#34;&gt;\(\gcd\)&lt;/span&gt;, primality-testing, checking if the k-th root is an integer are implemented and available for use. We also assume that the quantum subroutine for period finding is available for use. This yields the code:&lt;/p&gt;
+&lt;pre class=&#34;{r}&#34;&gt;&lt;code&gt;def shor_algorithm(N):
+    &amp;quot;&amp;quot;&amp;quot;Returns a pair of integers (P, Q) such that PQ = N for integer N&amp;quot;&amp;quot;&amp;quot;
+
+    if N % 2 == 0:  # even case
+        return (N//2, 2)  # trivial factorization
+
+    if is_prime(N):  # prime case
+        return (N, 1)  # N is prime, factors cannot be found
+
+    if is_power_k(N):  # prime power case
+        k = find_power_k(N)  # we find a k such that N**(1/k) is an integer
+        P = N**(1/k)
+        Q = N//P
+        return (P, Q)
+
+    # Now we can assume that the criteria for Shor&amp;#39;s algorithm is met
+
+    while True:
+        # Non-deterministic, we will try multiple values for a
+        a = randint(2, N - 1)  # pick random a
+
+        if gcd(a, N) != 1:  # Lucky case: a and N are not coprime!
+            P = gcd(a, N)  # gcd yields a non-trivial factor
+            Q = N//P
+            return (P, Q)
+
+        r = order_finding(a, N)  # quantum subroutine of the code
+
+        if r % 2 == 0:
+            continue  # r is not even, try another value for a
+
+        P = gcd(a**(r//2) - 1, N)
+        if P != 1:
+            Q = N//P  # gcd yielded non trivial factor
+            return (P, Q)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;implementing-shors-algorithm&#34;&gt;Implementing Shor’s algorithm&lt;/h2&gt;
+&lt;p&gt;We can verify that Shor’s algorithm works using Python and running an experiment: in the Jupyter notebook below, we try to factorize some numbers. Notice that this code does not reach the optimal complexity, because order finding is done with classical computers instead of quantum computers. The code will be refined on the next blog posts.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/10911e3e057ea5817ba876ca7ec17aee.js&#34;&gt;&lt;/script&gt;
+
+&lt;h1 id=&#34;next-step&#34;&gt;Next step&lt;/h1&gt;
+&lt;p&gt;The next step is to implement the quantum subroutine for period finding. To find the &lt;span class=&#34;math inline&#34;&gt;\(r\)&lt;/span&gt; for &lt;span class=&#34;math inline&#34;&gt;\(a^{r} \equiv 1 \pmod N\)&lt;/span&gt;, we will need to learn two new things: the Phase Estimation algorithm and the Quantum Fourier Transform.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>QGrooves ![](/img/Badges/qgrooves.svg)</title>
