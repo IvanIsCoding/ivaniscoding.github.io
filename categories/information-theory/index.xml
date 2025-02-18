@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Information Theory | Ivan Carvalho</title>
+    <link>https://ivaniscoding.github.io/categories/information-theory/</link>
+      <atom:link href="https://ivaniscoding.github.io/categories/information-theory/index.xml" rel="self" type="application/rss+xml" />
+    <description>Information Theory</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Tue, 28 Aug 2018 14:00:00 -0300</lastBuildDate>
+    <image>
+      <url>https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png</url>
+      <title>Information Theory</title>
+      <link>https://ivaniscoding.github.io/categories/information-theory/</link>
+    </image>
+    
+    <item>
+      <title>Information Theory #6 - Amusement Park</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory6/</link>
+      <pubDate>Tue, 28 Aug 2018 14:00:00 -0300</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/informationtheory6/</guid>
+      <description>&lt;p&gt;I am writing a series of posts about Information Theory problems. You may find the previous one &lt;a href=&#34;https://ivaniscoding.github.io/posts/informationtheory5/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The problem we will analyze is Amusement Park from the Japanese Olympiad in Informatics Open Contest (JOI Open 2017). You may find the problem statement and a place to submit &lt;a href=&#34;https://oj.uz/problem/view/JOI17_amusement_park&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A synthesis of the problem statement is : You are given a connected graph of N vertices and M edges (60 &amp;lt;= N &amp;lt;= 10000, M &amp;lt;= 20000) . JOI-kun must tell the integer X ( 0 &amp;lt;= X &amp;lt;= 2^60 - 1) to IOI-chan, but he cannot do that directly. Instead, he will write either 0 or 1 in each vertex.  IOI-chan can read the integer written on the vertex currently at and move to any adjacent vertex. Help IOI-chan discover X by using the smallest possible number of movements. You must submit two files:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;One that given the structure of the graph and the integer X, writes 0 or 1 on each vertex. Note that JOI-kun does not know the starting vertex of IOI-chan.&lt;/li&gt;
+&lt;li&gt;One that given a starting vertex and the graph structure, uses the least number of moves such that with the integers written on the visited vertices it can recover the integer X.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The scoring of the subtasks is based on the maximum number of moves IOI-chan does. In order to score 100 points, you must find a solution that uses at most 120 moves.&lt;/p&gt;
+&lt;p&gt;I will not discuss the first subtasks because I found a solution that in my opinion is conceptually simple (it is basically a DFS) and already scores 78 points going up to subtask 4. Thus, we will discuss the DFS idea and the final solution.&lt;/p&gt;
+&lt;h2 id=&#34;a-dfs-approach--78-points&#34;&gt;A DFS approach : 78 points&lt;/h2&gt;
+&lt;p&gt;There are some initial steps that are common to almost all approaches to this problem. They are necessary in order to solve the problem because they take care of the basic : how to send X with 0&#39;s and 1&#39;s&lt;/p&gt;
+&lt;p&gt;The idea is : we will have to use the binary encoding of X to send it with 0&#39;s and 1&#39;s. The strategy will be as follows : we will assign for each vertex which of the 60 bits it represents; we must find a procedure that produces the same result for IOI-chan and JOI-kun, because we need to be sure that we are correctly receiving the message.&lt;/p&gt;
+&lt;p&gt;The next step of this idea is : we need to find an efficient way of moving between the vertices such that we can recover the 60 bits quickly. When we get all the bits, we stop moving and report X. In order to achieve this, we have to also think about the way we assign the bit for each vertex, because this assignment heavily impacts in the number of movements.&lt;/p&gt;
+&lt;p&gt;The final step is : it is easier to solve this problem on a tree. Because of the tree properties, it is simple to find a correct way to assign the bits to the vertices and it is less complicated to decide where to move compared to a general graph. Due to the fact that our graph is connected, we can always find a spanning tree of the graph and transform the general graph into a tree.&lt;/p&gt;
+&lt;p&gt;An algorithm that finds a spanning tree and also finds an efficient way of choosing the bits is the Depth-First Search. Let&#39;s take a look :&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory6/amusement.png&#34; alt=&#34;DFS Tree&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We start the algorithm by doing the DFS from any vertex of the graph. There are two key ideas that make the algorithm efficient:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If a vertex was the (i)-th vertex to be discovered by the DFS, we define its discovery time as (i - 1). The bit that we will assign for this vertex will be (i - 1) modulo 60.&lt;/li&gt;
+&lt;li&gt;We keep the edges used to discover of a new vertex as the edges of our spanning tree. Thus, we build the tree as we assign the bits&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;By doing that, the only remaining step is to find an efficient way to move in order to quickly discover all the 60 bits.&lt;/p&gt;
+&lt;p&gt;However, the way we move will also be heavily inspired by the DFS. Suppose that we are currently at a vertex v and let T be the subtree of v considering that the tree is rooted at the starting vertex of the DFS. There are two cases:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The size of T is bigger than or equal to 60. We just follow the DFS order and stop when all the 60 bits are found.&lt;/li&gt;
+&lt;li&gt;The size of T is smaller than 60. We follow the DFS order and then return to the parent vertex of v, p. In p we do something similar but in a different order : instead of following the DFS from the first discovered child, we follow the DFS order from v and consider the array of children to be circular. Let&#39;s exemplify : if [1,2,3,4] was the ordering and you came from 3, them the order will be [3,4,2,1].&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This algorithm uses at most 160 movements and scores 78 points. It was harder to think and explain the algorithm then to implement it. You may find the partial solution &lt;a href=&#34;https://oj.uz/submission/69340&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;a-smart-subtree-approach--100-points&#34;&gt;A smart subtree approach : 100 points&lt;/h2&gt;
+&lt;p&gt;In the final solution, we will also stick to the idea of solving the problem on a tree and reducing a general graph to its spanning tree. However, we will tweak the moving part of our algorithm to be more efficient.&lt;/p&gt;
+&lt;p&gt;From now on, when we talk about subtrees , think of them as a connected acyclic subgraph rather than a subtree of a rooted tree. Suppose that we have a subtree of exactly 60 vertices . If we run the DFS algorithm on this subtree, we will be able to find X with 120 moves or less for all the vertices of the subtree.&lt;/p&gt;
+&lt;p&gt;If we could assign for each vertex a subtree of size 60 such that all the bits of X are represented in the subtree, then our problem is solved. Let&#39;s focus on finding a way of doing that.&lt;/p&gt;
+&lt;p&gt;Suppose we have already found the spanning tree and found an arbitrary subtree T of size 60. For all vertices of the subtree, we assign T as its subtree. Then, we will try to assign a subtree to the neighbors of the vertices of the subtree that have not yet been assigned a subtree.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory6/amusement1.png&#34; alt=&#34;Limited Subtree&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The idea is as follows. Let u be the vertex without an assigned subtree and v its neighbor that has been assigned the subtree T. To find subtree for u, we copy T and remove an arbitrary leaf of the tree that is not v. Then, we connect u to v in the new subtree T* and assign the bit of the removed leaf to u. The image above shows this idea for a smaller subtree : we pick any of the leaves (in this it was the one numbered 6, but it could be 5) and remove it. Then, we connect the new vertex to its neighbor in the subtree an assign the 6th bit to the new vertex.&lt;/p&gt;
+&lt;p&gt;We must run the routine above until all vertices are assigned a subtree. Because the graph is connected, it will always be possible to assign a subtree to each vertex.&lt;/p&gt;
+&lt;p&gt;In the decoding part as IOI-chan , we run the DFS idea from our previous algorithm in the subtree of the starting vertex. IOI-chan will make at most 120 moves.&lt;/p&gt;
+&lt;p&gt;In my final implementation, I opted to use a BFS to generate a spanning tree instead of the DFS. Despite that, the algorithm is exactly the same as the one described above.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/f783667abfc69916405b6ffe4ace99c5.js&#34;&gt;&lt;/script&gt;
+
+</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #5 - City</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory5/</link>
+      <pubDate>Mon, 27 Aug 2018 22:00:00 -0300</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/informationtheory5/</guid>
+      <description>&lt;p&gt;I am writing a series of posts about Information Theory problems. You may find the previous one &lt;a href=&#34;https://ivaniscoding.github.io/posts/informationtheory4/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The problem we will analyze is City from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2017). You may find the problem statement and a place to submit &lt;a href=&#34;https://oj.uz/problem/view/JOI17_city&#34;&gt;here&lt;/a&gt; .&lt;/p&gt;
+&lt;p&gt;A synthesis of the problem statement is : you are given a rooted tree of N vertices (N &amp;lt;= 250000) that has a depth that is at most 18. You must write an integer on each node so that given only the integers written on X and Y, without knowing the structure of the tree, you can answer the question : is X on the path from Y to the root, Y on the path from X to the root or neither of them?&lt;/p&gt;
+&lt;p&gt;The scoring of the problem is based on the maximum integer you write on each node. There is also a subtask for N &amp;lt;= 10.&lt;/p&gt;
+&lt;h2 id=&#34;subtask-1--n--10-8-points&#34;&gt;Subtask 1 : N &amp;lt;= 10 (8 points)&lt;/h2&gt;
+&lt;p&gt;In this subtask, the graph is small and the maximum integer does not matter as long it is smaller than 2^60 - 1.&lt;/p&gt;
+&lt;p&gt;Because of this, we may choose a suboptimal strategy to solve the problem. The simplest one is to encode the vertex and the whole adjacency matrix on the integer we send.&lt;/p&gt;
+&lt;p&gt;We use the binary encoding to send the current node (this uses 4 bits) and use another 45 bits to send the matrix. Then, we run a DFS to see which case happens&lt;/p&gt;
+&lt;h2 id=&#34;l--236---1--22-points&#34;&gt;L &amp;lt;= 2^36 - 1 : 22 points&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory5/city0.png&#34; alt=&#34;Euler Tour on a Tree&#34;&gt;&lt;/p&gt;
+&lt;p&gt;With very big N, it is impossible to send the adjacency matrix. So we will focus on another technique to solve the problem.&lt;/p&gt;
+&lt;p&gt;This technique is commonly called &amp;ldquo;Euler Tour on a Tree&amp;rdquo; , even tough it is not exactly an Euler Tour. You can interpret it as noticing a special property of the initial and final time when you do a DFS on the tree.&lt;/p&gt;
+&lt;p&gt;The image above represents the &amp;ldquo;Euler Tour&amp;rdquo;. Every time you enter a vertex v, you increase the DFS counter and says this is number is the start time of v . At the end of the DFS on v, we also save the DFS counter and says it is the end time of v. The vector in the image represents this DFS ordering.&lt;/p&gt;
+&lt;p&gt;The cool thing about this is that it allows us to check if a vertex u is on the subtree of a vertex v easily. Because the vertices of the subtree form a contiguous subarray in the DFS order array, we can simply check if the start of u is contained in the interval [s,e] where s is the start time of v and e the end time of v.&lt;/p&gt;
+&lt;p&gt;If you think a little bit about it, checking if a vertex v is on a subtree of another is exactly the same as checking if that another vertex is on the path from v to the root. So we found a solution to the problem we want to solve!&lt;/p&gt;
+&lt;p&gt;For each vertex, we send an integer that represents the start and end time of the DFS. To do that, we send 18 bits for the start and another 18 bits for the end. In the decoding part, we simply recover the starts and ends and run the interval check described above.&lt;/p&gt;
+&lt;p&gt;The maximum number if 2^36 - 1 , thus we score 22 points.&lt;/p&gt;
+&lt;h2 id=&#34;an-unused-property&#34;&gt;An unused property&lt;/h2&gt;
+&lt;p&gt;So far we did not the property that the depth of the tree is at most 18. The solution described above works for any tree, and therefore does not exploit the special property of the depth.&lt;/p&gt;
+&lt;p&gt;Because the maximum depth is 18, every node has at most 18 ancestors and is therefore contained in at most 18 intervals. Thus, the sum of the lengths of all intervals is at most 18*N. So on average each interval is at most 18. That is not much.&lt;/p&gt;
+&lt;p&gt;It seems to be a waste to send 18 bits of the end when we could send the size, which is on average 5 bits. So we will do exactly that : instead of sending the end, we send the size of the interval.&lt;/p&gt;
+&lt;p&gt;This optimization alone does not affect our punctuation, because there are causes in which we will still send integers up to 2**36 - 1. However, this idea is a crucial step to solve the problem.&lt;/p&gt;
+&lt;h2 id=&#34;an-efficient-way-of-sending-the-size--100-points-solution&#34;&gt;An efficient way of sending the size : 100 points solution&lt;/h2&gt;
+&lt;p&gt;We need to optimize the way we send the size. In a perfect environment, we could create a smaller dictionary that represented the sizes and send the position in that dictionary.&lt;/p&gt;
+&lt;p&gt;However, it is difficult to adjust a dictionary to the sizes of the interval. We will try a different approach : adjust the interval size to the dictionary. But how do we do that ?&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory5/city1.png&#34; alt=&#34;Dummy Nodes&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Suppose that the interval size is a. How do we fit that size to the dictionary , if it is not in it? Let b be the smallest integer of the dictionary greater than our equal to a. We can always add some extra leaves as dummy vertices in order to reach the size b. The image above exemplifies that, by adding two leaves to reach the size 5 from the original size 3.&lt;/p&gt;
+&lt;p&gt;In practice, we are adding empty spaces to our DFS array. The challenge now is to build that dictionary of sizes.&lt;/p&gt;
+&lt;h2 id=&#34;building-the-dictionary--100-points-solution&#34;&gt;Building the dictionary : 100 points solution&lt;/h2&gt;
+&lt;p&gt;The challenge of finding a dictionary of sizes is that it should not add many extra vertices, because in that case the start of the vertices would be big and thus the dictionary would need to be small.&lt;/p&gt;
+&lt;p&gt;If the total number of vertices (original and dummy) of the final solution is close to 2^K, then we must construct a dictionary of size 2^(28 - K) .&lt;/p&gt;
+&lt;p&gt;Additionally , this dictionary should vary gradually. A function that varies gradually is a power function, so we can describe our dictionary as a set of {r^0, r^1, r^2&amp;hellip;} for some number r. The optimal r is the solution for r^(2^(28 - K)) = 2^K&lt;/p&gt;
+&lt;p&gt;If you experiment with K, you may find that K = 20 is a good choice. Therefore, the maximum number of vertices if 2^20 and the dictionary size is 2^8 = 256.&lt;/p&gt;
+&lt;p&gt;The value of r is 2^(20/256) ≈ 1.055645 (we must truncate because we cannot represent an irrational number in an exact decimal form).&lt;/p&gt;
+&lt;p&gt;Because r is not an integer, our dictionary is not exactly described by a power function, but by an approximation. Let A be our dictionary and a0 = 0 the first element. We say that ai = max{ a(i-1) + 1, ai*r } , where ai*r is rounded down.&lt;/p&gt;
+&lt;p&gt;In the final code, I opted to send the difference between the start and the end instead of the size. The result is identical, tough.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/ae0fb800f1e113807aee2a2804132aa3.js&#34;&gt;&lt;/script&gt;
+
+</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #4 - Airline Route Map</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory4/</link>
+      <pubDate>Sun, 26 Aug 2018 20:00:00 -0300</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/informationtheory4/</guid>
+      <description>&lt;p&gt;I am writing a series of posts about Information Theory problems. You may find the previous one &lt;a href=&#34;https://ivaniscoding.github.io/posts/informationtheory3/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The problem we will analyze is Airline Route Map from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2018). You may find the problem statement and a place to submit &lt;a href=&#34;https://oj.uz/problem/view/JOI18_airline&#34;&gt;here&lt;/a&gt; .&lt;/p&gt;
+&lt;p&gt;A synthesis of the problem statement is : Alice needs to send to Bob an undirected graph of N vertices (N &amp;lt;= 1000) and M edges (M &amp;lt;= N*(N-1)/2). However, the information Alice sends suffers a series of shuffles before Bob receives it&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The number of the vertices are changed. So each of the N vertices will receive a new unique number from 0 to N-1.&lt;/li&gt;
+&lt;li&gt;The edge list is shuffled. The edges remain consistent to the information you sent (if you sent A-&amp;gt;B, then it will mean A* -&amp;gt; B*, where A* and B* are the new numbers for A and B) , but their order on the edge list is not the same.&lt;/li&gt;
+&lt;li&gt;The direction of the edge is changed. If it was A-&amp;gt;B , then you may receive A*-&amp;gt;B* or B*-&amp;gt;A*&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;You may add or remove vertices and edges when you are sending the graph as Alice. When Bob receives the shuffled information, he needs to recove the original graph Alice wanted to send. You must submit two files:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;One that given the undirected graph we want to send, generates a new graph and sends it.&lt;/li&gt;
+&lt;li&gt;One that given the shuffled sent graph, recovers the original one
+The scoring is based on the number of extra vertices you sent. The final subtasks uses only 12 extra vertices to recover the graph.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This time I will not focus on the subtasks but only at two solutions : one that uses 13 vertices and the improvement of this solution that uses 12 vertices.&lt;/p&gt;
+&lt;h2 id=&#34;a-question--add-or-remove-edges-&#34;&gt;A question : add or remove edges ?&lt;/h2&gt;
+&lt;p&gt;We are allowed to send any graph, so we must choose if we will add or remove edges (or do both). It turns out that it is very hard to recover information of edges that were not sent using few additional vertices. So it is better to send the original graph with some additional vertices that will help to recover the original numbering of the vertices.&lt;/p&gt;
+&lt;h2 id=&#34;first-step--how-to-recover-the-numbers-&#34;&gt;First step : how to recover the numbers ?&lt;/h2&gt;
+&lt;p&gt;The first challenge is to recover the original numbers with such few extra vertices. This requires an efficient way of sending information.&lt;/p&gt;
+&lt;p&gt;It turns that sending the binary representation of the numbers is a good idea. To do that, we create 10 extra vertices, one for each possible set bit of a number. Then, we connect the i-th extra vertex to the numbers whose i-th bit is set.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory4/airline0.png&#34; alt=&#34;Connection to bits&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The image above does not show all the bits, but represent the connections of vertex 6 : it has an edge to the vertices that represent 2^1 and 2^2, but not to the one that is 2^0.&lt;/p&gt;
+&lt;h2 id=&#34;second-step--identifying-the-bit-vertices&#34;&gt;Second step : identifying the bit vertices&lt;/h2&gt;
+&lt;p&gt;The next challenge is to identify those special vertices. My idea to solve this was to create an additional vertex that is connected to all vertices of the graph, except to the bit ones.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory4/airline1.png&#34; alt=&#34;Additional vertex connected to everything except bits&#34;&gt;&lt;/p&gt;
+&lt;p&gt;In addition to that, I also connected the bit vertices to form a chain , connecting the i-th one to the (i+1)-th one.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory4/airline2.png&#34; alt=&#34;Bit chain&#34;&gt;&lt;/p&gt;
+&lt;p&gt;So now we only need to identify the 10th bit vertex and the special vertex that is connected to all the nodes. If we do that, we can always discover the next bit of the chain and we have solve our problem.&lt;/p&gt;
+&lt;h2 id=&#34;third-step--identifying-the-last-bit-vertex-and-the-special-vertex&#34;&gt;Third step : identifying the last bit vertex and the special vertex&lt;/h2&gt;
+&lt;p&gt;We have already used 11 extra vertices, so we do not want to use a lot more in order to identify these two vertices. So we must find some special property or implicit information that can helps us decode without sending many vertices.&lt;/p&gt;
+&lt;p&gt;One important piece of information that we have not used so far is the degree of the vertices. If we analyze the degrees, we discover an important property : for N &amp;gt;= 3, all of the vertices but two will always have their degree bigger than or equal to 2. The only two vertices that sometimes can break the rule are the vertex 0, when it does not have any edge in the original graph,  and the 10th bit vertex when N &amp;lt;= 512.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory4/airline3.png&#34; alt=&#34;A trick for the two cases&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Therefore, it is a good idea to use two extra vertices with degree one to try identify the special and bit vertex, because they will be unique in our graph. With the extra one degree vertex, the 10th bit vertex no longer can have a degree one. The only remaining vertex that can mess up with our idea is 0.&lt;/p&gt;
+&lt;p&gt;However, it is easy to overcome the problem with 0 : we can simply make the graph 1-indexed instead of 0-indexed. That way, 0 will become one and have a set bit, thus having a degree of at least two.&lt;/p&gt;
+&lt;p&gt;In the end , we do as follows : we make the graph 1-indexed and add the two 1-degree vertices. Then , we identify the two vertices that are connected to the 1-degree vertices and distinguish the special vertex based on the degree (the special one will always have more edges). Then , we process our chain of bits, discover the original numbering for each vertex and report the original graph. This algorithm uses 13 additional vertices and scores 91 points, which is a very good result.&lt;/p&gt;
+&lt;h2 id=&#34;fourth-step--final-optimization&#34;&gt;Fourth step : final optimization&lt;/h2&gt;
+&lt;p&gt;In order to fully solve the problem, we must get rid of exactly one extra vertex. Therefore, we will need to use again implicit information that we did not use before.&lt;/p&gt;
+&lt;p&gt;It turns out that we do not need the 1-degree vertex to identify the last bit vertex. Of all the bit vertices (that can be easily identified because of the special vertex), it will always be the one that has the smallest degree.&lt;/p&gt;
+&lt;p&gt;Because of that, we drop the 1-degree vertex that connects to the last bit and tweak the algorithm we used before. Notice that by doing this, the 10th bit vertex can sometimes have only one edge, but with some thinking we can handle this case.&lt;/p&gt;
+&lt;p&gt;In my implementation of this idea, I hard coded small cases to avoid corner cases. The remaining part of the code implements exactly the same idea as described above.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/32cb88cb0ae2c60ee4d2e42b8bfdfef3.js&#34;&gt;&lt;/script&gt;
+
+</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #3 - Broken Device</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory3/</link>
+      <pubDate>Sat, 25 Aug 2018 12:00:00 -0300</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/informationtheory3/</guid>
+      <description>&lt;p&gt;I am writing a series of posts about Information Theory problems. You may find the previous one &lt;a href=&#34;https://ivaniscoding.github.io/posts/informationtheory2/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The problem we will analyze is Broken Device from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2017). You may find the problem statement and a place to submit &lt;a href=&#34;https://oj.uz/problem/view/JOI17_broken_device&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A synthesis of the problem statement is : Anna wants to send a 60-bit integer to Bruno. She has a device that can send a sequence of 150 numbers that are either 0 or 1. The twist is that L (0 &amp;lt;= L &amp;lt;= 40) of the positions of the device are broken and can only send 0. Bruno receives the sequence Anna sent, but the does not know the broken positions. You must submit two files:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;One that given the integer X we want to send and the K broken positions, generates a sequence of length 150 that can be decoded.&lt;/li&gt;
+&lt;li&gt;One that given the sequence generated by the previous procedure, decodes the integer X without knowing the K broken positions.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The subtasks are based on the maximum number of broken positions your algorithm can handle. Let&#39;s see some ideas for different K&#39;s.&lt;/p&gt;
+&lt;h2 id=&#34;k--0--0-points&#34;&gt;K = 0 : 0 points&lt;/h2&gt;
+&lt;p&gt;This is not a subtask, but you need to know how to solve this case in order to solve the full problem. The idea is very simple : send the binary encoding of X. We will use the binary encoding in all other subtasks , but you need to keep this idea in mind.&lt;/p&gt;
+&lt;p&gt;We use the first 60 positions to send the encoding and leave the other 90 unused.&lt;/p&gt;
+&lt;h2 id=&#34;k--1--8-points&#34;&gt;K = 1 : 8 points&lt;/h2&gt;
+&lt;p&gt;Because there is a broken place, we might not be able to send X using the 60 first positions. However, it will not be difficult to overcome that.&lt;/p&gt;
+&lt;p&gt;The key idea is to send a signal meaning that this is the place the binary representation starts. That is, the first number 1 of the sequence will mean &amp;ldquo;The following 60 numbers are the binary encoding of X&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;In order to use this idea, we need to be sure that there will 61 adjacent positions that are not broken. Because K = 1, we know that this is true.&lt;/p&gt;
+&lt;h2 id=&#34;k--15--41-points&#34;&gt;K = 15 : 41 points&lt;/h2&gt;
+&lt;p&gt;We will use a different strategy to send the binary encoding of X. The first step of our algorithm is to divide our 150 sequence into 75 buckets of size 2. The image bellow represents this idea , where grey is &amp;ldquo;0&amp;rdquo; and black is &amp;ldquo;1&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory3/broken0.png&#34; alt=&#34;Buckets of size 2&#34;&gt;&lt;/p&gt;
+&lt;p&gt;This will allow us to use an encoding that is less affected by the broken places, because we will not need that a lot of adjacent non-broken positions.&lt;/p&gt;
+&lt;p&gt;Our encoding will use every 2 positions to send at most one bit. Notice that sometimes we may not send any information because of the broken places, but that is okay.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory3/broken1.png&#34; alt=&#34;Table encoding for buckets of size 2&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We will send the bits in order. If we receive &amp;ldquo;00&amp;rdquo;, then we did not send any information. If we receive &amp;ldquo;10&amp;rdquo;, this means that the next bit is &amp;ldquo;0&amp;rdquo;, and if we receive &amp;ldquo;11&amp;rdquo;, this means that the next bit is &amp;ldquo;1&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;By using this encoding , we can send up to 75 bits if there weren&#39;t any broken places. When there is at least one broken position in a bucket, in the worst case, we lose that bucket.&lt;/p&gt;
+&lt;p&gt;Considering we need to send 60 bits, we can afford to lose up to 15 buckets. So we solve to K up to 15.&lt;/p&gt;
+&lt;h2 id=&#34;intermediary-ks--41-points&#34;&gt;Intermediary K&#39;s : 41+ points&lt;/h2&gt;
+&lt;p&gt;We can improve the previous solution to handle more broken positions.&lt;/p&gt;
+&lt;p&gt;The first improvement is to find a meaning for &amp;ldquo;01&amp;rdquo;, something that we did not. By meaning we are not only talking about &amp;ldquo;1&amp;rdquo; or &amp;ldquo;0&amp;rdquo;, but other creative ideas like repeating previous numbers.&lt;/p&gt;
+&lt;p&gt;The second improvement is to use randomization in order to avoid the worst case of our algorithm:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;We may shuffle the position of the bits, in order to prevent the worst case where each broken position is on a different bucket&lt;/li&gt;
+&lt;li&gt;We may change the integer we are sending by XORing it with a random number. This prevents cases where all numbers are 1 or 0, which can be bad for some ideas. To recover the original integer on the decoding part, we simply XOR the number we found with the random number&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We need to carefully implement these ideas because we need to be able to revert the changes in the decoding part.&lt;/p&gt;
+&lt;h2 id=&#34;k--40--100-points&#34;&gt;K = 40 : 100 points&lt;/h2&gt;
+&lt;p&gt;The final solution is somewhat similar to the 41 points solution, but instead uses buckets of size 3.&lt;/p&gt;
+&lt;p&gt;With buckets of size 3 , we can create an encoding that sends up to 2 bits per bucket. Inefficient implementations of this idea do not score full points, but do better than the 41 point solution. I will go straight to the efficient implementation of the idea, but you may take sometime to create a encoding on your own.&lt;/p&gt;
+&lt;p&gt;Because of the size, we will use a encoding-table that is more resistant to broken places. The special property of the table is that it will allow us to send 2 bits of information in the case there are no broken places and 1 bit of information in the case there is one broken place.&lt;/p&gt;
+&lt;p&gt;Because of that, we can always send 60 bits regardless of the configuration. One possible table is the following :&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory3/brokenf.png&#34; alt=&#34;Optimal table for size 3 buckets&#34;&gt;&lt;/p&gt;
+&lt;p&gt;My implementation of this idea:&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/60aa5d68fe46012bd812564bc7b74f42.js&#34;&gt;&lt;/script&gt;
+
+</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #2 - Navigation</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory2/</link>
+      <pubDate>Fri, 24 Aug 2018 17:00:00 -0300</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/informationtheory2/</guid>
+      <description>&lt;p&gt;I am writing a series of posts about Information Theory problems. You may find the previous one &lt;a href=&#34;https://ivaniscoding.github.io/posts/informationtheory1/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The problem we will analyze is Navigation from the Japanese Olympiad in Informatics Spring Camp (JOI SC 2015). You may find the problem statement and a place to submit &lt;a href=&#34;https://dunjudge.me/analysis/problems/762/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A synthesis of the problem statement is : Anna lives in an island that is part of the IOI islands, that can be represented by an acyclic connected graph. Bruno will visit Anna, but he does not know the whole structure of the tree. He only knows the adjacent islands to the island he is currently at. To help Bruno , Anna will write an integer on each island such that Brunno can go to Anna&#39;s island using the short possible path.&lt;/p&gt;
+&lt;p&gt;We must submit two files:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;One that given the structure of the tree and the island Anna lives, writes a number on each island&lt;/li&gt;
+&lt;li&gt;One that given the current island and its number, the adjacent islands to that island and their respective number, goes from that island to the one closest to Anna&#39;s island. In the case Bruno is already on Anna&#39;s island, you must not move.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The subtasks are based on the maximum number you wrote on the vertices of the tree.&lt;/p&gt;
+&lt;h2 id=&#34;subtask-1--no-restrictions&#34;&gt;Subtask 1 : No restrictions&lt;/h2&gt;
+&lt;p&gt;For all subtasks , we will root the tree at Anna&#39;s island.&lt;/p&gt;
+&lt;p&gt;The idea for this subtask is to write on each node its distance from the root of the tree when we are encoding. The image above exemplifies this idea.&lt;/p&gt;
+&lt;p&gt;When we are decoding, we just go to the node whose number is the smallest.&lt;/p&gt;
+&lt;h2 id=&#34;subtask-2--use-numbers-0-1-and-2&#34;&gt;Subtask 2 : use numbers 0, 1 and 2&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory2/navigation0.png&#34; alt=&#34;Level-tree&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We need to use something completely different from our previous solution.&lt;/p&gt;
+&lt;p&gt;Instead of writing the distances, we will create a table telling wether we should or shouldn&#39;t go to a node based on the number of the current node.&lt;/p&gt;
+&lt;p&gt;This table should be complementary : if 0-&amp;gt;1 means go, 1-&amp;gt;0 means do not go. Because of that, we discard 0-&amp;gt;0 , 1-&amp;gt;1 and 2-&amp;gt;2. Even tough we have 6 possibilites, it is possible to find a table that does what we want.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/InformationTheory2/tabela.png&#34; alt=&#34;Table of wheter go or not&#34;&gt;&lt;/p&gt;
+&lt;p&gt;To mark each node with the correct integer, we start by doing a DFS from the root. We can choose any integer for the root, so we choose 0 . At each step, we write for the children of our current vertex the number such that it means &amp;ldquo;Don&#39;t go&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;Decoding is easy because of the table. The only case we need to be aware is for the root, because in that case we will find only &amp;ldquo;Don&#39;t go&amp;rdquo;, so we must return the own vertex in that case.&lt;/p&gt;
+&lt;h2 id=&#34;subtasks-3-and-4--0-and-1&#34;&gt;Subtasks 3 and 4 : 0 and 1&lt;/h2&gt;
+&lt;p&gt;With only two numbers , it is impossible to find a table like the previous one. In order to solve the problem , we must try a different strategy or find some implicit information that we have not used so far.&lt;/p&gt;
+&lt;p&gt;In this case, we will go with the second option. At the current point, we have not taken advantage of the fact that the number of the vertices remain the same. That is a lot of information !&lt;/p&gt;
+&lt;p&gt;Our previous solution relied heavily on the idea of the complementary table. We need to find some information that is complementary and uses the number of the vertices.&lt;/p&gt;
+&lt;p&gt;An operator that does exactly that is the less than operator. If  (a &amp;lt; b) equals true, then (a &amp;gt; b) equals false. This was the implicit information we were looking for.&lt;/p&gt;
+&lt;p&gt;In order to decide wether we should or shouldn&#39;t go from vertex A to B, we will calculate the following value : v = (integer written on A) + (integer written on B) + (A &amp;lt; B). If v is an even number, then we do not go. If v is an odd number, then we go.&lt;/p&gt;
+&lt;p&gt;Because of the complementary nature of the less operator, if v means &amp;ldquo;Go&amp;rdquo; to A, then it will mean &amp;ldquo;Don&#39;t go&amp;rdquo; to B.&lt;/p&gt;
+&lt;p&gt;To mark the correct integer on each node, we start by doing a DFS from the root. For each children, we choose the correct integer such that we write &amp;ldquo;Don&#39;t go&amp;rdquo; from the current node.&lt;/p&gt;
+&lt;p&gt;Even tough there was a lot of thinking , the final code is very simple. Wow!&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/7d5609cd161b9abed9a65185fc30dc89.js&#34;&gt;&lt;/script&gt;
+
+</description>
+    </item>
+    
+    <item>
+      <title>Information Theory #1 - Coins</title>
+      <link>https://ivaniscoding.github.io/posts/informationtheory1/</link>
+      <pubDate>Fri, 24 Aug 2018 13:00:00 -0300</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/informationtheory1/</guid>
+      <description>&lt;p&gt;Information Theory problems are not common and that is why I am writing about them.&lt;/p&gt;
+&lt;p&gt;They generally consist of two parts : encoding and decoding. It seems to be simple in theory, but problem setters get very creative when adding restrictions that make simple things hard.&lt;/p&gt;
+&lt;p&gt;Each problem is unique, however there are some aspects that seem to be shared by many problems:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It is important to know what you need to send&lt;/li&gt;
+&lt;li&gt;It relevant to know which information will be available to both the encoder and decoder&lt;/li&gt;
+&lt;li&gt;Binary encoding is an efficient way of sending data&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The problem we will analyze is Coins from the Practice Section of the International Olympiad in Informatics (IOI 2017 Practice). You may find the problem statement and a place to submit &lt;a href=&#34;https://dunjudge.me/analysis/problems/1663/&#34;&gt;here&lt;/a&gt; . I have chosen this one because it is neither too easy nor too hard, so it is the ideal one to start.&lt;/p&gt;
+&lt;p&gt;A synthesis of the problem statement is : you have a number C (0 &amp;lt;= C &amp;lt; 64) and an array of 64 numbers that are either 0 or 1. In the encoding part, you may change the status of at least one number and at most K numbers of the array. In the decoding part, you receive the array already with the changes and you must answer the number C.&lt;/p&gt;
+&lt;p&gt;We will focus on the subtasks 3, 4 and 5.&lt;/p&gt;
+&lt;h2 id=&#34;subtask-3--k--64&#34;&gt;Subtask 3 : K = 64 &lt;/h2&gt;
+&lt;p&gt;The idea of this task is to calculate the number C by the number of 1&#39;s in the array. Thus, we flip 0&#39;s to 1&#39;s until we have C 1&#39;s in our array.&lt;/p&gt;
+&lt;p&gt;Notice that we must always flip at least one coin. So in the case the number of 1&#39;s is already equal to C, we need to flip the same coin twice.&lt;/p&gt;
+&lt;h2 id=&#34;subtask-4--k--8&#34;&gt;Subtask 4 : K = 8&lt;/h2&gt;
+&lt;p&gt;The idea above wastes lots of implicit information that is shared between the encoder and decoder. In order to reduce the number of flips, we must use that information.&lt;/p&gt;
+&lt;p&gt;Because the position of the numbers of the array do not change, we can use the first 8 coins to send the binary representation of the number C. So we need to flip at most 8 coins, and not 64 like before.&lt;/p&gt;
+&lt;p&gt;Notice again that in the case the 8 first coins already correspond to the binary encoding of C, we need to flip the same coin twice because we must flip some coin.&lt;/p&gt;
+&lt;h2 id=&#34;subtask-5--k--1&#34;&gt;Subtask 5 : K = 1&lt;/h2&gt;
+&lt;p&gt;Honestly, I was a bit surprised when the problem asked for a solution that uses only one coin flip. I did not expect such a efficient solution at first. However, after thinking about some bitwise operators, I was able to design an algorithm that did the job.&lt;/p&gt;
+&lt;p&gt;Firstly , we will need to define a new decoding function for the array. This function may seem a little bit strange at first, but is has a very special property that solves the problem.&lt;/p&gt;
+&lt;p&gt;Let A be the array we receive. f(A) = i1^i2^&amp;hellip;ik where &amp;ldquo;^&amp;rdquo; is the bitwise XOR operator and i1,i2 &amp;hellip; ik the positions that are &amp;ldquo;1&amp;rdquo; on the array. In the case A has no &amp;ldquo;1&amp;rdquo;, f(A) = 0.&lt;/p&gt;
+&lt;p&gt;The first special property is that result of the function is always an integer x such that 0 &amp;lt;= x &amp;lt;= 63.  The second is that when we flip the coin j of A and obtain the array A*, the value f(A*) = f(A)^j , regardless of the state of position j in the array A.&lt;/p&gt;
+&lt;p&gt;Because 0 &amp;lt;= x &amp;lt;= 63 and 0 &amp;lt;= C &amp;lt;= 63, we can prove that there is an y , 0 &amp;lt;= y &amp;lt;= 63, such that x^y.&lt;/p&gt;
+&lt;p&gt;This leads to the solution. We calculate the value of f(Aj*) for Aj* identical to A , except for the j-th coin that is flipped, for all 0 &amp;lt;= j &amp;lt;= 63. One of the j&#39;s will lead to a configuration whose function value is C, so we return that j as the solution.&lt;/p&gt;
+&lt;p&gt;A further improvement is that we can know the value of j even quicker. Because of the XOR properties, j = f(A)^C is the position our previous algorithm would find.&lt;/p&gt;
+&lt;p&gt;The final code could not be simpler.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/f4045192efcd00d49024cfed6bee5803.js&#34;&gt;&lt;/script&gt;
+
+</description>
+    </item>
+    
+  </channel>
+</rss>

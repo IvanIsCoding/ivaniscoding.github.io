@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Coding Interview | Ivan Carvalho</title>
+    <link>https://ivaniscoding.github.io/categories/coding-interview/</link>
+      <atom:link href="https://ivaniscoding.github.io/categories/coding-interview/index.xml" rel="self" type="application/rss+xml" />
+    <description>Coding Interview</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Mon, 01 Apr 2024 06:00:00 -0400</lastBuildDate>
+    <image>
+      <url>https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png</url>
+      <title>Coding Interview</title>
+      <link>https://ivaniscoding.github.io/categories/coding-interview/</link>
+    </image>
+    
+    <item>
+      <title>How to survive coding interviews with a single line of Python code</title>
+      <link>https://ivaniscoding.github.io/posts/codeinterview/</link>
+      <pubDate>Mon, 01 Apr 2024 06:00:00 -0400</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/codeinterview/</guid>
+      <description>&lt;p&gt;Entering the world of coding interviews can be daunting. Whether you
+are a recent graduate with a bachelor’s or master’s degree in Computer
+Science or a senior industry professional, questions may arise with
+regards to which programming language to use and which strategy to
+follow before and during your coding interview.&lt;/p&gt;
+&lt;p&gt;This guide will give a simple answer out of the many possible one for
+that question.&lt;/p&gt;
+&lt;p&gt;To keep things simple, I recommend the Python programming language.
+And to keep our strategy even simpler, I recommend writing all your
+solutions in a single line.&lt;/p&gt;
+&lt;p&gt;Writing your code in one line can bring numerous benefits. Firstly,
+if there is a bug, you don’t need to worry about which line of code the
+error happened. Secondly, one line progams are concise. Combined with
+the fact that Python is similar to plain English, this strategy helps
+your interviewer understand your solution better. In fact, it is like
+reading one very long sentence with many commas.&lt;/p&gt;
+&lt;p&gt;Are you still stressed about the coding interview and in doubt on how
+to code in a single line? You need not worry, because I will provide
+examples and tips throughout the rest of this article.&lt;/p&gt;
+&lt;h2 id=&#34;recursion-is-your-friend&#34;&gt;Recursion is your friend&lt;/h2&gt;
+&lt;p&gt;Recursion is a powerful concept that allows us to reutilize code.
+Hence, it fits perfectly with Python solutions using one line of
+code.&lt;/p&gt;
+&lt;p&gt;Let’s take for example the task of inverting a binary tree (&lt;a
+href=&#34;https://leetcode.com/problems/invert-binary-tree/&#34;&gt;link&lt;/a&gt;). This
+question is rumored to be a frequently asked questions for candidates
+that write package managers for macOS.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/2bc07fa83e5547f4d541aadb85fd90d9.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;In the example above, recursion does most of the work. To invert a
+binary tree, we swap the left and right nodes and then keep repeating
+the process. Clear and concise.&lt;/p&gt;
+&lt;h2 id=&#34;conditional-operators-are-helfpul&#34;&gt;Conditional Operators are
+helfpul&lt;/h2&gt;
+&lt;p&gt;This detail was also in the last code snippet, but we can discuss it
+individually. Do not waste multiple lines writing &lt;code&gt;if&lt;/code&gt; and
+&lt;code&gt;else&lt;/code&gt; statements! In fact, Python lets you write conditional
+operators in a single line.&lt;/p&gt;
+&lt;p&gt;Consider the following code that computes the depth of a binary tree
+(&lt;a
+href=&#34;https://leetcode.com/problems/maximum-depth-of-binary-tree&#34;&gt;link&lt;/a&gt;)
+.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/f9f0f4e313c75513515695fd70a2ff62.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Thanks to conditional operators, your code fits concisely in one
+line. The &lt;code&gt;if&lt;/code&gt; and &lt;code&gt;else&lt;/code&gt; statements let you
+handle correctly the base case for the recursion which is the empty tree
+node.&lt;/p&gt;
+&lt;h2 id=&#34;lambdas-are-powerful&#34;&gt;Lambdas are powerful&lt;/h2&gt;
+&lt;p&gt;Lambdas, also known as anonymous functions, let us define Python
+functions without wasting unnecessary lines.&lt;/p&gt;
+&lt;p&gt;Take for example the task of finding the first palindrome in a list
+(&lt;a
+href=&#34;https://leetcode.com/problems/find-first-palindromic-string-in-the-array/&#34;&gt;link&lt;/a&gt;).&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/de20fcd81807250c6c3e26be1b807b28.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Thanks to the &lt;code&gt;lambda&lt;/code&gt; statement, we didn’t need to define
+a separate function to check for palindromes
+(&lt;code&gt;x == x[::-1]&lt;/code&gt;).&lt;/p&gt;
+&lt;h2 id=&#34;the-walrus-is-a-must&#34;&gt;The Walrus is a must&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;I told you about the Walrus and me, man&lt;/p&gt;
+&lt;p&gt;You know that we’re as close as can be, man&lt;/p&gt;
+&lt;p style=&#34;text-align:right;&#34;&gt;
+- The Beatles
+&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The walrus &lt;del&gt;was Paul&lt;/del&gt; was introduced in &lt;a
+href=&#34;https://peps.python.org/pep-0572/&#34;&gt;PEP 572&lt;/a&gt;. Because the
+feature landed in Python 3.8, it is higly likely that you can use it as
+of 2024. The walrus lets us write less code, which is great.&lt;/p&gt;
+&lt;p&gt;The true power of the walrus, however, appears when it is combined
+with lambda functions, because it yields recursive lambdas. Now you
+don’t need to waste a separate line to define a recursive function!&lt;/p&gt;
+&lt;p&gt;Take for example the task to check if a binary tree is symmetric (&lt;a
+href=&#34;https://leetcode.com/problems/symmetric-tree/&#34;&gt;link&lt;/a&gt;).&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/c0f65cbd52e496b2bc30f1db12044163.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;The lambda definition with the walrus operator
+(&lt;code&gt;f := lambda&lt;/code&gt;) allows us to define a recursive function that
+solves the problem in a single line. The code does not need to waste
+lines in superfluous function definitions.&lt;/p&gt;
+&lt;h2 id=&#34;the-standard-library-is-one-function-call-away&#34;&gt;The standard
+library is one function call away&lt;/h2&gt;
+&lt;p&gt;Python is known for its included batteries i.e. libraries that ship
+with Python. They can be useful for coding interviews as well.&lt;/p&gt;
+&lt;p&gt;There is a misconception that you need your &lt;code&gt;import&lt;/code&gt;
+statement in a separate line. But that is not necessary due to the
+&lt;code&gt;__import__&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;I demonstrate that in the solution for calculating the majority
+element in an array (&lt;a
+href=&#34;https://leetcode.com/problems/majority-element&#34;&gt;link&lt;/a&gt;) .&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/3d275126409348dbbd7ffea256ff848c.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Python has a built-in &lt;code&gt;Counter&lt;/code&gt; class that handles this
+exact case. By using the standard library, we reused existing code and
+made our solution simpler without having to sacrifice an extra line for
+the import.&lt;/p&gt;
+&lt;h2 id=&#34;the-wheel-can-be-reinvented&#34;&gt;The wheel can be reinvented&lt;/h2&gt;
+&lt;p&gt;Sometimes your interviewer will explicitly forbid you from using the
+standard library. In those cases, it is likely take you can write
+similar code still in one line.&lt;/p&gt;
+&lt;p&gt;Take for example the task of sorting an array from scratch (&lt;a
+href=&#34;https://leetcode.com/problems/sort-an-array/&#34;&gt;link&lt;/a&gt;). We can
+fit a Randomized Quicksort in one (very long) line.&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/b95a3999a878e852e31ce1edda498d7b.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;If the interviewer complains about using &lt;code&gt;random.randint&lt;/code&gt;
+though, you can just read from &lt;code&gt;/dev/random&lt;/code&gt; instead. And if
+they complain about opening &lt;code&gt;/dev/random&lt;/code&gt; with the Python
+built-ins, you can use punched cards to execute code.&lt;/p&gt;
+&lt;h2 id=&#34;believe-in-yourself&#34;&gt;Believe in Yourself&lt;/h2&gt;
+&lt;p&gt;You might find harder questions along your coding interview journey.
+Do not panic. Believe in yourself and keep going. Look at the following
+solution for calculating block sums in a matrix (&lt;a
+href=&#34;https://leetcode.com/problems/matrix-block-sum/&#34;&gt;link&lt;/a&gt;).&lt;/p&gt;
+&lt;script type=&#34;application/javascript&#34; src=&#34;https://gist.github.com/IvanIsCoding/7e0e6cabbf051f0aee0b939a00fbd83b.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Sometimes I’ll start a line of code and I don’t even know where it’s
+going. I just hope I find it along the way. And pray there is no syntax
+error.&lt;/p&gt;
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;If you have reached the end of the article, I want to kindly remind
+you to read the date of the publication of this article. Happy Aрrіl
+Fօօls’ Day! Do not take the content of this post seriously, it is all a
+ʝοκе. The contents of this post do not reflect my employer’s opinion on
+coding interviews. In fact, they don’t even represent mine.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

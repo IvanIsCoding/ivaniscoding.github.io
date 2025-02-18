@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Authors | Ivan Carvalho</title>
+    <link>https://ivaniscoding.github.io/authors/</link>
+      <atom:link href="https://ivaniscoding.github.io/authors/index.xml" rel="self" type="application/rss+xml" />
+    <description>Authors</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language>
+    <image>
+      <url>https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png</url>
+      <title>Authors</title>
+      <link>https://ivaniscoding.github.io/authors/</link>
+    </image>
+    
+    <item>
+      <title></title>
+      <link>https://ivaniscoding.github.io/authors/admin/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/authors/admin/</guid>
+      <description>&lt;p&gt;Currently, I am a Software Developer at Google working on Google Cloud. I am also an open-source developer, a maintainer of &lt;a href=&#34;https://github.com/Qiskit/rustworkx&#34;&gt;rustworkx&lt;/a&gt;, and a student at &lt;a href=&#34;https://omscs.gatech.edu/&#34;&gt;Georgia Tech&#39;s OMSCS&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Previously, I was at the University of British Columbia. I wrote my &lt;a href=&#34;https://doi.org/10.14288/1.0417515&#34;&gt;Honours Thesis&lt;/a&gt; supervised by &lt;a href=&#34;https://cmps-people.ok.ubc.ca/rlawrenc/&#34;&gt;Dr. Ramon Lawrence&lt;/a&gt; and my research focused on databases, particulary on Learned Indexes.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

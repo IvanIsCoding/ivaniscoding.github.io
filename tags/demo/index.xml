@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Demo | Ivan Carvalho</title>
+    <link>https://ivaniscoding.github.io/tags/demo/</link>
+      <atom:link href="https://ivaniscoding.github.io/tags/demo/index.xml" rel="self" type="application/rss+xml" />
+    <description>Demo</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 14 Feb 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://ivaniscoding.github.io/images/icon_hud7c04f8250daa34436c1572b3b03bb6e_328675_512x512_fill_lanczos_center_2.png</url>
+      <title>Demo</title>
+      <link>https://ivaniscoding.github.io/tags/demo/</link>
+    </image>
+    
+    <item>
+      <title>\@sclepius ![](/img/Badges/asclepius.svg)</title>
+      <link>https://ivaniscoding.github.io/project/asclepius/</link>
+      <pubDate>Sun, 14 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/asclepius/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>QGrooves ![](/img/Badges/qgrooves.svg)</title>
+      <link>https://ivaniscoding.github.io/project/qgrooves/</link>
+      <pubDate>Fri, 06 Mar 2020 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/qgrooves/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Motiv.ai ![](/img/Badges/motiv.svg)</title>
+      <link>https://ivaniscoding.github.io/project/motiv_ai/</link>
+      <pubDate>Sun, 19 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/motiv_ai/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Quantomoku ![](/img/Badges/quantomoku.svg)</title>
+      <link>https://ivaniscoding.github.io/project/quantomoku/</link>
+      <pubDate>Mon, 13 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/quantomoku/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Quantum K-Means ![](/img/Badges/kmeans.svg)</title>
+      <link>https://ivaniscoding.github.io/project/quantum_kmeans/</link>
+      <pubDate>Sun, 12 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/quantum_kmeans/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Quantum ![](/img/Badges/quantum.svg)</title>
+      <link>https://ivaniscoding.github.io/project/quantum/</link>
+      <pubDate>Wed, 01 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/quantum/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Olympiad Solutions ![](/img/Badges/olympiad.svg)</title>
+      <link>https://ivaniscoding.github.io/project/olympiad_solutions/</link>
+      <pubDate>Fri, 01 Jun 2018 00:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/olympiad_solutions/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>DragonStore ![](/img/Badges/dragonstore.svg)</title>
+      <link>https://ivaniscoding.github.io/project/dragonstore/</link>
+      <pubDate>Mon, 01 Jan 2018 01:00:00 +0000</pubDate>
+      <guid>https://ivaniscoding.github.io/project/dragonstore/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
