@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="182.23795"
+   height="20.167715"
+   version="1.1"
+   id="svg24"
+   sodipodi:docname="Dialogflow.svg"
+   inkscape:version="0.92.4 (unknown)">
+  <metadata
+     id="metadata30">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs28">
+    <clipPath
+       id="a-3">
+      <rect
+         style="fill:#ffffff"
+         y="0"
+         x="0"
+         width="63"
+         height="20"
+         rx="3"
+         id="rect7-6" />
+    </clipPath>
+    <linearGradient
+       gradientUnits="userSpaceOnUse"
+       y1="0"
+       x1="0"
+       gradientTransform="scale(1.7748239,0.56343617)"
+       id="b-7"
+       x2="0"
+       y2="35.496479">
+      <stop
+         offset="0"
+         stop-color="#bbb"
+         stop-opacity=".1"
+         id="stop2-5" />
+      <stop
+         offset="1"
+         stop-opacity=".1"
+         id="stop4-3" />
+    </linearGradient>
+    <clipPath
+       id="a-0">
+      <rect
+         style="fill:#ffffff"
+         y="0"
+         x="0"
+         width="49"
+         height="20"
+         rx="3"
+         id="rect7-9" />
+    </clipPath>
+    <linearGradient
+       gradientUnits="userSpaceOnUse"
+       y1="0"
+       x1="0"
+       gradientTransform="scale(1.5652476,0.63887656)"
+       id="b-3"
+       x2="0"
+       y2="31.304953">
+      <stop
+         offset="0"
+         stop-color="#bbb"
+         stop-opacity=".1"
+         id="stop2-6" />
+      <stop
+         offset="1"
+         stop-opacity=".1"
+         id="stop4-0" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     id="namedview26"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="7.119403"
+     inkscape:cx="33.5"
+     inkscape:cy="4.5492663"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg24" />
+  <linearGradient
+     id="b"
+     x2="0"
+     y2="36.60601"
+     gradientTransform="scale(1.8303005,0.54635836)"
+     x1="0"
+     y1="0"
+     gradientUnits="userSpaceOnUse">
+    <stop
+       offset="0"
+       stop-color="#bbb"
+       stop-opacity=".1"
+       id="stop2" />
+    <stop
+       offset="1"
+       stop-opacity=".1"
+       id="stop4" />
+  </linearGradient>
+  <clipPath
+     id="a">
+    <rect
+       width="67"
+       height="20"
+       rx="3"
+       id="rect7"
+       x="0"
+       y="0"
+       style="fill:#ffffff" />
+  </clipPath>
+  <g
+     clip-path="url(#a)"
+     id="g16">
+    <path
+       d="m 0,0 v 0 20 0 z"
+       id="path10"
+       inkscape:connector-curvature="0"
+       style="fill:#ff8c00" />
+    <path
+       d="M 0,0 H 67 V 20 H 0 Z"
+       id="path12"
+       inkscape:connector-curvature="0"
+       style="fill:#ff8c00" />
+    <path
+       d="M 0,0 H 67 V 20 H 0 Z"
+       id="path14"
+       inkscape:connector-curvature="0"
+       style="fill:url(#b)" />
+  </g>
+  <g
+     font-size="110"
+     id="g22"
+     style="font-size:110px;font-family:'DejaVu Sans', Verdana, Geneva, sans-serif;text-anchor:middle;fill:#ffffff">
+    <text
+       x="335"
+       y="150"
+       transform="scale(0.1)"
+       textLength="570"
+       id="text18"
+       lengthAdjust="spacing"
+       style="fill:#010101;fill-opacity:0.3">Dialogflow</text>
+    <text
+       x="335"
+       y="140"
+       transform="scale(0.1)"
+       textLength="570"
+       id="text20"
+       lengthAdjust="spacing">Dialogflow</text>
+  </g>
+  <g
+     clip-path="url(#a-3)"
+     id="g16-5"
+     transform="translate(68.508386,0.16771492)">
+    <path
+       style="fill:#4db33d"
+       inkscape:connector-curvature="0"
+       d="m 0,0 v 0 20 0 z"
+       id="path10-6" />
+    <path
+       style="fill:#4db33d"
+       inkscape:connector-curvature="0"
+       d="M 0,0 H 63 V 20 H 0 Z"
+       id="path12-2" />
+    <path
+       style="fill:url(#b-7)"
+       inkscape:connector-curvature="0"
+       d="M 0,0 H 63 V 20 H 0 Z"
+       id="path14-9" />
+  </g>
+  <g
+     style="font-size:110px;font-family:'DejaVu Sans', Verdana, Geneva, sans-serif;text-anchor:middle;fill:#ffffff"
+     font-size="110"
+     id="g22-1"
+     transform="translate(68.508386,0.16771492)">
+    <text
+       style="fill:#010101;fill-opacity:0.3"
+       lengthAdjust="spacing"
+       x="315"
+       y="150"
+       transform="scale(0.1)"
+       textLength="530"
+       id="text18-2">MongoDB</text>
+    <text
+       lengthAdjust="spacing"
+       x="315"
+       y="140"
+       transform="scale(0.1)"
+       textLength="530"
+       id="text20-7">MongoDB</text>
+  </g>
+  <g
+     clip-path="url(#a-0)"
+     id="g16-6"
+     transform="translate(133.23794,0.02725368)">
+    <path
+       style="fill:#007ec6"
+       inkscape:connector-curvature="0"
+       d="m 0,0 v 0 20 0 z"
+       id="path10-2" />
+    <path
+       style="fill:#007ec6"
+       inkscape:connector-curvature="0"
+       d="M 0,0 H 49 V 20 H 0 Z"
+       id="path12-6" />
+    <path
+       style="fill:url(#b-3)"
+       inkscape:connector-curvature="0"
+       d="M 0,0 H 49 V 20 H 0 Z"
+       id="path14-1" />
+  </g>
+  <g
+     style="font-size:110px;font-family:'DejaVu Sans', Verdana, Geneva, sans-serif;text-anchor:middle;fill:#ffffff"
+     font-size="110"
+     id="g22-8"
+     transform="translate(133.23794,0.02725368)">
+    <text
+       style="fill:#010101;fill-opacity:0.3"
+       lengthAdjust="spacing"
+       x="245"
+       y="150"
+       transform="scale(0.1)"
+       textLength="390"
+       id="text18-7">Python</text>
+    <text
+       lengthAdjust="spacing"
+       x="245"
+       y="140"
+       transform="scale(0.1)"
+       textLength="390"
+       id="text20-9">Python</text>
+  </g>
+</svg>

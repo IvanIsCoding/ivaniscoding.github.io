@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Ivan Carvalho">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Publishing Rust binaries for Linux and macOS">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://ivaniscoding.github.io/posts/rustpackaging2/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/atom-one-dark.min.css" crossorigin="anonymous" title="hl-light">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/atom-one-dark.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu_81c19ee2f26835dd.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu_2f1f00b57803fd83.png">
+
+  <link rel="canonical" href="https://ivaniscoding.github.io/posts/rustpackaging2/">
+
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Ivan Carvalho">
+  <meta property="og:url" content="https://ivaniscoding.github.io/posts/rustpackaging2/">
+  <meta property="og:title" content="Homebrew and One-Line Installers for My Rust CLI: Lessons Learned | Ivan Carvalho">
+  <meta property="og:description" content="Publishing Rust binaries for Linux and macOS"><meta property="og:image" content="https://ivaniscoding.github.io/img/social_preview.png">
+  <meta property="twitter:image" content="https://ivaniscoding.github.io/img/social_preview.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2026-02-02T10:00:00-05:00">
+    
+    <meta property="article:modified_time" content="2026-02-02T10:00:00-05:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Homebrew and One-Line Installers for My Rust CLI: Lessons Learned | Ivan Carvalho</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Ivan Carvalho</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Ivan Carvalho</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Homebrew and One-Line Installers for My Rust CLI: Lessons Learned</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Feb 2, 2026
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/rust/">Rust</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>Have you ever run <code>brew install sometool</code> or
+<code>curl https://sometool.dev | bash</code> to install software? Did
+you ever want to set up one for your own software? Yes? If so, you are
+in the right spot.</p>
+<p>Throughout this article, I will share how I set up a <a
+href="https://brew.sh/">Homebrew</a> tap and a <code>curl|bash</code>
+installer for my Rust project. Along with this will also be the closely
+related topics of:</p>
+<ul>
+<li>GitHub releases</li>
+<li><code>cargo binstall</code> and its GitHub Actions applications</li>
+<li>GitHub attestations</li>
+</ul>
+<p>As a reminder, this is a series of posts I made about packaging my
+Rust CLI:</p>
+<ul>
+<li><a href="/posts/rustpackaging1">Part 1: PyPI, NPM, and GitHub
+Actions</a></li>
+<li>Part 2: Linux and macOS (this post)</li>
+<li><a href="/posts/rustpackaging3">Part 3: FreeBSD, Nix, Guix</a></li>
+<li><a href="/posts/rustpackaging4">Part 4: Windows and
+multi-platform</a></li>
+</ul>
+<p>One of the reasons why I wrote this post was to share what I learned
+writing <a href="https://github.com/IvanIsCoding/celq">celq</a>. It is a
+small tool that can query JSON, TOML, and YAML from the command-line. Go
+check it out!</p>
+<h2 id="github-releases">GitHub Releases</h2>
+<p>Before we dive into setting up a Homebrew tap and the installer
+script, we need to talk about the prerequisite: hosting the pre-built
+binaries.</p>
+<p>For this blog post, I will use GitHub releases to host the binaries.
+This is mostly out of convenience. GitHub offers a very generous limits
+of free bandwidth for downloading binaries hosted with them. Feel free
+to host your binaries elsewhere (e.g. GitLab, S3). As long as you have a
+predictable URL based on the version of your asset, you should be
+fine.</p>
+<p>To generate the pre-built binaries for a Rust CLI, a high-level
+overview is:</p>
+<ol type="1">
+<li>Install the Rust toolchain for the target</li>
+<li>Run <code>cargo build --release</code></li>
+<li>Possibly compress and rename the binary from step 2</li>
+<li>Run <code>gh release upload $version $asset</code></li>
+</ol>
+<p>The steps can vary depending on your project. For example, you might
+need to install additional tools for step 1. You can also choose to not
+compress the binary in step 3.</p>
+<p>With regards to compression, it is fairly standard to compress Linux
+and macOS binaries with <code>.tar.gz</code> and Windows binaries with
+<code>.zip</code>. Nothing is stopping you from using other compression
+schemes like zstd if you want, but from looking around most people try
+to stick with what is already available in systems by default.</p>
+<p>For celq, I used GitHub Actions to perform steps 1 to 4. You can
+check <a
+href="https://github.com/IvanIsCoding/celq/blob/a12dc1446b7c7fa2ad6ad79540560a94210573b5/.github/workflows/release_github.yml#L30">release_github.yml</a>
+if you are curious. This is again mostly out of convenience. GitHub
+Actions was the easiest way for me to get a Windows machine.</p>
+<h2 id="cargo-binstall">cargo binstall</h2>
+<p>Before we jump into Homebrew, let’s collect a freebie: <a
+href="https://github.com/cargo-bins/cargo-binstall">cargo binstall</a>.
+It lets users install celq with <code>cargo binstall celq</code>.</p>
+<p>I found this method valuable for the particular reason: combined with
+<a href="https://github.com/taiki-e/install-action">install-action</a>,
+it makes it trivial to use Rust CLIs on GitHub Actions! Look at
+this:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> taiki-e/install-action@v2</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tool</span><span class="kw">:</span><span class="at"> celq</span></span></code></pre></div>
+<p><a href="https://github.com/cargo-bins/cargo-binstall">cargo
+binstall</a> works in this clever way. First, it queries crates.io to
+get metadata about your crate. Then, it infers the download link for the
+pre-built binary and downloads it. Afterward, it puts the binary in
+<code>$HOME/.cargo/bin</code> which should be in the <code>PATH</code>
+if users have cargo installed.</p>
+<p>You can refer to <a
+href="https://github.com/cargo-bins/cargo-binstall/blob/main/SUPPORT.md">cargo
+binstall’s documentation</a> for tweaking your crate if the defaults
+don’t work. I needed to use overrides for celq because I customized the
+asset names. In general, configuration was straightforward and it just
+required a <code>[package.metadata.binstall]</code> section in
+<code>Cargo.toml</code>.</p>
+<h2 id="homebrew">Homebrew</h2>
+<p>I think a responsible thing to say for this section is: check the <a
+href="https://axodotdev.github.io/cargo-dist/book/"><code>dist</code></a>
+tool documentation after reading the blog post. There is prior art to
+this, <code>dist</code> is the most mindless way of setting things
+up.</p>
+<p>With that being said, I did not use <code>dist</code> because I
+wanted to know how things worked. This made me learn about some
+limitations from <code>dist</code> that I will share with you, such as
+installing from source.</p>
+<p>Setting up Homebrew starts with setting up a Homebrew tap. A tap is
+just a GitHub repository with the <code>homebrew-</code> prefix. For
+example, <a
+href="https://github.com/get-celq/homebrew-tap">get-celq/homebrew-tap</a>
+is the tap I set up.</p>
+<p>When installing things from it, the commands look like:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">brew</span> install get-celq/tap/celq</span></code></pre></div>
+<p>If the repository name was <code>homebrew-rustcli</code>, the command
+would use <code>get-celq/rustcli/$formula</code> instead. It is possible
+to host taps outside of GitHub by telling users to run
+<code>brew tap $repo $url</code> first.</p>
+<p>It is also possible to distribute your binary through <a
+href="https://github.com/Homebrew/homebrew-core">homebrew-core</a>. That
+is the default channel when running <code>brew install $formula</code>,
+but the bar for submitting software there is of course higher. Overall,
+I appreciate Homebrew’s support for third-party channels.</p>
+<p>Inside the tap, there are formulas in the <code>Formula</code>
+folder. Formulas are written in Ruby, so for celq there is <a
+href="https://github.com/get-celq/homebrew-tap/blob/main/Formula/celq.rb">Formula/celq.rb</a>.
+Apart from metadata, I think I can split the formula into three parts:
+URL to assets, installation step, and tests.</p>
+<p>Tying this back to the GitHub releases section, the formulas contain
+link to assets and the SHA256 checksum. To support multiple
+architectures and OSes, formulas use the
+<code>OS.linux</code>/<code>OS.mac</code> and
+<code>Hardware::CPU.arm</code>/<code>Hardware::CPU.intel</code>
+variables combined with Ruby if statements:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="cn">OS</span><span class="at">.mac?</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="dt">Hardware</span><span class="kw">::</span><span class="cn">CPU</span><span class="at">.arm</span>?</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>      url <span class="st">&quot;$GITHUB_REPO_URL/releases/download/$VERSION/$asset&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>      sha256 <span class="st">&quot;$HASH&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div>
+<p>To automate Homebrew releases, I simply fill in a <a
+href="https://github.com/IvanIsCoding/celq/blob/main/brew/celq.rb">formula
+template</a> with the version and hashes. Afterward, I make a commit to
+the tap Git repository. You can check <a
+href="https://github.com/IvanIsCoding/celq/blob/main/.github/scripts/update-homebrew-formula.sh">update-homebrew-formula.sh</a>
+for the script that does it.</p>
+<p>The rest of the formula is fixed. There’s the <code>install</code>
+section, which for me was quite simple:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> install</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    bin<span class="at">.install</span> <span class="st">&quot;celq&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div>
+<p>Still, you could leverage Ruby to write more complicated actions such
+as executing post-installation scripts.</p>
+<p>Lastly, Homebrew also lets us run tests post installation. This is
+not a requirement, but I found it nice to be able to write a smoke test
+with <code>test do</code> to confirm that things work at runtime.</p>
+<h2 id="homebrew-from-source-plus-bottles">Homebrew from source plus
+bottles</h2>
+<p>One intriguing limitation from <code>dist</code> for me was that it
+didn’t support creating formulas that build from source. But what did
+that entail?</p>
+<p>Upon looking at other formulas in homebrew-core for Rust CLIs such as
+the one for <a
+href="https://github.com/Homebrew/homebrew-core/blob/main/Formula/j/just.rb">just</a>,
+the answer became clearer.</p>
+<p>If you list Rust as a build dependency, Homebrew can delegate the
+work to Cargo and install the binary in the right spot:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>depends_on <span class="st">&quot;rust&quot;</span> <span class="kw">=&gt;</span> <span class="wa">:build</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> install</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">system</span> <span class="st">&quot;cargo&quot;</span>, <span class="st">&quot;install&quot;</span>, <span class="st">&quot;--locked&quot;</span>, <span class="st">&quot;--root&quot;</span>, prefix, <span class="st">&quot;--path&quot;</span>, <span class="st">&quot;.&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div>
+<p>For crates that don’t want to host pre-built binaries or crates that
+depend on system libraries, that option can be interesting.</p>
+<p>Another thing I learned about while setting up the installation from
+source were <a href="https://docs.brew.sh/Bottles">Homebrew bottles</a>.
+It turns out that homebrew-core handles pre-built binaries differently
+from how we discussed in the previous section!</p>
+<p>Instead of modifying the <code>url</code> field based on the
+platform, formulas with bottles keep the source code in the
+<code>url</code> field and then generate binaries with
+<code>brew bottle $formula</code>. It looks like this:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>bottle <span class="cf">do</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  root_url <span class="st">&quot;$GITHUB_REPO_URL&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  rebuild <span class="dv">0</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  sha256 <span class="wa">cellar: :any</span>, <span class="wa">arm64_tahoe: </span>  <span class="st">&quot;$hash1&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  sha256 <span class="wa">cellar: :any</span>, <span class="wa">arm64_sequoia: </span><span class="st">&quot;$hash2&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  sha256 <span class="wa">cellar: :any</span>, <span class="wa">x86_64_linux: </span> <span class="st">&quot;$hash4&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div>
+<p>I assume that <code>dist</code> chose the style without bottles
+because of simplicity. Formulas with bottles are a two-step process.
+First, you need to update the formula. Then, you need to run
+<code>brew bottle</code> after the formula is in the tap.</p>
+<p>It’s easier to automate the case without bottles. Nevertheless,
+bottles unlock the benefits of pre-built binaries with the flexibility
+of allowing users to pass <code>--build-from-source</code> when
+required.</p>
+<h2 id="making-an-installer-script-can-be-quite-hard">Making an
+installer script can be quite hard</h2>
+<p>Next, to install scripts. My original goal was to have one of those
+one-liners:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">--proto</span> <span class="st">&#39;=https&#39;</span> <span class="at">--tlsv1.2</span> <span class="at">-sSf</span> https://get-celq.github.io/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div>
+<p>Before I wrote my own script, I looked at <a
+href="https://github.com/astral-sh/uv/releases">uv’s script from their
+GitHub release</a>. uv uses <code>dist</code> to generate their
+script.</p>
+<p>To my surprise, I found around 2,000 lines of shell script. I can
+summarize my learnings as: it is more complicated than it looks! There
+are lots of details to think about. To list a few:</p>
+<ul>
+<li>Detecting glibc vs musl can be a lot of work</li>
+<li>Adding your binary to the <code>$PATH</code> is also a lot of
+work</li>
+<li>Handling shadowed bins, updaters, and more</li>
+<li><code>sh</code> is barebones, you’ll need <code>shellcheck</code> to
+make sure you didn’t use a feature that is not portable</li>
+</ul>
+<p>Even though I like uv and <code>dist</code>, I discarded the idea of
+re-implementing their strategy.</p>
+<h2 id="copying-a-good-existing-script">Copying a good existing
+script</h2>
+<p>My next best strategy was to research other Rust software that didn’t
+use <code>dist</code> and shipped with a script. I found two good
+candidates: <a href="https://github.com/casey/just">just</a> and <a
+href="https://github.com/cargo-bins/cargo-binstall">cargo-binstall</a>.</p>
+<p>I learned some useful tricks by looking at their work. cargo-binstall
+had the benefit of being an installer, so of course its script <a
+href="https://github.com/cargo-bins/cargo-binstall/blob/1573c71f7a000e29578e78b3b6de661a87f57ee9/install-from-binstall-release.sh#L58">uses
+cargo-binstall to install itself</a>. I guess one way of writing an
+installer is downloading cargo-binstall and calling it! Although I chose
+not to take that option.</p>
+<p>I ended up basing celq’s installer on the one written by Casey
+Rodarmor for just. Just’s script was considerably shorter. At 180 lines,
+it makes a few compromises. It does less things than the script
+generated by <code>dist</code>, but it still gets the job done.</p>
+<p>The first compromise is perhaps the most controversial. How does
+just’s installer detect glibc or musl’s version? The answer is: it
+doesn’t! I did not realize that was an option, but if you browse <a
+href="https://github.com/casey/just/releases">just’s release page</a>
+you will see that indeed they only ship musl binaries.</p>
+<p>Choosing only musl binaries has some consequences, as the binaries
+compiled with <code>x86_64-unknown-linux-gnu</code> are smaller than the
+ones for <code>x86_64-unknown-linux-musl</code>. There are also other
+differences such as the musl vs glibc allocators, if you don’t use a
+custom allocator. But the amount of complexity avoided by only using
+musl in the installer made me adopt the same strategy.</p>
+<p>The other simplification was with regards to modifying the
+<code>$PATH</code> environment variable. The <code>just</code> installer
+avoids this problem by requiring a <code>--to</code> argument. If you
+pass a location that is in the <code>$PATH</code>, good for you!
+Otherwise the installer will not intervene. This again cuts many lines
+of code.</p>
+<p>I diverged a bit from <code>just</code>’s behavior by guessing
+default destinations that are generally in <code>$PATH</code>, although
+the <code>--to</code> option was still available. If the guessed
+location is not in the path, I just print a warning.</p>
+<p>Again, all these small optimizations from Casey compound and make the
+just installer be less complex.</p>
+<h2 id="attestations-and-checksums">Attestations and checksums</h2>
+<p>To wrap things up, let’s discuss two small additions I made to celq’s
+installer compared to just’s. I saw uv using <a
+href="https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations">GitHub
+attestations</a> and I wanted to play with them.</p>
+<p>The first modification was a <code>--verify-checksum</code> flag:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">--proto</span> <span class="st">&#39;=https&#39;</span> <span class="at">--tlsv1.2</span> <span class="at">-sSf</span> https://get-celq.github.io/install.sh <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bash</span> <span class="at">-s</span> <span class="at">--</span> <span class="at">--verify-checksum</span></span></code></pre></div>
+<p>The concept is simple; I embedded the SHA256 checksums in the
+installer. It is a simpler check than attestations, but at least it
+helps with integrity checks to make sure the download was not corrupted.
+You can see <a
+href="https://github.com/IvanIsCoding/celq/blob/6647e08c511958b861fc0eae9089cbbc5d50a2c7/template_install.sh#L92">template_install.sh</a>
+at the repository, it was fairly easy to implement.</p>
+<p>The second modification was the <code>--verify-attestation</code>
+flag. That flag relies on the <a href="https://cli.github.com/">GitHub
+CLI</a> (<code>gh</code>). I thought about it because I saw some
+discussion online about how insecure <code>curl|bash</code> one-liners
+were. The idea behind it is to mitigate some of those concerns with
+attestations:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">--proto</span> <span class="st">&#39;=https&#39;</span> <span class="at">--tlsv1.2</span> <span class="at">-sSf</span> https://get-celq.github.io/install.sh <span class="op">&gt;</span> install.sh</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> attestation verify install.sh <span class="at">--repo</span> IvanIsCoding/celq</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> install.sh <span class="at">--verify-attestation</span></span></code></pre></div>
+<p>Instead of directly piping the script to <code>bash</code>, we save
+the script to a file. Then, we use <code>gh</code> to verify that the
+script was indeed generated by me in a GitHub action. Once we establish
+that the installer is legitimate and from my repository, we run it with
+the <code>--verify-attestation</code> that applies the same logic to the
+pre-built binaries. If there is an issue checking that the binaries are
+from any place other than the ones built by my GitHub Actions, the
+script fails.</p>
+<p>My release process was very similar to Homebrew’s: template the shell
+script and then make a commit to the GitHub pages repository to publish
+the script. <a
+href="https://github.com/IvanIsCoding/celq/blob/6647e08c511958b861fc0eae9089cbbc5d50a2c7/.github/workflows/release_github.yml#L187">release_github.yml</a>
+contains the templating and the attestation generation.</p>
+<h2 id="whats-next">What’s Next</h2>
+<p>If you found this blog post interesting, stay tuned for the next one.
+It will cover FreeBSD, Nix, and Guix. There’s cross-compiling Rust
+binaries to FreeBSD, writing Nix with two kinds of derivations, patching
+my crate to compile on Guix’s older Rust version, and more.</p>
+
+    </div>
+
+    
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rust/">rust</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="portrait mr-3" src="/authors/authors/avatar_hu_e6b5933c51c7da19.jpg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="https://ivaniscoding.github.io/">Ivan Carvalho</a></h5>
+      <h6 class="card-subtitle">Software Developer</h6>
+      <p class="card-text">Always looking for a challenge!</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/ivan-carvalho/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/IvanIsCoding" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/posts/rustpackaging1/">I packaged my Rust CLI to too many places, here&#39;s what I learned</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <script src="/js/academic.min.abdd766c2ff9ae04ed4871c941357ca8.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

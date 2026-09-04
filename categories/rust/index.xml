@@ -1,0 +1,1252 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rust | Ivan Carvalho</title>
+    <link>https://ivaniscoding.github.io/categories/rust/</link>
+      <atom:link href="https://ivaniscoding.github.io/categories/rust/index.xml" rel="self" type="application/rss+xml" />
+    <description>Rust</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 15 Feb 2026 10:00:00 -0500</lastBuildDate>
+    <image>
+      <url>https://ivaniscoding.github.io/images/icon_hu_a1fc4ff3cf0d0f89.png</url>
+      <title>Rust</title>
+      <link>https://ivaniscoding.github.io/categories/rust/</link>
+    </image>
+    
+    <item>
+      <title>Shipping My Rust CLI to Windows: Lessons Learned (feat. Windows 98 and APE Bonus)</title>
+      <link>https://ivaniscoding.github.io/posts/rustpackaging4/</link>
+      <pubDate>Sun, 15 Feb 2026 10:00:00 -0500</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/rustpackaging4/</guid>
+      <description>&lt;p&gt;Have you ever been curious about shipping Rust software to Windows
+users? Did you ever want to create a binary that works on Windows 98
+through Windows 11? Or one binary that runs on six different systems?
+No? Well, I did.&lt;/p&gt;
+&lt;p&gt;In this post, I will discuss:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Packaging for Scoop, Chocolatey, and Winget&lt;/li&gt;
+&lt;li&gt;Multi-platform support with Mise&lt;/li&gt;
+&lt;li&gt;Time-traveling to Windows 98 with retro-compatible builds&lt;/li&gt;
+&lt;li&gt;Actually Portable Executables that run on any platform&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;As a reminder, this is a series of posts I made about packaging my
+Rust CLI:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging1&#34;&gt;Part 1: PyPI, NPM, and GitHub
+Actions&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging2&#34;&gt;Part 2: Linux and macOS&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging3&#34;&gt;Part 3: FreeBSD, Nix, Guix&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 4: Windows and multi-platform (this post)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;One of the reasons why I wrote this post was to share what I learned
+writing &lt;a href=&#34;https://github.com/IvanIsCoding/celq&#34;&gt;celq&lt;/a&gt;. It is a
+small tool that can query JSON, TOML, and YAML from the command line. Go
+check it out!&lt;/p&gt;
+&lt;h2 id=&#34;scoop&#34;&gt;Scoop&lt;/h2&gt;
+&lt;p&gt;Let’s start with &lt;a href=&#34;https://scoop.sh/&#34;&gt;Scoop&lt;/a&gt; because, in my
+opinion, it is one of the most flexible distribution channels. Although
+the implementations are completely different, Scoop shares many positive
+aspects with Homebrew discussed in &lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging2&#34;&gt;part
+2&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Scoop has the concept of buckets. Buckets are Git repos that are a
+collection of apps. To add a bucket, I instruct my users to run:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb1&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb1-1&#34;&gt;&lt;a href=&#34;#cb1-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;scoop&lt;/span&gt; bucket add get-celq https://github.com/get-celq/scoop-bucket&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Inside the Git repository, there are app manifests in the
+&lt;code&gt;buckets/&lt;/code&gt; folder. The manifests are in JSON format. To
+install my CLI, users need to run:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;scoop install get-celq/celq&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There is a &lt;code&gt;main&lt;/code&gt; bucket that ships by default with Scoop,
+so running things like &lt;code&gt;scoop install main/uv&lt;/code&gt; works with
+less friction. Naturally, the bar for submitting apps to the main bucket
+is higher. For me, a third-party bucket controlled by myself was
+sufficient.&lt;/p&gt;
+&lt;p&gt;Having established what buckets are, let’s investigate the manifest.
+You can take a look at an example such as &lt;a
+href=&#34;https://github.com/get-celq/scoop-bucket/blob/main/bucket/celq.json&#34;&gt;celq.json&lt;/a&gt;.
+Scoop manifests will generally point to GitHub releases.&lt;/p&gt;
+&lt;p&gt;Keeping a Scoop bucket up-to-date looks like this:&lt;/p&gt;
+&lt;ol type=&#34;1&#34;&gt;
+&lt;li&gt;Download the Windows binary from GitHub releases&lt;/li&gt;
+&lt;li&gt;Calculate the SHA256 checksum for the release&lt;/li&gt;
+&lt;li&gt;Fill in the template of the JSON manifest with the hash and the
+version&lt;/li&gt;
+&lt;li&gt;Make a commit with the updated version&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;A fun fact about celq is the dogfooding: I generate celq’s manifest
+with celq. Take a look at &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/scoop/celq.json.cel&#34;&gt;celq.json.cel&lt;/a&gt;
+if you are curious.&lt;/p&gt;
+&lt;h2 id=&#34;mise&#34;&gt;Mise&lt;/h2&gt;
+&lt;p&gt;Moving on to &lt;a href=&#34;https://mise.jdx.dev/&#34;&gt;Mise&lt;/a&gt;. This is a
+multi-platform solution that perhaps should have been covered in part 1.
+It wasn’t, so now is the second-best moment.&lt;/p&gt;
+&lt;p&gt;Mise is a polyglot tool manager. It has the concept of &lt;a
+href=&#34;https://mise.jdx.dev/configuration.html&#34;&gt;mise.toml&lt;/a&gt;, which
+makes it easy to share the environment. It also has the concept of &lt;a
+href=&#34;https://mise.jdx.dev/dev-tools/backends/&#34;&gt;backends&lt;/a&gt;: Mise can
+fetch tools from multiple ecosystems.&lt;/p&gt;
+&lt;p&gt;For most Rust projects, I believe that the &lt;code&gt;cargo&lt;/code&gt; and
+&lt;code&gt;github&lt;/code&gt; backends would be freebies. If you publish to
+crates.io or to GitHub releases, that should get you covered for
+commands like &lt;code&gt;mise use -g cargo:celq&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Mise can be interesting when you have Windows developers because it
+would allow a shared configuration across operating systems. I do not
+know how well that fares in practice, but conceptually that can avoid
+duplicating work (e.g., setting up a separate script for configuring a
+Windows environment).&lt;/p&gt;
+&lt;h2 id=&#34;chocolatey&#34;&gt;Chocolatey&lt;/h2&gt;
+&lt;p&gt;Next, we are back to a Windows-specific package manager: Chocolatey.
+Among the three package managers for Windows that we discuss today,
+Chocolatey is the oldest. It also comes pre-installed on all Windows
+GitHub runners, which can be handy.&lt;/p&gt;
+&lt;p&gt;Chocolatey is built on top of NuGet. Generally, it will have the
+following format:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb3&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb3-1&#34;&gt;&lt;a href=&#34;#cb3-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;awesomepackage/&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb3-2&#34;&gt;&lt;a href=&#34;#cb3-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;├──&lt;/span&gt; awesomepackage.nuspec&lt;/span&gt;
+&lt;span id=&#34;cb3-3&#34;&gt;&lt;a href=&#34;#cb3-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;└──&lt;/span&gt; tools/&lt;/span&gt;
+&lt;span id=&#34;cb3-4&#34;&gt;&lt;a href=&#34;#cb3-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;ex&#34;&gt;├──&lt;/span&gt; awesomepackage.exe&lt;/span&gt;
+&lt;span id=&#34;cb3-5&#34;&gt;&lt;a href=&#34;#cb3-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;ex&#34;&gt;├──&lt;/span&gt; LICENSE.txt&lt;/span&gt;
+&lt;span id=&#34;cb3-6&#34;&gt;&lt;a href=&#34;#cb3-6&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;ex&#34;&gt;├──&lt;/span&gt; VERIFICATION.txt&lt;/span&gt;
+&lt;span id=&#34;cb3-7&#34;&gt;&lt;a href=&#34;#cb3-7&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;ex&#34;&gt;└──&lt;/span&gt; chocolateyInstall.ps1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;.nuspec&lt;/code&gt; file is an XML manifest. You can take a look
+at &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/choco/celq.nuspec&#34;&gt;celq.nuspec&lt;/a&gt;
+to see roughly what it looks like. Perhaps the most important section of
+the manifest is where &lt;code&gt;&amp;lt;files&amp;gt;&lt;/code&gt; is defined, in our case
+pointing to &lt;code&gt;tools&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;For celq, I bundled the binary with the file I uploaded to
+Chocolatey. It is possible to include scripts for pre-install and
+post-install steps like &lt;code&gt;chocolateyInstall&lt;/code&gt;. The scripts can
+range from downloading the binary from GitHub releases to creating
+default configuration files and folders. Because my CLI was simple, I
+didn’t include a script and simply shipped &lt;code&gt;celq.exe&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Lastly, about &lt;code&gt;VERIFICATION.txt&lt;/code&gt;: Chocolatey has a manual
+verification process! I was not aware of that when I first uploaded my
+package, but everything gets reviewed by a human. Due to that, it’s not
+uncommon for Chocolatey packages to lag a bit behind other repositories.
+But at least there is more oversight compared with, say, NPM.&lt;/p&gt;
+&lt;p&gt;The file includes instructions for the Chocolatey admins to verify
+your upload. I got it wrong the first time, so here is my suggestion
+based on what got accepted without pushback:&lt;/p&gt;
+&lt;details&gt;
+&lt;summary&gt;
+VERIFICATION.txt that gets accepted
+&lt;/summary&gt;
+&lt;pre class=&#34;none&#34;&gt;&lt;code&gt;VERIFICATION
+
+This package is built from source and published by the maintainers.
+
+Generated by `CertUtil -hashfile awesomepackage.exe SHA256`:
+
+SHA256_EXE
+
+---
+
+To verify the binary, confirm that awesomepackage.exe&amp;#39;s SHA256 matches
+the SHA256 reported at the attestation URL:
+https://github.com/user/awesomepackage/attestations/FILL_ME
+
+
+Alternatively, this can be done via the command line:
+
+0. If you do not have the GitHub CLI installed:
+   choco install gh
+
+1. Authenticate the GitHub CLI, if you haven&amp;#39;t done so:
+   gh auth login
+
+2. Verify the attestation of awesomepackage.exe:
+
+   gh attestation verify awesomepackage.exe --repo user/awesomepackage&lt;/code&gt;&lt;/pre&gt;
+&lt;/details&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;A summary of my tip is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Package the same &lt;code&gt;.exe&lt;/code&gt; from GitHub Releases for Windows.
+Do not run &lt;code&gt;cargo build&lt;/code&gt; multiple times, as builds are not
+guaranteed to be deterministic (i.e., the checksum can change).&lt;/li&gt;
+&lt;li&gt;Include the SHA256 of the &lt;code&gt;.exe&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Generate a &lt;a
+href=&#34;https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations&#34;&gt;GitHub
+Attestation&lt;/a&gt; that we discussed in &lt;a
+href=&#34;https://ivaniscoding.github.io/posts/rustpackaging2&#34;&gt;part 2&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Deterministic builds are possible, but that is out-of-scope for this
+post.&lt;/p&gt;
+&lt;h2 id=&#34;winget&#34;&gt;WinGet&lt;/h2&gt;
+&lt;p&gt;WinGet is Windows Package Manager, backed by Microsoft itself. It is
+newer than Chocolatey, but has seen increasing adoption. It comes
+pre-installed on consumer editions of Windows 11. Windows Server is not
+guaranteed to have it, but the GitHub Actions runners do, too.&lt;/p&gt;
+&lt;p&gt;WinGet uses YAML manifests and has the default source set to &lt;a
+href=&#34;https://github.com/microsoft/winget-pkgs&#34;&gt;winget-pkgs&lt;/a&gt;, a
+GitHub repository maintained by Microsoft. It is possible to add other
+sources, and some solutions like &lt;a
+href=&#34;https://winget.pro/&#34;&gt;winget.pro&lt;/a&gt; offer ready-made private
+setups, but I will not discuss those.&lt;/p&gt;
+&lt;p&gt;I recommend using one of the following two tools to generate the
+manifests:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a
+href=&#34;https://github.com/microsoft/winget-create&#34;&gt;winget-create&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/russellbanks/Komac&#34;&gt;komac&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I originally used winget-create because it was made by Microsoft, but
+komac might be more convenient as you can run it on Linux, which can be
+handy for CI/CD and folks that cross-compile.&lt;/p&gt;
+&lt;p&gt;When running winget-create/komac, the tools will ask you questions to
+help fill the metadata of the manifest. The most important one is the
+&lt;code&gt;Installer URL&lt;/code&gt; question. You can make it point to GitHub
+Releases. Once it has the GitHub URL, it even generates the SHA256
+checksum for you in the YAML file.&lt;/p&gt;
+&lt;p&gt;Updating WinGet packages consists of creating an automation to open
+pull requests to Microsoft’s repository. &lt;a
+href=&#34;https://github.com/vedantmgoyal9/winget-releaser&#34;&gt;winget-releaser&lt;/a&gt;
+seems to be a popular option. Similarly to Chocolatey, WinGet packages
+can lag behind slightly because the PRs need to be reviewed by a
+human.&lt;/p&gt;
+&lt;h2 id=&#34;windows-98-and-retro-computing&#34;&gt;Windows 98 and Retro
+Computing&lt;/h2&gt;
+&lt;p&gt;Moving to the most fun but least practical part of the blog post:
+Windows 98. I am happy to share that I have managed to run celq on an
+operating system that is 25+ years old.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://ivaniscoding.github.io/img/RustPackaging4/celq_win98.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;This is anachronistic. Even though JavaScript was around in 1998,
+JSON was not formalized until the early 2000s, so the usefulness of a
+JSON query tool is dubious. The binary size of 5 MB would be considered
+bloated for the time. Rust only ever supported Windows XP, and &lt;a
+href=&#34;https://github.com/rust-lang/compiler-team/issues/378&#34;&gt;that
+support was removed in 2021&lt;/a&gt;. Despite all of that, it was still
+tempting to see how far back I could go.&lt;/p&gt;
+&lt;p&gt;To support old versions of Windows, I chose the WASM route. I already
+had implemented an &lt;a
+href=&#34;https://celq-playground.github.io/&#34;&gt;interactive playground&lt;/a&gt; for
+celq, so this was a natural next step. There are other ways of tackling
+this problem that I will not discuss (e.g., Rust9X, KernelEx,
+no_std).&lt;/p&gt;
+&lt;h3 id=&#34;from-wasm-to-c-to-windows-98&#34;&gt;From WASM to C to Windows 98&lt;/h3&gt;
+&lt;p&gt;My initial strategy was to use &lt;a
+href=&#34;https://github.com/turbolent/w2c2&#34;&gt;w2c2&lt;/a&gt;. w2c2 is a neat tool
+written by &lt;a href=&#34;https://github.com/turbolent&#34;&gt;Bastian Müller&lt;/a&gt;
+that transpiles WASM to C89. w2c2 also supports WASI, so I could compile
+my binary with the &lt;a
+href=&#34;https://doc.rust-lang.org/beta/rustc/platform-support/wasm32-wasip1.html&#34;&gt;&lt;code&gt;wasm32-wasip1&lt;/code&gt;&lt;/a&gt;
+target and go from there.&lt;/p&gt;
+&lt;p&gt;w2c2 is handy in this context because it splits the problem in two
+parts. The first one is compiling to WASM: if your Rust code can be
+compiled to WASM, you are 50% of your way there. There can be some
+friction in this part, as some of your code or dependencies might not
+support WASM. For example, the allocator I used (&lt;code&gt;mimalloc&lt;/code&gt;)
+didn’t, and I had to disable it for the WASM build. But overall, Rust
+still has excellent WASM support.&lt;/p&gt;
+&lt;p&gt;The second part is finding a C compiler supporting C89. And this is
+where the w2c2 author intentionally gifted the retro-computing
+community. C89 is such an old standard that it acts as a common
+denominator for many systems. There are C89 compilers for IBM’s OS/2,
+Apple’s Classic Mac OS, Windows 3.1, early versions of Sun’s Solaris,
+and so on.&lt;/p&gt;
+&lt;p&gt;The transpiled code from w2c2 is available at &lt;a
+href=&#34;https://github.com/celq-playground/celq-retro&#34;&gt;celq-retro&lt;/a&gt;.
+Initially, I tested the C output with a recent &lt;code&gt;gcc&lt;/code&gt; version
+installed on my system:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb5&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb5-1&#34;&gt;&lt;a href=&#34;#cb5-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;fu&#34;&gt;gcc&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-Os&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-std&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;gnu90 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb5-2&#34;&gt;&lt;a href=&#34;#cb5-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   &lt;span class=&#34;at&#34;&gt;-D_GNU_SOURCE&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-DHAS_UNISTD&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;1 &lt;span class=&#34;at&#34;&gt;-DHAS_TIMESPEC&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;1 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb5-3&#34;&gt;&lt;a href=&#34;#cb5-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;-DHAS_SYSUIO&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;1 &lt;span class=&#34;at&#34;&gt;-I.&lt;/span&gt;/vendor &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb5-4&#34;&gt;&lt;a href=&#34;#cb5-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    main.c celq.c vendor/wasi.c &lt;span class=&#34;at&#34;&gt;-o&lt;/span&gt; celq &lt;span class=&#34;at&#34;&gt;-lm&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Not only did it compile, but the smoke tests passed with the
+transpiled version. That was promising. My next move was to find a C89
+compiler that could target Windows 98.&lt;/p&gt;
+&lt;p&gt;My recommendation for anyone attempting the same for a CLI is: &lt;a
+href=&#34;https://en.wikipedia.org/wiki/DJGPP&#34;&gt;DJGPP&lt;/a&gt;. I learned that
+there is a port of GCC that targets DOS. &lt;a
+href=&#34;https://github.com/andrewwutw/build-djgpp/releases&#34;&gt;andrewwutw/build-djgpp&lt;/a&gt;
+had releases from 2023 that ran on modern Linux environments, which was
+quite handy. I compiled the code with:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb6&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb6-1&#34;&gt;&lt;a href=&#34;#cb6-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;i586-pc-msdosdjgpp-gcc&lt;/span&gt; &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-2&#34;&gt;&lt;a href=&#34;#cb6-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;-o&lt;/span&gt; celq.exe &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-3&#34;&gt;&lt;a href=&#34;#cb6-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;-O2&lt;/span&gt; &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-4&#34;&gt;&lt;a href=&#34;#cb6-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;-I.&lt;/span&gt;/vendor &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-5&#34;&gt;&lt;a href=&#34;#cb6-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;-DHAS_UNISTD&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;1 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-6&#34;&gt;&lt;a href=&#34;#cb6-6&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;-DHAS_TIMESPEC&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;0 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-7&#34;&gt;&lt;a href=&#34;#cb6-7&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    main.c celq.c vendor/wasi.c&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It generated a 5 MB binary. The binary would have been too big to fit
+on a floppy disk, but I suppose it could be distributed via CDs. I am
+aware that it is not a native Win32 binary and that it runs on a DOS
+extender. Nevertheless, for my CLI it worked flawlessly.&lt;/p&gt;
+&lt;h3 id=&#34;openwatcom-and-supporting-many-windows-versions&#34;&gt;OpenWATCOM and
+supporting many Windows versions&lt;/h3&gt;
+&lt;p&gt;There is a missing part of the previous section that I did not tell
+you: DJGPP was not the first compiler I tried. It was the second one.
+The first one I tried was &lt;a
+href=&#34;https://en.wikipedia.org/wiki/Watcom_C/C%2B%2B&#34;&gt;OpenWATCOM&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;OpenWATCOM is the successor of the WATCOM C/C++ compiler, based on
+the source code that was made available in the early 2000s. Originally,
+the compiler was proprietary. Among its many claims to fame, WATCOM was
+used to compile DOOM for the game’s original release. With such a
+reputation, I had to try OpenWATCOM.&lt;/p&gt;
+&lt;p&gt;To my surprise, the modern version of OpenWATCOM runs on 64-bit
+operating systems. There is even a GitHub Action to set it up, called &lt;a
+href=&#34;https://github.com/open-watcom/setup-watcom&#34;&gt;setup-watcom&lt;/a&gt;. I
+am amazed at how easy it was setting things up. I swear cross-compiling
+for Windows 98 was easier than cross-compiling for modern macOS.&lt;/p&gt;
+&lt;p&gt;There was one major problem, however. &lt;a
+href=&#34;https://github.com/turbolent/w2c2/blob/2a31254683de4a3f6a750c123daa7ddf97631c69/wasi/win32.h#L32&#34;&gt;w2c2’s
+&lt;code&gt;wasi/win32.h&lt;/code&gt; header&lt;/a&gt; contains a conflicting definition
+of &lt;code&gt;dirent&lt;/code&gt; with Watcom’s vendored &lt;code&gt;dirent.h&lt;/code&gt;. I
+ultimately gave up on solving the conflict and simply stubbed the
+problematic functions with &lt;code&gt;#ifdef __WATCOMC__&lt;/code&gt; statements. I
+think the conflicts are fixable and could be upstreamed to w2c2. But
+given that DJGPP worked right away, I was not motivated to pursue
+that.&lt;/p&gt;
+&lt;p&gt;With the stubbed functions in place (throwing an error), I compiled
+the binary with:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb7&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb7-1&#34;&gt;&lt;a href=&#34;#cb7-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;wcl386&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-l&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;nt &lt;span class=&#34;at&#34;&gt;-os&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-i&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;./vendor &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-2&#34;&gt;&lt;a href=&#34;#cb7-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   &lt;span class=&#34;at&#34;&gt;-d__inline__&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-3&#34;&gt;&lt;a href=&#34;#cb7-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   &lt;span class=&#34;at&#34;&gt;-d_WIN32&lt;/span&gt; &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-4&#34;&gt;&lt;a href=&#34;#cb7-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   &lt;span class=&#34;at&#34;&gt;-d_X86_&lt;/span&gt; &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-5&#34;&gt;&lt;a href=&#34;#cb7-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   &lt;span class=&#34;at&#34;&gt;-d_MSC_VER&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;1000 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-6&#34;&gt;&lt;a href=&#34;#cb7-6&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   &lt;span class=&#34;at&#34;&gt;-dHAS_UNISTD&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;0 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-7&#34;&gt;&lt;a href=&#34;#cb7-7&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   &lt;span class=&#34;at&#34;&gt;-dHAS_TIMESPEC&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;1 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-8&#34;&gt;&lt;a href=&#34;#cb7-8&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   &lt;span class=&#34;at&#34;&gt;-bm&lt;/span&gt; &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-9&#34;&gt;&lt;a href=&#34;#cb7-9&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;   main.c celq.c vendor/wasi.c vendor/win32.c &lt;span class=&#34;at&#34;&gt;-fe&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;celq.exe&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;OpenWATCOM took longer to compile than DJGPP and produced a bigger
+binary (8 MB). Nonetheless, it was a true Win32 binary. I tested it on
+Windows 98; it worked. I tested it on Windows XP; it worked as well. I
+tested it on Wine; it also worked. I tested it on Windows 11; it still
+worked.&lt;/p&gt;
+&lt;p&gt;It is a shame that I had to stub the WASI functions, because that
+blocked access to the file system. The binary produced by OpenWATCOM had
+the quality of running on Windows versions spanning three decades. That
+was remarkable.&lt;/p&gt;
+&lt;h3 id=&#34;time-traveling&#34;&gt;Time traveling&lt;/h3&gt;
+&lt;p&gt;In the earlier sections, I was fortunate enough to find recent
+compilers targeting vintage systems. I wanted to also test the time
+travel route: get my hands on a contemporary C89 compiler for the target
+system and compile from there.&lt;/p&gt;
+&lt;p&gt;For Windows 98, this is generally the time when you would summon &lt;a
+href=&#34;https://en.wikipedia.org/wiki/Borland_C%2B%2B&#34;&gt;Borland C++
+5.02&lt;/a&gt; or &lt;a
+href=&#34;https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B&#34;&gt;Visual C++
+6.0&lt;/a&gt;. Together with WATCOM, I believe those were the most accurate
+tools for the period.&lt;/p&gt;
+&lt;p&gt;For this blog, I decided not to go the abandonware route and stuck
+with open-source software: &lt;a
+href=&#34;https://en.wikipedia.org/wiki/MinGW&#34;&gt;MinGW&lt;/a&gt; was my compiler of
+choice. For personal use, I think abandonware is fine, but sharing it is
+more of a grey area. The advantage of MinGW is that I can easily share
+the setup.&lt;/p&gt;
+&lt;p&gt;My first task was to get my hands on the oldest MinGW version I could
+find. Ideally, I wanted it to be compiled to avoid having to build the
+toolchain. To my surprise, &lt;a
+href=&#34;https://archive.debian.org/&#34;&gt;https://archive.debian.org/&lt;/a&gt; still
+hosts the original MinGW binary uploads. Thanks, Debian.&lt;/p&gt;
+&lt;p&gt;I built two Docker images:
+&lt;code&gt;ghcr.io/celq-playground/celq-retro/debian-etch-mingw&lt;/code&gt; with
+MinGW 3.4.5 from the Debian 4.0 release; and
+&lt;code&gt;ghcr.io/celq-playground/celq-retro/debian-woody-mingw&lt;/code&gt; with
+MinGW 2.95 from the Debian 3.0 release. The compiler is available
+through the &lt;code&gt;i586-mingw32msvc-gcc&lt;/code&gt; command.&lt;/p&gt;
+&lt;p&gt;There are older versions of MinGW, but I settled for the &lt;a
+href=&#34;https://tracker.debian.org/news/381698/installed-mingw32-29527-1-i386-source/&#34;&gt;very
+first version uploaded to Debian&lt;/a&gt;. I could not find anything earlier
+than 2.95 on SourceForge either. Some early versions of Dev C++ might
+have bundled even earlier editions of MinGW, though.&lt;/p&gt;
+&lt;p&gt;&lt;a
+href=&#34;https://github.com/celq-playground/celq-retro/blob/main/.github/workflows/build-oldest-mingw.yml&#34;&gt;build-oldest-mingw.yml&lt;/a&gt;
+has the workflow and incantation that makes compilation work. I can
+attest that it produces valid binaries: the executable passes the smoke
+tests on Windows 11.&lt;/p&gt;
+&lt;p&gt;I tested &lt;code&gt;celq.exe&lt;/code&gt; on Windows 98 and, unfortunately, it
+crashed at runtime. &lt;code&gt;celq.exe --version&lt;/code&gt; and
+&lt;code&gt;celq.exe --help&lt;/code&gt; did work, but anything doing computations
+failed. On a more positive note, the binary worked on Windows ME and
+Windows XP, so I was still happy with the result.&lt;/p&gt;
+&lt;h2 id=&#34;actually-portable-executable&#34;&gt;Actually Portable Executable&lt;/h2&gt;
+&lt;p&gt;Last but not least, &lt;a
+href=&#34;https://github.com/jart/cosmopolitan/blob/master/ape/specification.md&#34;&gt;Actually
+Portable Executables (APEs)&lt;/a&gt;. I had always thought about chaining &lt;a
+href=&#34;https://github.com/jart/cosmopolitan&#34;&gt;Cosmopolitan&lt;/a&gt; with w2c2,
+so this was my chance to do it.&lt;/p&gt;
+&lt;p&gt;For those unfamiliar with Cosmopolitan, it is a tool that makes C/C++
+run anywhere. &lt;code&gt;cosmocc&lt;/code&gt; can create “fat” polyglot binaries
+that run on Linux, macOS, Windows, FreeBSD, NetBSD, and OpenBSD. It
+feels like magic, to be honest.&lt;/p&gt;
+&lt;p&gt;I replaced &lt;code&gt;gcc&lt;/code&gt; with &lt;code&gt;cosmocc&lt;/code&gt; from the
+command in the earlier sections and things just worked. The binary from
+&lt;code&gt;cosmocc&lt;/code&gt; was the largest at 9.5 MB, which is almost twice
+the size of platform-specific binaries.&lt;/p&gt;
+&lt;p&gt;I can attest that the strategy works: the binary did run on Linux,
+macOS, Windows, and FreeBSD. For some reason, the smoke tests failed on
+Windows, but I am still in awe it ran on four OSes and passed on three
+of them.&lt;/p&gt;
+&lt;p&gt;So I will put it out there: if you want to make a polyglot Rust CLI,
+&lt;code&gt;wasm32-wasip1&lt;/code&gt; + w2c2 + &lt;code&gt;cosmocc&lt;/code&gt; works.&lt;/p&gt;
+&lt;h2 id=&#34;topics-not-covered&#34;&gt;Topics not covered&lt;/h2&gt;
+&lt;h3 id=&#34;rust9x&#34;&gt;Rust9x&lt;/h3&gt;
+&lt;p&gt;I want to highlight &lt;a
+href=&#34;https://seri.tools/blog/rust9x-1-93/&#34;&gt;Rust9x&lt;/a&gt; by &lt;a
+href=&#34;https://github.com/seritools&#34;&gt;Dennis Duda&lt;/a&gt;. This is another
+sensible way of targeting Windows 95 and Windows 98. There is a Rust
+toolchain targeting Windows versions as early as Windows 95. I did not
+test Rust9x, but it was my backup plan if w2c2 failed.&lt;/p&gt;
+&lt;h3 id=&#34;signing-binaries&#34;&gt;Signing binaries&lt;/h3&gt;
+&lt;p&gt;I did not sign my binaries. The reason was mostly centered on cost:
+generally you need to pay for code signing. If you are a legitimate
+open-source project, check out the &lt;a
+href=&#34;https://signpath.org/&#34;&gt;SignPath foundation&lt;/a&gt; because that was
+one possible route. SignPath provides free code signing for reputable
+projects.&lt;/p&gt;
+&lt;h3 id=&#34;anti-virus-misclassifications&#34;&gt;Anti-virus
+misclassifications&lt;/h3&gt;
+&lt;p&gt;I did not run into this problem with celq, but there is a non-zero
+chance Rust binaries get classified as viruses by accident. This affects
+some libraries more than others; see &lt;a
+href=&#34;https://github.com/tauri-apps/tauri/issues/2486&#34;&gt;Tauri, for
+example&lt;/a&gt;. While browsing Chocolatey, I noticed that even ripgrep
+sometimes got &lt;a
+href=&#34;https://community.chocolatey.org/packages/ripgrep#virus&#34;&gt;classified
+as malware&lt;/a&gt;. I wish I had more actionable advice.&lt;/p&gt;
+&lt;h3 id=&#34;wasm3&#34;&gt;wasm3&lt;/h3&gt;
+&lt;p&gt;For the APE section, I believe &lt;a
+href=&#34;https://github.com/wasm3/wasm3&#34;&gt;wasm3&lt;/a&gt; can achieve a similar
+effect. The idea is to compile a WASM interpreter with Cosmopolitan and
+then ship the interpreter plus the WASM file. The same applies for
+retro-computing, but wasm3 targets C99 which is more recent than
+C89.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Trying to support FreeBSD and Nix for my Rust CLI: Lessons Learned</title>
+      <link>https://ivaniscoding.github.io/posts/rustpackaging3/</link>
+      <pubDate>Mon, 09 Feb 2026 10:00:00 -0500</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/rustpackaging3/</guid>
+      <description>&lt;p&gt;Have you ever been curious about how Rust software is packaged with
+Nix? Did you ever want to ship binaries for FreeBSD? No? Well, I
+did.&lt;/p&gt;
+&lt;p&gt;In this post, bear with me as we explore:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Building from source for FreeBSD, OpenBSD, and NetBSD&lt;/li&gt;
+&lt;li&gt;Cross-compiling for FreeBSD x86-64 and aarch64&lt;/li&gt;
+&lt;li&gt;Ways of writing Nix derivations for Rust&lt;/li&gt;
+&lt;li&gt;Generating a Guix package from crates.io&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;As a reminder, this is a series of posts I made about packaging my
+Rust CLI:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging2&#34;&gt;Part 2: Linux and macOS&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 3: FreeBSD, Nix, Guix (this post)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging4&#34;&gt;Part 4: Windows and
+multi-platform&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;There is also a Part 1, but let’s put it this way: it was written for
+another audience. If you are a Nix or BSD user, you might find it
+vile.&lt;/p&gt;
+&lt;p&gt;One of the reasons why I wrote this post was to share what I learned
+writing &lt;a href=&#34;https://github.com/IvanIsCoding/celq&#34;&gt;celq&lt;/a&gt;. It is a
+small tool that can query JSON, TOML, and YAML from the command line. Go
+check it out!&lt;/p&gt;
+&lt;h2 id=&#34;disclaimers&#34;&gt;Disclaimers&lt;/h2&gt;
+&lt;p&gt;Firstly, I have titled this post with the word “trying” because I did
+not have much of a clue of what I was doing before I tried doing it. If
+you find issues, reach out and I will try to fix them.&lt;/p&gt;
+&lt;p&gt;Secondly, this post focuses on self-distribution. Do not immediately
+submit ports to FreeBSD Ports or packages to Nixpkgs just because you
+can. There is a cost for the maintainers to keep the builds running. Let
+things happen organically: if users like your software, they will send a
+recipe themselves. As long as you make the software easy to build, you
+did your part.&lt;/p&gt;
+&lt;h2 id=&#34;freebsd-from-source&#34;&gt;FreeBSD from Source&lt;/h2&gt;
+&lt;p&gt;I have always been fond of &lt;a
+href=&#34;https://www.freebsd.org/&#34;&gt;FreeBSD&lt;/a&gt;, so I wanted my code to
+support it. It might seem obvious, but the first step for supporting a
+new platform is to test your code there! It can be as simple as:&lt;/p&gt;
+&lt;ol type=&#34;1&#34;&gt;
+&lt;li&gt;Install Rust and other dependencies/toolchains&lt;/li&gt;
+&lt;li&gt;Run &lt;code&gt;cargo build&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Run &lt;code&gt;cargo test&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;There are two ways of doing the first step. One can install Rust from
+the FreeBSD packages with &lt;code&gt;pkg install rust&lt;/code&gt; or
+&lt;code&gt;rust-nightly&lt;/code&gt;. The alternative is installing
+&lt;code&gt;rustup-init&lt;/code&gt; from the repository and then downloading the
+rest of the toolchain with rustup, as is usually done on other
+platforms.&lt;/p&gt;
+&lt;p&gt;Afterward, the second step is to verify the code builds. In general,
+this step will go smoothly for Rust code, but there could be some
+friction, especially with system libraries or libraries that make
+low-level syscalls specific to Linux. This step is either trivial or
+requires investigation when the build fails.&lt;/p&gt;
+&lt;p&gt;Lastly, tests. This is similar to the previous step in the sense that
+tests either pass smoothly or identify problems that require manual
+fixes. Running tests can catch assumptions on Linux runtime behavior
+that don’t transfer to FreeBSD.&lt;/p&gt;
+&lt;p&gt;These steps need to run somewhere, so a few options for CI are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://cirrus-ci.org/&#34;&gt;Cirrus CI&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/vmactions/freebsd-vm&#34;&gt;GitHub Actions
+with virtualization&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Self-hosted runners with FreeBSD&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I ended up using Cirrus CI as they offered first-class FreeBSD
+support. Their free tier was sufficient for my project, but their
+pay-as-you-go model seemed reasonable. I set it up to only run full
+builds on commits to main that change Rust files to help lower the
+resource usage. GitHub Actions do not support native FreeBSD runners,
+but there are many actions wrapping QEMU around. I use those for smaller
+tasks we will discuss later on.&lt;/p&gt;
+&lt;p&gt;Following these steps ensures that your project plays nicely with the
+&lt;a
+href=&#34;https://docs.freebsd.org/en/books/porters-handbook/special/#using-cargo&#34;&gt;Rust
+section of the Porter’s handbook&lt;/a&gt;. It will simplify the life of any
+future port maintainer.&lt;/p&gt;
+&lt;h2 id=&#34;cross-compiling-freebsd-binaries&#34;&gt;Cross-compiling FreeBSD
+binaries&lt;/h2&gt;
+&lt;p&gt;Next, let’s talk about pre-built binaries. FreeBSD users can always
+install from source as discussed previously, but for convenience, it is
+still interesting to provide binaries.&lt;/p&gt;
+&lt;p&gt;Even if you are not keen on keeping a FreeBSD CI, cross-compilation
+to FreeBSD from Linux has become easier recently. &lt;a
+href=&#34;https://github.com/rust-cross/cargo-zigbuild&#34;&gt;cargo-zigbuild&lt;/a&gt;,
+which we discussed during Part 1, has reduced the friction.&lt;/p&gt;
+&lt;p&gt;The idea behind cargo-zigbuild is as follows: Zig has a great linker
+and it ships with the FreeBSD libc headers. That would be handy for
+cross-compilation! Indeed, take a look at this command:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb1&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb1-1&#34;&gt;&lt;a href=&#34;#cb1-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;cargo&lt;/span&gt; zigbuild &lt;span class=&#34;at&#34;&gt;--locked&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--release&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--target&lt;/span&gt; x86_64-unknown-freebsd&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Because Linux runners are more abundant, I found it easier to set up
+Zig and cargo-zigbuild with the &lt;code&gt;x86_64-unknown-freebsd&lt;/code&gt;
+target than spinning up QEMU in GitHub Actions.&lt;/p&gt;
+&lt;p&gt;For aarch64 binaries, the story is slightly different as
+&lt;code&gt;aarch64-unknown-freebsd&lt;/code&gt; is a tier 3 target. If you just
+copy the setup from x86-64, you will end up with an error message like
+this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;error: component &amp;#39;rust-std&amp;#39; for target &amp;#39;aarch64-unknown-freebsd&amp;#39; is unavailable for download for channel &amp;#39;1.89.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The easiest solution for cross-compilation is to switch to Rust
+nightly and use the unstable &lt;a
+href=&#34;https://doc.rust-lang.org/cargo/reference/unstable.html#build-std&#34;&gt;build-std&lt;/a&gt;
+feature:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb3&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb3-1&#34;&gt;&lt;a href=&#34;#cb3-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;cargo&lt;/span&gt; +nightly zigbuild &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb3-2&#34;&gt;&lt;a href=&#34;#cb3-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  &lt;span class=&#34;at&#34;&gt;--target&lt;/span&gt; aarch64-unknown-freebsd &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb3-3&#34;&gt;&lt;a href=&#34;#cb3-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  &lt;span class=&#34;at&#34;&gt;-Z&lt;/span&gt; build-std=std,panic_abort &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb3-4&#34;&gt;&lt;a href=&#34;#cb3-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  &lt;span class=&#34;at&#34;&gt;-Z&lt;/span&gt; build-std-features=panic_immediate_abort&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The above command requires the &lt;code&gt;rust-src&lt;/code&gt; component from
+rustup and takes longer as it needs to compile std. But it gets the job
+done.&lt;/p&gt;
+&lt;h2 id=&#34;openbsd-and-netbsd&#34;&gt;OpenBSD and NetBSD&lt;/h2&gt;
+&lt;p&gt;I will briefly discuss OpenBSD and NetBSD, but I will disclose I have
+never used them on a daily basis.&lt;/p&gt;
+&lt;p&gt;If you want to support these systems, I strongly recommend following
+the build-from-source approach discussed previously. Install Rust with
+the package manager, run
+&lt;code&gt;cargo build&lt;/code&gt;/&lt;code&gt;cargo test&lt;/code&gt; to catch bugs, and act
+accordingly to close bugs.&lt;/p&gt;
+&lt;p&gt;I was not convinced pre-built binaries would add much value for these
+platforms. Nevertheless, testing OpenBSD/NetBSD in CI via virtualization
+goes a long way toward preventing regressions for future port
+maintainers.&lt;/p&gt;
+&lt;h2 id=&#34;nix-from-your-repository&#34;&gt;Nix from your repository&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://nixos.org/&#34;&gt;NixOS&lt;/a&gt; is one Linux distribution that
+is different from others. Nix can also be used outside of NixOS like in
+&lt;a href=&#34;https://github.com/nix-community/home-manager&#34;&gt;Home
+Manager&lt;/a&gt;. For those not familiar with it, Nix uses a declarative
+build system with a functional programming language.&lt;/p&gt;
+&lt;p&gt;In contrast to the previous blog post where we shipped pre-built
+binaries for Linux, Nix users expect a Nix derivation. The derivations
+make the system state reproducible and easier to inspect.&lt;/p&gt;
+&lt;p&gt;There are multiple ways of writing Rust derivations for Nix. At the
+time of writing, I learned that the &lt;a
+href=&#34;https://wiki.nixos.org/wiki/Rust&#34;&gt;NixOS wiki listed seven
+different methods&lt;/a&gt;. I used the built-in
+&lt;code&gt;buildRustPackage&lt;/code&gt;, although &lt;code&gt;crane&lt;/code&gt; seems to be a
+popular option as well.&lt;/p&gt;
+&lt;p&gt;For me, the best way to learn the derivation was to go check how
+other Rust CLIs did it in Nixpkgs. I looked at &lt;a
+href=&#34;https://github.com/NixOS/nixpkgs/blob/279fa8a4bc2f79f255d406ab24929b1e9fd1821d/pkgs/by-name/ja/jaq/package.nix&#34;&gt;jaq’s
+entry&lt;/a&gt;, because celq was inspired by jaq.&lt;/p&gt;
+&lt;p&gt;The tweaks I made were:&lt;/p&gt;
+&lt;h3 id=&#34;automatically-reading-the-version&#34;&gt;Automatically reading the
+version&lt;/h3&gt;
+&lt;p&gt;Nix can read your &lt;code&gt;Cargo.toml&lt;/code&gt;! You can write the file
+once and forget it, there is no risk that the version will get out of
+sync.&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb4&#34;&gt;&lt;pre
+class=&#34;sourceCode nix&#34;&gt;&lt;code class=&#34;sourceCode nix&#34;&gt;&lt;span id=&#34;cb4-1&#34;&gt;&lt;a href=&#34;#cb4-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;kw&#34;&gt;let&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb4-2&#34;&gt;&lt;a href=&#34;#cb4-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  &lt;span class=&#34;va&#34;&gt;cargoToml&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;bu&#34;&gt;builtins&lt;/span&gt;.fromTOML &lt;span class=&#34;op&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bu&#34;&gt;builtins&lt;/span&gt;.readFile Cargo.toml&lt;span class=&#34;op&#34;&gt;);&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb4-3&#34;&gt;&lt;a href=&#34;#cb4-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;kw&#34;&gt;in&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb4-4&#34;&gt;&lt;a href=&#34;#cb4-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;/span&gt;
+&lt;span id=&#34;cb4-5&#34;&gt;&lt;a href=&#34;#cb4-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;rustPlatform.buildRustPackage &lt;span class=&#34;op&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;va&#34;&gt;finalAttrs&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;{&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb4-6&#34;&gt;&lt;a href=&#34;#cb4-6&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  &lt;span class=&#34;va&#34;&gt;pname&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;celq&amp;quot;&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb4-7&#34;&gt;&lt;a href=&#34;#cb4-7&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  &lt;span class=&#34;va&#34;&gt;version&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; cargoToml.package.version&lt;span class=&#34;op&#34;&gt;;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb4-8&#34;&gt;&lt;a href=&#34;#cb4-8&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;op&#34;&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;referring-to-the-local-source&#34;&gt;Referring to the local
+source&lt;/h3&gt;
+&lt;p&gt;It is possible to refer to the source of your library without
+&lt;code&gt;fetchFromGitHub&lt;/code&gt; or &lt;code&gt;fetchCrate&lt;/code&gt;. That minimizes
+the burden of updating &lt;code&gt;sha256&lt;/code&gt; checksum field during
+updates.&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb5&#34;&gt;&lt;pre
+class=&#34;sourceCode nix&#34;&gt;&lt;code class=&#34;sourceCode nix&#34;&gt;&lt;span id=&#34;cb5-1&#34;&gt;&lt;a href=&#34;#cb5-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;src = lib.cleanSource &lt;span class=&#34;ss&#34;&gt;./.&lt;/span&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&#34;avoiding-cargohash&#34;&gt;Avoiding cargoHash&lt;/h3&gt;
+&lt;p&gt;The concept of having &lt;code&gt;Cargo.lock&lt;/code&gt; published with your
+crate fits nicely with the idea of reproducible builds for Nix. If you
+specify:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb6&#34;&gt;&lt;pre
+class=&#34;sourceCode nix&#34;&gt;&lt;code class=&#34;sourceCode nix&#34;&gt;&lt;span id=&#34;cb6-1&#34;&gt;&lt;a href=&#34;#cb6-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;cargoLock = &lt;span class=&#34;op&#34;&gt;{&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-2&#34;&gt;&lt;a href=&#34;#cb6-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;va&#34;&gt;lockFile&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;ss&#34;&gt;./Cargo.lock&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-3&#34;&gt;&lt;a href=&#34;#cb6-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;va&#34;&gt;allowBuiltinFetchGit&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;cn&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-4&#34;&gt;&lt;a href=&#34;#cb6-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  &lt;span class=&#34;op&#34;&gt;}&lt;/span&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You avoid the need to update &lt;code&gt;cargoHash&lt;/code&gt; each time you
+modify your dependencies.&lt;/p&gt;
+&lt;h3 id=&#34;in-practice&#34;&gt;In practice&lt;/h3&gt;
+&lt;p&gt;You can take a look at &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/nix/celq_dev.nix&#34;&gt;celq_dev.nix&lt;/a&gt;
+and &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/flake.nix&#34;&gt;flake.nix&lt;/a&gt;
+to see the end result, but I managed to achieve this:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb7&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb7-1&#34;&gt;&lt;a href=&#34;#cb7-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;nix&lt;/span&gt; run github:IvanIsCoding/celq#dev &lt;span class=&#34;at&#34;&gt;--&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--version&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;My &lt;code&gt;dev&lt;/code&gt; derivation runs the code from the latest commit
+from main. It also doesn’t need to be updated, which makes it
+low-maintenance.&lt;/p&gt;
+&lt;h2 id=&#34;nix-from-crates.io&#34;&gt;Nix from crates.io&lt;/h2&gt;
+&lt;p&gt;Now that we’ve discussed the first derivation, let’s dive into the
+second derivation, which was the one I wrote first.. I talked with some
+Nix users and the previous one is the more idiomatic one.&lt;/p&gt;
+&lt;p&gt;With that being said, I found this derivation useful as it can be
+tweaked to package any tool published in crates.io. Mentally, it was
+also comforting to have a derivation pinned to a published, stable
+version in case I messed up the state of the &lt;code&gt;main&lt;/code&gt; during
+development.&lt;/p&gt;
+&lt;p&gt;You can see the derivation in &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/nix/celq.nix&#34;&gt;celq.nix&lt;/a&gt;.
+It “undoes” some of the conveniences we discussed previously:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;version&lt;/code&gt; needs to be manually specified&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sha256&lt;/code&gt; for the source from crates.io needs to be
+specified&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cargoHash&lt;/code&gt; needs to be specified and updated for each
+version&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Keeping these three fields up-to-date can be slightly annoying, in
+particular &lt;code&gt;cargoHash&lt;/code&gt; as it is kind of hard to calculate the
+hash without running &lt;code&gt;nix&lt;/code&gt; first. Nevertheless, the code runs
+with &lt;code&gt;nix run github:IvanIsCoding/celq&lt;/code&gt; and it will not break
+as long as I point it to a stable crates.io release.&lt;/p&gt;
+&lt;h2 id=&#34;guix&#34;&gt;Guix&lt;/h2&gt;
+&lt;p&gt;Last but not least, &lt;a href=&#34;https://guix.gnu.org/&#34;&gt;Guix&lt;/a&gt;. This is
+another package manager based in functional programming. The language
+though is different: Guix uses &lt;a
+href=&#34;https://en.wikipedia.org/wiki/GNU_Guile&#34;&gt;Guile&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I must say that Guix does have excellent documentation. To package
+&lt;code&gt;celq&lt;/code&gt; for Guix, I followed the steps from the &lt;a
+href=&#34;https://guix.gnu.org/cookbook/en/guix-cookbook.html&#34;&gt;cookbook&lt;/a&gt;:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb8&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb8-1&#34;&gt;&lt;a href=&#34;#cb8-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;guix&lt;/span&gt; import crate celq&lt;/span&gt;
+&lt;span id=&#34;cb8-2&#34;&gt;&lt;a href=&#34;#cb8-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;guix&lt;/span&gt; import &lt;span class=&#34;at&#34;&gt;--insert&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;packages/celq.scm &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb8-3&#34;&gt;&lt;a href=&#34;#cb8-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;      crate &lt;span class=&#34;at&#34;&gt;--lockfile&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;=&lt;/span&gt;../celq-repo/Cargo.lock celq&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This generated &lt;a
+href=&#34;https://github.com/get-celq/celq-channel/blob/main/packages/celq.scm&#34;&gt;celq.scm&lt;/a&gt;,
+which can conveniently be distributed on a custom &lt;a
+href=&#34;https://guix.gnu.org/cookbook/en/html_node/Channels.html&#34;&gt;Guix
+channel&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I found the Guix tooling interesting because the file did convert
+&lt;code&gt;Cargo.lock&lt;/code&gt; ahead of time, so there were many statements
+like this:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb9&#34;&gt;&lt;pre
+class=&#34;sourceCode guile&#34;&gt;&lt;code class=&#34;sourceCode scheme&#34;&gt;&lt;span id=&#34;cb9-1&#34;&gt;&lt;a href=&#34;#cb9-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;(&lt;span class=&#34;ex&#34;&gt;define&lt;/span&gt;&lt;span class=&#34;fu&#34;&gt; rust-cel-0.11.6&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb9-2&#34;&gt;&lt;a href=&#34;#cb9-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  (crate-source &lt;span class=&#34;st&#34;&gt;&amp;quot;cel&amp;quot;&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;0.11.6&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb9-3&#34;&gt;&lt;a href=&#34;#cb9-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;                &lt;span class=&#34;st&#34;&gt;&amp;quot;0pyrqas0r64wykydfmgqfjyb1c14x4w07mafk6fmakzvhb8b7plf&amp;quot;&lt;/span&gt;))&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Unfortunately, the Rust version that shipped with Guix was not recent
+enough to compile my dependencies. This was fixable with some
+interesting tricks. Guix can patch &lt;code&gt;Cargo.toml&lt;/code&gt;, so naturally
+I tried to lower the MSRV:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb10&#34;&gt;&lt;pre
+class=&#34;sourceCode guile&#34;&gt;&lt;code class=&#34;sourceCode scheme&#34;&gt;&lt;span id=&#34;cb10-1&#34;&gt;&lt;a href=&#34;#cb10-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;substitute* &lt;span class=&#34;st&#34;&gt;&amp;quot;Cargo.toml&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb10-2&#34;&gt;&lt;a href=&#34;#cb10-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;                &lt;span class=&#34;co&#34;&gt;;; Patch rust-version&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb10-3&#34;&gt;&lt;a href=&#34;#cb10-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;                ((&lt;span class=&#34;st&#34;&gt;&amp;quot;rust-version = &lt;/span&gt;&lt;span class=&#34;ch&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;st&#34;&gt;[^&lt;/span&gt;&lt;span class=&#34;ch&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;st&#34;&gt;]+&lt;/span&gt;&lt;span class=&#34;ch&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;st&#34;&gt;&amp;quot;&lt;/span&gt;)&lt;/span&gt;
+&lt;span id=&#34;cb10-4&#34;&gt;&lt;a href=&#34;#cb10-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;                 &lt;span class=&#34;st&#34;&gt;&amp;quot;rust-version = &lt;/span&gt;&lt;span class=&#34;ch&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;st&#34;&gt;1.85&lt;/span&gt;&lt;span class=&#34;ch&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;st&#34;&gt;&amp;quot;&lt;/span&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I applied the same strategy to downgrade the dependencies, reran
+&lt;code&gt;guix import crate&lt;/code&gt; based on a &lt;code&gt;Cargo.lock&lt;/code&gt; with
+downgraded dependencies, and kept going. Eventually, things compiled
+after a couple of attempts.&lt;/p&gt;
+&lt;p&gt;I do not plan to keep my Guix channel up-to-date, as I have not found
+a programmatic way of applying the patches after updates. Nevertheless,
+I enjoyed going through the process and getting a successful build.&lt;/p&gt;
+&lt;h2 id=&#34;whats-next&#34;&gt;What’s Next&lt;/h2&gt;
+&lt;p&gt;The last post of this series will cover Windows. It will also discuss
+multi-platform tools I have not got a chance to cover such as Mise. In
+addition to some practical topics like Scoop, I will also cover less
+practical experiments like targeting MS-DOS and Windows 98. Stay
+tuned.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Homebrew and One-Line Installers for My Rust CLI: Lessons Learned</title>
+      <link>https://ivaniscoding.github.io/posts/rustpackaging2/</link>
+      <pubDate>Mon, 02 Feb 2026 10:00:00 -0500</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/rustpackaging2/</guid>
+      <description>&lt;p&gt;Have you ever run &lt;code&gt;brew install sometool&lt;/code&gt; or
+&lt;code&gt;curl https://sometool.dev | bash&lt;/code&gt; to install software? Did
+you ever want to set up one for your own software? Yes? If so, you are
+in the right spot.&lt;/p&gt;
+&lt;p&gt;Throughout this article, I will share how I set up a &lt;a
+href=&#34;https://brew.sh/&#34;&gt;Homebrew&lt;/a&gt; tap and a &lt;code&gt;curl|bash&lt;/code&gt;
+installer for my Rust project. Along with this will also be the closely
+related topics of:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;GitHub releases&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cargo binstall&lt;/code&gt; and its GitHub Actions applications&lt;/li&gt;
+&lt;li&gt;GitHub attestations&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;As a reminder, this is a series of posts I made about packaging my
+Rust CLI:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging1&#34;&gt;Part 1: PyPI, NPM, and GitHub
+Actions&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 2: Linux and macOS (this post)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging3&#34;&gt;Part 3: FreeBSD, Nix, Guix&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging4&#34;&gt;Part 4: Windows and
+multi-platform&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;One of the reasons why I wrote this post was to share what I learned
+writing &lt;a href=&#34;https://github.com/IvanIsCoding/celq&#34;&gt;celq&lt;/a&gt;. It is a
+small tool that can query JSON, TOML, and YAML from the command-line. Go
+check it out!&lt;/p&gt;
+&lt;h2 id=&#34;github-releases&#34;&gt;GitHub Releases&lt;/h2&gt;
+&lt;p&gt;Before we dive into setting up a Homebrew tap and the installer
+script, we need to talk about the prerequisite: hosting the pre-built
+binaries.&lt;/p&gt;
+&lt;p&gt;For this blog post, I will use GitHub releases to host the binaries.
+This is mostly out of convenience. GitHub offers a very generous limits
+of free bandwidth for downloading binaries hosted with them. Feel free
+to host your binaries elsewhere (e.g. GitLab, S3). As long as you have a
+predictable URL based on the version of your asset, you should be
+fine.&lt;/p&gt;
+&lt;p&gt;To generate the pre-built binaries for a Rust CLI, a high-level
+overview is:&lt;/p&gt;
+&lt;ol type=&#34;1&#34;&gt;
+&lt;li&gt;Install the Rust toolchain for the target&lt;/li&gt;
+&lt;li&gt;Run &lt;code&gt;cargo build --release&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Possibly compress and rename the binary from step 2&lt;/li&gt;
+&lt;li&gt;Run &lt;code&gt;gh release upload $version $asset&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The steps can vary depending on your project. For example, you might
+need to install additional tools for step 1. You can also choose to not
+compress the binary in step 3.&lt;/p&gt;
+&lt;p&gt;With regards to compression, it is fairly standard to compress Linux
+and macOS binaries with &lt;code&gt;.tar.gz&lt;/code&gt; and Windows binaries with
+&lt;code&gt;.zip&lt;/code&gt;. Nothing is stopping you from using other compression
+schemes like zstd if you want, but from looking around most people try
+to stick with what is already available in systems by default.&lt;/p&gt;
+&lt;p&gt;For celq, I used GitHub Actions to perform steps 1 to 4. You can
+check &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/a12dc1446b7c7fa2ad6ad79540560a94210573b5/.github/workflows/release_github.yml#L30&#34;&gt;release_github.yml&lt;/a&gt;
+if you are curious. This is again mostly out of convenience. GitHub
+Actions was the easiest way for me to get a Windows machine.&lt;/p&gt;
+&lt;h2 id=&#34;cargo-binstall&#34;&gt;cargo binstall&lt;/h2&gt;
+&lt;p&gt;Before we jump into Homebrew, let’s collect a freebie: &lt;a
+href=&#34;https://github.com/cargo-bins/cargo-binstall&#34;&gt;cargo binstall&lt;/a&gt;.
+It lets users install celq with &lt;code&gt;cargo binstall celq&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I found this method valuable for the particular reason: combined with
+&lt;a href=&#34;https://github.com/taiki-e/install-action&#34;&gt;install-action&lt;/a&gt;,
+it makes it trivial to use Rust CLIs on GitHub Actions! Look at
+this:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb1&#34;&gt;&lt;pre
+class=&#34;sourceCode yaml&#34;&gt;&lt;code class=&#34;sourceCode yaml&#34;&gt;&lt;span id=&#34;cb1-1&#34;&gt;&lt;a href=&#34;#cb1-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;kw&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;at&#34;&gt; &lt;/span&gt;&lt;span class=&#34;fu&#34;&gt;uses&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;at&#34;&gt; taiki-e/install-action@v2&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb1-2&#34;&gt;&lt;a href=&#34;#cb1-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;at&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;fu&#34;&gt;with&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;:&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb1-3&#34;&gt;&lt;a href=&#34;#cb1-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;at&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;fu&#34;&gt;tool&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;at&#34;&gt; celq&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/cargo-bins/cargo-binstall&#34;&gt;cargo
+binstall&lt;/a&gt; works in this clever way. First, it queries crates.io to
+get metadata about your crate. Then, it infers the download link for the
+pre-built binary and downloads it. Afterward, it puts the binary in
+&lt;code&gt;$HOME/.cargo/bin&lt;/code&gt; which should be in the &lt;code&gt;PATH&lt;/code&gt;
+if users have cargo installed.&lt;/p&gt;
+&lt;p&gt;You can refer to &lt;a
+href=&#34;https://github.com/cargo-bins/cargo-binstall/blob/main/SUPPORT.md&#34;&gt;cargo
+binstall’s documentation&lt;/a&gt; for tweaking your crate if the defaults
+don’t work. I needed to use overrides for celq because I customized the
+asset names. In general, configuration was straightforward and it just
+required a &lt;code&gt;[package.metadata.binstall]&lt;/code&gt; section in
+&lt;code&gt;Cargo.toml&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;homebrew&#34;&gt;Homebrew&lt;/h2&gt;
+&lt;p&gt;I think a responsible thing to say for this section is: check the &lt;a
+href=&#34;https://axodotdev.github.io/cargo-dist/book/&#34;&gt;&lt;code&gt;dist&lt;/code&gt;&lt;/a&gt;
+tool documentation after reading the blog post. There is prior art to
+this, &lt;code&gt;dist&lt;/code&gt; is the most mindless way of setting things
+up.&lt;/p&gt;
+&lt;p&gt;With that being said, I did not use &lt;code&gt;dist&lt;/code&gt; because I
+wanted to know how things worked. This made me learn about some
+limitations from &lt;code&gt;dist&lt;/code&gt; that I will share with you, such as
+installing from source.&lt;/p&gt;
+&lt;p&gt;Setting up Homebrew starts with setting up a Homebrew tap. A tap is
+just a GitHub repository with the &lt;code&gt;homebrew-&lt;/code&gt; prefix. For
+example, &lt;a
+href=&#34;https://github.com/get-celq/homebrew-tap&#34;&gt;get-celq/homebrew-tap&lt;/a&gt;
+is the tap I set up.&lt;/p&gt;
+&lt;p&gt;When installing things from it, the commands look like:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb2&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb2-1&#34;&gt;&lt;a href=&#34;#cb2-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;brew&lt;/span&gt; install get-celq/tap/celq&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If the repository name was &lt;code&gt;homebrew-rustcli&lt;/code&gt;, the command
+would use &lt;code&gt;get-celq/rustcli/$formula&lt;/code&gt; instead. It is possible
+to host taps outside of GitHub by telling users to run
+&lt;code&gt;brew tap $repo $url&lt;/code&gt; first.&lt;/p&gt;
+&lt;p&gt;It is also possible to distribute your binary through &lt;a
+href=&#34;https://github.com/Homebrew/homebrew-core&#34;&gt;homebrew-core&lt;/a&gt;. That
+is the default channel when running &lt;code&gt;brew install $formula&lt;/code&gt;,
+but the bar for submitting software there is of course higher. Overall,
+I appreciate Homebrew’s support for third-party channels.&lt;/p&gt;
+&lt;p&gt;Inside the tap, there are formulas in the &lt;code&gt;Formula&lt;/code&gt;
+folder. Formulas are written in Ruby, so for celq there is &lt;a
+href=&#34;https://github.com/get-celq/homebrew-tap/blob/main/Formula/celq.rb&#34;&gt;Formula/celq.rb&lt;/a&gt;.
+Apart from metadata, I think I can split the formula into three parts:
+URL to assets, installation step, and tests.&lt;/p&gt;
+&lt;p&gt;Tying this back to the GitHub releases section, the formulas contain
+link to assets and the SHA256 checksum. To support multiple
+architectures and OSes, formulas use the
+&lt;code&gt;OS.linux&lt;/code&gt;/&lt;code&gt;OS.mac&lt;/code&gt; and
+&lt;code&gt;Hardware::CPU.arm&lt;/code&gt;/&lt;code&gt;Hardware::CPU.intel&lt;/code&gt;
+variables combined with Ruby if statements:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb3&#34;&gt;&lt;pre
+class=&#34;sourceCode ruby&#34;&gt;&lt;code class=&#34;sourceCode ruby&#34;&gt;&lt;span id=&#34;cb3-1&#34;&gt;&lt;a href=&#34;#cb3-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;cf&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;cn&#34;&gt;OS&lt;/span&gt;&lt;span class=&#34;at&#34;&gt;.mac?&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb3-2&#34;&gt;&lt;a href=&#34;#cb3-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;cf&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;dt&#34;&gt;Hardware&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;cn&#34;&gt;CPU&lt;/span&gt;&lt;span class=&#34;at&#34;&gt;.arm&lt;/span&gt;?&lt;/span&gt;
+&lt;span id=&#34;cb3-3&#34;&gt;&lt;a href=&#34;#cb3-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;      url &lt;span class=&#34;st&#34;&gt;&amp;quot;$GITHUB_REPO_URL/releases/download/$VERSION/$asset&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb3-4&#34;&gt;&lt;a href=&#34;#cb3-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;      sha256 &lt;span class=&#34;st&#34;&gt;&amp;quot;$HASH&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb3-5&#34;&gt;&lt;a href=&#34;#cb3-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;cf&#34;&gt;end&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb3-6&#34;&gt;&lt;a href=&#34;#cb3-6&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;cf&#34;&gt;end&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To automate Homebrew releases, I simply fill in a &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/brew/celq.rb&#34;&gt;formula
+template&lt;/a&gt; with the version and hashes. Afterward, I make a commit to
+the tap Git repository. You can check &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/.github/scripts/update-homebrew-formula.sh&#34;&gt;update-homebrew-formula.sh&lt;/a&gt;
+for the script that does it.&lt;/p&gt;
+&lt;p&gt;The rest of the formula is fixed. There’s the &lt;code&gt;install&lt;/code&gt;
+section, which for me was quite simple:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb4&#34;&gt;&lt;pre
+class=&#34;sourceCode ruby&#34;&gt;&lt;code class=&#34;sourceCode ruby&#34;&gt;&lt;span id=&#34;cb4-1&#34;&gt;&lt;a href=&#34;#cb4-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;cf&#34;&gt;def&lt;/span&gt; install&lt;/span&gt;
+&lt;span id=&#34;cb4-2&#34;&gt;&lt;a href=&#34;#cb4-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    bin&lt;span class=&#34;at&#34;&gt;.install&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;celq&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb4-3&#34;&gt;&lt;a href=&#34;#cb4-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;cf&#34;&gt;end&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Still, you could leverage Ruby to write more complicated actions such
+as executing post-installation scripts.&lt;/p&gt;
+&lt;p&gt;Lastly, Homebrew also lets us run tests post installation. This is
+not a requirement, but I found it nice to be able to write a smoke test
+with &lt;code&gt;test do&lt;/code&gt; to confirm that things work at runtime.&lt;/p&gt;
+&lt;h2 id=&#34;homebrew-from-source-plus-bottles&#34;&gt;Homebrew from source plus
+bottles&lt;/h2&gt;
+&lt;p&gt;One intriguing limitation from &lt;code&gt;dist&lt;/code&gt; for me was that it
+didn’t support creating formulas that build from source. But what did
+that entail?&lt;/p&gt;
+&lt;p&gt;Upon looking at other formulas in homebrew-core for Rust CLIs such as
+the one for &lt;a
+href=&#34;https://github.com/Homebrew/homebrew-core/blob/main/Formula/j/just.rb&#34;&gt;just&lt;/a&gt;,
+the answer became clearer.&lt;/p&gt;
+&lt;p&gt;If you list Rust as a build dependency, Homebrew can delegate the
+work to Cargo and install the binary in the right spot:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb5&#34;&gt;&lt;pre
+class=&#34;sourceCode ruby&#34;&gt;&lt;code class=&#34;sourceCode ruby&#34;&gt;&lt;span id=&#34;cb5-1&#34;&gt;&lt;a href=&#34;#cb5-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;depends_on &lt;span class=&#34;st&#34;&gt;&amp;quot;rust&amp;quot;&lt;/span&gt; &lt;span class=&#34;kw&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;wa&#34;&gt;:build&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb5-2&#34;&gt;&lt;a href=&#34;#cb5-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;/span&gt;
+&lt;span id=&#34;cb5-3&#34;&gt;&lt;a href=&#34;#cb5-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;cf&#34;&gt;def&lt;/span&gt; install&lt;/span&gt;
+&lt;span id=&#34;cb5-4&#34;&gt;&lt;a href=&#34;#cb5-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  &lt;span class=&#34;fu&#34;&gt;system&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;cargo&amp;quot;&lt;/span&gt;, &lt;span class=&#34;st&#34;&gt;&amp;quot;install&amp;quot;&lt;/span&gt;, &lt;span class=&#34;st&#34;&gt;&amp;quot;--locked&amp;quot;&lt;/span&gt;, &lt;span class=&#34;st&#34;&gt;&amp;quot;--root&amp;quot;&lt;/span&gt;, prefix, &lt;span class=&#34;st&#34;&gt;&amp;quot;--path&amp;quot;&lt;/span&gt;, &lt;span class=&#34;st&#34;&gt;&amp;quot;.&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb5-5&#34;&gt;&lt;a href=&#34;#cb5-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;cf&#34;&gt;end&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;For crates that don’t want to host pre-built binaries or crates that
+depend on system libraries, that option can be interesting.&lt;/p&gt;
+&lt;p&gt;Another thing I learned about while setting up the installation from
+source were &lt;a href=&#34;https://docs.brew.sh/Bottles&#34;&gt;Homebrew bottles&lt;/a&gt;.
+It turns out that homebrew-core handles pre-built binaries differently
+from how we discussed in the previous section!&lt;/p&gt;
+&lt;p&gt;Instead of modifying the &lt;code&gt;url&lt;/code&gt; field based on the
+platform, formulas with bottles keep the source code in the
+&lt;code&gt;url&lt;/code&gt; field and then generate binaries with
+&lt;code&gt;brew bottle $formula&lt;/code&gt;. It looks like this:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb6&#34;&gt;&lt;pre
+class=&#34;sourceCode ruby&#34;&gt;&lt;code class=&#34;sourceCode ruby&#34;&gt;&lt;span id=&#34;cb6-1&#34;&gt;&lt;a href=&#34;#cb6-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;bottle &lt;span class=&#34;cf&#34;&gt;do&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-2&#34;&gt;&lt;a href=&#34;#cb6-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  root_url &lt;span class=&#34;st&#34;&gt;&amp;quot;$GITHUB_REPO_URL&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-3&#34;&gt;&lt;a href=&#34;#cb6-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  rebuild &lt;span class=&#34;dv&#34;&gt;0&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-4&#34;&gt;&lt;a href=&#34;#cb6-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  sha256 &lt;span class=&#34;wa&#34;&gt;cellar: :any&lt;/span&gt;, &lt;span class=&#34;wa&#34;&gt;arm64_tahoe: &lt;/span&gt;  &lt;span class=&#34;st&#34;&gt;&amp;quot;$hash1&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-5&#34;&gt;&lt;a href=&#34;#cb6-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  sha256 &lt;span class=&#34;wa&#34;&gt;cellar: :any&lt;/span&gt;, &lt;span class=&#34;wa&#34;&gt;arm64_sequoia: &lt;/span&gt;&lt;span class=&#34;st&#34;&gt;&amp;quot;$hash2&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-6&#34;&gt;&lt;a href=&#34;#cb6-6&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;  sha256 &lt;span class=&#34;wa&#34;&gt;cellar: :any&lt;/span&gt;, &lt;span class=&#34;wa&#34;&gt;x86_64_linux: &lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;$hash4&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-7&#34;&gt;&lt;a href=&#34;#cb6-7&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;cf&#34;&gt;end&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I assume that &lt;code&gt;dist&lt;/code&gt; chose the style without bottles
+because of simplicity. Formulas with bottles are a two-step process.
+First, you need to update the formula. Then, you need to run
+&lt;code&gt;brew bottle&lt;/code&gt; after the formula is in the tap.&lt;/p&gt;
+&lt;p&gt;It’s easier to automate the case without bottles. Nevertheless,
+bottles unlock the benefits of pre-built binaries with the flexibility
+of allowing users to pass &lt;code&gt;--build-from-source&lt;/code&gt; when
+required.&lt;/p&gt;
+&lt;h2 id=&#34;making-an-installer-script-can-be-quite-hard&#34;&gt;Making an
+installer script can be quite hard&lt;/h2&gt;
+&lt;p&gt;Next, to install scripts. My original goal was to have one of those
+one-liners:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb7&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb7-1&#34;&gt;&lt;a href=&#34;#cb7-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;curl&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--proto&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;#39;=https&amp;#39;&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--tlsv1.2&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-sSf&lt;/span&gt; https://get-celq.github.io/install.sh &lt;span class=&#34;kw&#34;&gt;|&lt;/span&gt; &lt;span class=&#34;fu&#34;&gt;bash&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Before I wrote my own script, I looked at &lt;a
+href=&#34;https://github.com/astral-sh/uv/releases&#34;&gt;uv’s script from their
+GitHub release&lt;/a&gt;. uv uses &lt;code&gt;dist&lt;/code&gt; to generate their
+script.&lt;/p&gt;
+&lt;p&gt;To my surprise, I found around 2,000 lines of shell script. I can
+summarize my learnings as: it is more complicated than it looks! There
+are lots of details to think about. To list a few:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Detecting glibc vs musl can be a lot of work&lt;/li&gt;
+&lt;li&gt;Adding your binary to the &lt;code&gt;$PATH&lt;/code&gt; is also a lot of
+work&lt;/li&gt;
+&lt;li&gt;Handling shadowed bins, updaters, and more&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sh&lt;/code&gt; is barebones, you’ll need &lt;code&gt;shellcheck&lt;/code&gt; to
+make sure you didn’t use a feature that is not portable&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Even though I like uv and &lt;code&gt;dist&lt;/code&gt;, I discarded the idea of
+re-implementing their strategy.&lt;/p&gt;
+&lt;h2 id=&#34;copying-a-good-existing-script&#34;&gt;Copying a good existing
+script&lt;/h2&gt;
+&lt;p&gt;My next best strategy was to research other Rust software that didn’t
+use &lt;code&gt;dist&lt;/code&gt; and shipped with a script. I found two good
+candidates: &lt;a href=&#34;https://github.com/casey/just&#34;&gt;just&lt;/a&gt; and &lt;a
+href=&#34;https://github.com/cargo-bins/cargo-binstall&#34;&gt;cargo-binstall&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I learned some useful tricks by looking at their work. cargo-binstall
+had the benefit of being an installer, so of course its script &lt;a
+href=&#34;https://github.com/cargo-bins/cargo-binstall/blob/1573c71f7a000e29578e78b3b6de661a87f57ee9/install-from-binstall-release.sh#L58&#34;&gt;uses
+cargo-binstall to install itself&lt;/a&gt;. I guess one way of writing an
+installer is downloading cargo-binstall and calling it! Although I chose
+not to take that option.&lt;/p&gt;
+&lt;p&gt;I ended up basing celq’s installer on the one written by Casey
+Rodarmor for just. Just’s script was considerably shorter. At 180 lines,
+it makes a few compromises. It does less things than the script
+generated by &lt;code&gt;dist&lt;/code&gt;, but it still gets the job done.&lt;/p&gt;
+&lt;p&gt;The first compromise is perhaps the most controversial. How does
+just’s installer detect glibc or musl’s version? The answer is: it
+doesn’t! I did not realize that was an option, but if you browse &lt;a
+href=&#34;https://github.com/casey/just/releases&#34;&gt;just’s release page&lt;/a&gt;
+you will see that indeed they only ship musl binaries.&lt;/p&gt;
+&lt;p&gt;Choosing only musl binaries has some consequences, as the binaries
+compiled with &lt;code&gt;x86_64-unknown-linux-gnu&lt;/code&gt; are smaller than the
+ones for &lt;code&gt;x86_64-unknown-linux-musl&lt;/code&gt;. There are also other
+differences such as the musl vs glibc allocators, if you don’t use a
+custom allocator. But the amount of complexity avoided by only using
+musl in the installer made me adopt the same strategy.&lt;/p&gt;
+&lt;p&gt;The other simplification was with regards to modifying the
+&lt;code&gt;$PATH&lt;/code&gt; environment variable. The &lt;code&gt;just&lt;/code&gt; installer
+avoids this problem by requiring a &lt;code&gt;--to&lt;/code&gt; argument. If you
+pass a location that is in the &lt;code&gt;$PATH&lt;/code&gt;, good for you!
+Otherwise the installer will not intervene. This again cuts many lines
+of code.&lt;/p&gt;
+&lt;p&gt;I diverged a bit from &lt;code&gt;just&lt;/code&gt;’s behavior by guessing
+default destinations that are generally in &lt;code&gt;$PATH&lt;/code&gt;, although
+the &lt;code&gt;--to&lt;/code&gt; option was still available. If the guessed
+location is not in the path, I just print a warning.&lt;/p&gt;
+&lt;p&gt;Again, all these small optimizations from Casey compound and make the
+just installer be less complex.&lt;/p&gt;
+&lt;h2 id=&#34;attestations-and-checksums&#34;&gt;Attestations and checksums&lt;/h2&gt;
+&lt;p&gt;To wrap things up, let’s discuss two small additions I made to celq’s
+installer compared to just’s. I saw uv using &lt;a
+href=&#34;https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations&#34;&gt;GitHub
+attestations&lt;/a&gt; and I wanted to play with them.&lt;/p&gt;
+&lt;p&gt;The first modification was a &lt;code&gt;--verify-checksum&lt;/code&gt; flag:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb8&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb8-1&#34;&gt;&lt;a href=&#34;#cb8-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;curl&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--proto&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;#39;=https&amp;#39;&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--tlsv1.2&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-sSf&lt;/span&gt; https://get-celq.github.io/install.sh &lt;span class=&#34;kw&#34;&gt;|&lt;/span&gt; &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb8-2&#34;&gt;&lt;a href=&#34;#cb8-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;fu&#34;&gt;bash&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-s&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--verify-checksum&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The concept is simple; I embedded the SHA256 checksums in the
+installer. It is a simpler check than attestations, but at least it
+helps with integrity checks to make sure the download was not corrupted.
+You can see &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/6647e08c511958b861fc0eae9089cbbc5d50a2c7/template_install.sh#L92&#34;&gt;template_install.sh&lt;/a&gt;
+at the repository, it was fairly easy to implement.&lt;/p&gt;
+&lt;p&gt;The second modification was the &lt;code&gt;--verify-attestation&lt;/code&gt;
+flag. That flag relies on the &lt;a href=&#34;https://cli.github.com/&#34;&gt;GitHub
+CLI&lt;/a&gt; (&lt;code&gt;gh&lt;/code&gt;). I thought about it because I saw some
+discussion online about how insecure &lt;code&gt;curl|bash&lt;/code&gt; one-liners
+were. The idea behind it is to mitigate some of those concerns with
+attestations:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb9&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb9-1&#34;&gt;&lt;a href=&#34;#cb9-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;curl&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--proto&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;#39;=https&amp;#39;&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--tlsv1.2&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-sSf&lt;/span&gt; https://get-celq.github.io/install.sh &lt;span class=&#34;op&#34;&gt;&amp;gt;&lt;/span&gt; install.sh&lt;/span&gt;
+&lt;span id=&#34;cb9-2&#34;&gt;&lt;a href=&#34;#cb9-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;gh&lt;/span&gt; attestation verify install.sh &lt;span class=&#34;at&#34;&gt;--repo&lt;/span&gt; IvanIsCoding/celq&lt;/span&gt;
+&lt;span id=&#34;cb9-3&#34;&gt;&lt;a href=&#34;#cb9-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;fu&#34;&gt;bash&lt;/span&gt; install.sh &lt;span class=&#34;at&#34;&gt;--verify-attestation&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Instead of directly piping the script to &lt;code&gt;bash&lt;/code&gt;, we save
+the script to a file. Then, we use &lt;code&gt;gh&lt;/code&gt; to verify that the
+script was indeed generated by me in a GitHub action. Once we establish
+that the installer is legitimate and from my repository, we run it with
+the &lt;code&gt;--verify-attestation&lt;/code&gt; that applies the same logic to the
+pre-built binaries. If there is an issue checking that the binaries are
+from any place other than the ones built by my GitHub Actions, the
+script fails.&lt;/p&gt;
+&lt;p&gt;My release process was very similar to Homebrew’s: template the shell
+script and then make a commit to the GitHub pages repository to publish
+the script. &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/6647e08c511958b861fc0eae9089cbbc5d50a2c7/.github/workflows/release_github.yml#L187&#34;&gt;release_github.yml&lt;/a&gt;
+contains the templating and the attestation generation.&lt;/p&gt;
+&lt;h2 id=&#34;whats-next&#34;&gt;What’s Next&lt;/h2&gt;
+&lt;p&gt;If you found this blog post interesting, stay tuned for the next one.
+It will cover FreeBSD, Nix, and Guix. There’s cross-compiling Rust
+binaries to FreeBSD, writing Nix with two kinds of derivations, patching
+my crate to compile on Guix’s older Rust version, and more.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>I packaged my Rust CLI to too many places, here&#39;s what I learned</title>
+      <link>https://ivaniscoding.github.io/posts/rustpackaging1/</link>
+      <pubDate>Sun, 25 Jan 2026 13:00:00 -0800</pubDate>
+      <guid>https://ivaniscoding.github.io/posts/rustpackaging1/</guid>
+      <description>&lt;p&gt;Have you ever had the urge to make your software available in all
+distribution channels? Did you ever create over 10 different
+installation methods for a tool no one uses (yet)? No? Well I did.&lt;/p&gt;
+&lt;p&gt;If you stick around until the end, you will learn how I packaged my
+Rust CLI to an obnoxious number of places. This is the first post of a
+series about packaging my Rust CLI. I am planning to split it into four
+parts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Part 1: PyPI, NPM, and GitHub Actions (this post)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging2&#34;&gt;Part 2: Linux and macOS&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging3&#34;&gt;Part 3: FreeBSD, Nix, Guix&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ivaniscoding.github.io/posts/rustpackaging4&#34;&gt;Part 4: Windows and
+multi-platform&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;One of the reasons I am writing this post is to promote &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq&#34;&gt;celq&lt;/a&gt;. It’s a tool that
+can query JSON, YAML, and TOML. The quickest way to describe it is: it’s
+like if jq met &lt;a href=&#34;https://cel.dev/&#34;&gt;CEL&lt;/a&gt;. Go check it out!&lt;/p&gt;
+&lt;p&gt;Even if you don’t want to install celq, you can try the &lt;a
+href=&#34;https://celq-playground.github.io/&#34;&gt;playground&lt;/a&gt; on your
+browser!&lt;/p&gt;
+&lt;p&gt;To get things started, I’ll start with the most “exotic” options: the
+Python Package Index (PyPI) and NPM. I will also cover GitHub Actions,
+which will tie with the NPM section.&lt;/p&gt;
+&lt;p&gt;PyPI and NPM can be puzzling choices for some readers. After all,
+there’s not a single line of Python or JavaScript code in my binary.
+Nevertheless, the CLI is available &lt;a
+href=&#34;https://pypi.org/project/celq/&#34;&gt;for Python&lt;/a&gt; and &lt;a
+href=&#34;https://www.npmjs.com/package/celq&#34;&gt;JavaScript&lt;/a&gt; developers.&lt;/p&gt;
+&lt;h2 id=&#34;why&#34;&gt;Why?&lt;/h2&gt;
+&lt;p&gt;You might be asking: why is this piece of software available in so
+many distribution channels? At this point, the answer is for the sake of
+it. I wanted to push the number to the limit. I have not yet reached the
+limit, but I am at a point where the ROI for each additional channel is
+fairly small.&lt;/p&gt;
+&lt;p&gt;Nevertheless, there is a reason for distributing pre-built binaries.
+Users don’t want to spend time compiling your code. Especially in CI
+where they do it hundreds of times a day! In addition, sometimes users
+won’t even have the compiler for your language installed.&lt;/p&gt;
+&lt;p&gt;Another way of putting it is: convenience. Users want a convenient
+way to download your binary, they don’t want friction. This is where
+Python and JavaScript come in.&lt;/p&gt;
+&lt;p&gt;As of 2025, JavaScript and Python topped nearly all programming
+language ranks. It is reasonable to assume that Python and JS developers
+would have some of the following tools already installed:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.astral.sh/uv/&#34;&gt;&lt;code&gt;uv&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a
+href=&#34;https://en.wikipedia.org/wiki/Pip_(package_manager)&#34;&gt;&lt;code&gt;pip&lt;/code&gt;&lt;/a&gt;
+or &lt;a href=&#34;https://github.com/pypa/pipx&#34;&gt;&lt;code&gt;pipx&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;npm&lt;/code&gt; and &lt;code&gt;npx&lt;/code&gt; (it comes with Node.js after
+all)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://pnpm.io/&#34;&gt;&lt;code&gt;pnpm&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/yarnpkg&#34;&gt;&lt;code&gt;yarn&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If you package your Rust CLI for PyPI and NPM, you will unblock an
+almost frictionless way for users to run your tool.
+&lt;code&gt;uvx celq&lt;/code&gt; and &lt;code&gt;npx celq&lt;/code&gt; should just download the
+binary somewhere and run it.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;yarn install celq&lt;/code&gt; and &lt;code&gt;pip install celq&lt;/code&gt;
+might require a few extra steps, but overall it is still a simple way of
+installing software. I am not saying it is the best way of installing
+software (it isn’t). But it gets the job done.&lt;/p&gt;
+&lt;p&gt;Also, in my defense: &lt;code&gt;celq&lt;/code&gt; is tangentially useful for
+Python and JavaScript developers.&lt;/p&gt;
+&lt;p&gt;Have you ever wondered what versions &lt;code&gt;uv&lt;/code&gt; resolves for a
+project? Well, &lt;code&gt;celq&lt;/code&gt; can query it. Let’s take for example
+&lt;code&gt;jupyter&lt;/code&gt; related packages:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb1&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb1-1&#34;&gt;&lt;a href=&#34;#cb1-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;uvx&lt;/span&gt; celq &lt;span class=&#34;at&#34;&gt;--from-toml&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;-p&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;#39;this.package.filter(p, p.name.contains(&amp;quot;jupyter&amp;quot;))&amp;#39;&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;&amp;lt;&lt;/span&gt; uv.lock&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;uv.lock&lt;/code&gt; is a TOML file, &lt;code&gt;celq&lt;/code&gt; can process
+TOML. The same argument applies for &lt;code&gt;package-lock.json&lt;/code&gt;!&lt;/p&gt;
+&lt;p&gt;Now that the motivation is clearer, let’s see what the process
+entails.&lt;/p&gt;
+&lt;h2 id=&#34;python&#34;&gt;Python&lt;/h2&gt;
+&lt;p&gt;To publish binaries for PyPI, we will use many tools written in Rust.
+The first one is &lt;code&gt;uv&lt;/code&gt; which we discussed previously. More
+specifically, we’ll be interested in the &lt;a
+href=&#34;https://docs.astral.sh/uv/guides/package/#publishing-your-package&#34;&gt;&lt;code&gt;uv publish&lt;/code&gt;&lt;/a&gt;
+subcommand of &lt;code&gt;uv&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The other immediate tool is &lt;a
+href=&#34;https://www.maturin.rs/&#34;&gt;maturin&lt;/a&gt;. Maturin is mostly known for
+building Python extensions in Rust. But it works for Rust binaries as
+well.&lt;/p&gt;
+&lt;p&gt;The only thing you will need is a &lt;code&gt;pyproject.toml&lt;/code&gt; file.
+You need to put it somewhere. For my project, I made a &lt;code&gt;pypi&lt;/code&gt;
+folder and put it in &lt;code&gt;pypi/pyproject.toml&lt;/code&gt;. But putting it at
+the root of your repository works too.&lt;/p&gt;
+&lt;p&gt;There are lots of metadata in the file, but the core of it is:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb2&#34;&gt;&lt;pre
+class=&#34;sourceCode toml&#34;&gt;&lt;code class=&#34;sourceCode toml&#34;&gt;&lt;span id=&#34;cb2-1&#34;&gt;&lt;a href=&#34;#cb2-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;kw&#34;&gt;[project]&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-2&#34;&gt;&lt;a href=&#34;#cb2-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;name&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;placeholder&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-3&#34;&gt;&lt;a href=&#34;#cb2-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;requires-python&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;&amp;gt;=3.10&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-4&#34;&gt;&lt;a href=&#34;#cb2-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;description&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;TODO&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-5&#34;&gt;&lt;a href=&#34;#cb2-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;readme&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;dt&#34;&gt;file&lt;/span&gt;&lt;span class=&#34;op&#34;&gt; =&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;README.md&amp;quot;&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;, &lt;/span&gt;&lt;span class=&#34;dt&#34;&gt;content-type&lt;/span&gt;&lt;span class=&#34;op&#34;&gt; =&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;text/markdown&amp;quot;&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;}&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-6&#34;&gt;&lt;a href=&#34;#cb2-6&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;license-files&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;st&#34;&gt;&amp;quot;FILLME&amp;quot;&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;]&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-7&#34;&gt;&lt;a href=&#34;#cb2-7&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;dynamic&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;st&#34;&gt;&amp;quot;version&amp;quot;&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;]&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-8&#34;&gt;&lt;a href=&#34;#cb2-8&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-9&#34;&gt;&lt;a href=&#34;#cb2-9&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;kw&#34;&gt;[build-system]&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-10&#34;&gt;&lt;a href=&#34;#cb2-10&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;requires&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;st&#34;&gt;&amp;quot;maturin&amp;gt;=1.9,&amp;lt;2&amp;quot;&lt;/span&gt;&lt;span class=&#34;op&#34;&gt;]&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-11&#34;&gt;&lt;a href=&#34;#cb2-11&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;build-backend&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;maturin&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-12&#34;&gt;&lt;a href=&#34;#cb2-12&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-13&#34;&gt;&lt;a href=&#34;#cb2-13&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;kw&#34;&gt;[tool.maturin]&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-14&#34;&gt;&lt;a href=&#34;#cb2-14&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;bindings&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;bin&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-15&#34;&gt;&lt;a href=&#34;#cb2-15&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;manifest-path&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;../Cargo.toml&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-16&#34;&gt;&lt;a href=&#34;#cb2-16&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;module-name&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;st&#34;&gt;&amp;quot;placeholder&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb2-17&#34;&gt;&lt;a href=&#34;#cb2-17&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;dt&#34;&gt;locked&lt;/span&gt; &lt;span class=&#34;op&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;cn&#34;&gt;true&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That is it. Compared to NPM, this one is fairly simple. Of course
+your &lt;code&gt;Cargo.toml&lt;/code&gt; might be in a different path or your
+workspace might have multiple binaries. Mine didn’t so I didn’t have to
+take care of it. But if you have to, just check &lt;a
+href=&#34;https://www.maturin.rs/config.html&#34;&gt;maturin’s documentation&lt;/a&gt;
+because they support it all.&lt;/p&gt;
+&lt;p&gt;After all is setup, you can build a Python wheel locally. Just run
+this command in the same directory as your
+&lt;code&gt;pyproject.toml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb3&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb3-1&#34;&gt;&lt;a href=&#34;#cb3-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;uv&lt;/span&gt; build &lt;span class=&#34;at&#34;&gt;--wheel&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Under the hood, &lt;code&gt;uv&lt;/code&gt; will end up calling
+&lt;code&gt;maturin&lt;/code&gt; and give you a &lt;code&gt;.whl&lt;/code&gt; file somewhere.
+Assuming you have a &lt;a href=&#34;https://pypi.org/help/#apitoken&#34;&gt;PyPI API
+token&lt;/a&gt;, you can upload the wheel with:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;uv publish  some/path/placeholder.whl&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I could tell you that is all there is to it. If you are on macOS,
+Windows, or Alpine Linux the above command works. But that would be a
+lie.&lt;/p&gt;
+&lt;p&gt;If you are running a moderately recent Linux distribution that
+doesn’t use musl, you’ll get the following error:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Binary wheel &amp;#39;placeholder-0.0.1-py3-none-linux_x86_64.whl&amp;#39; has an unsupported platform tag &amp;#39;linux_x86_64&amp;#39;.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This comes from the thoughtful decision of the PyPI maintainers to
+make binaries published in PyPI compatible with older Linux
+distributions. The TL;DR for folks that just want to publish software
+is: if you build on a Linux distro that is too new, it might include
+newer libc symbols. If you try to execute the binary on an older distro,
+things could break!&lt;/p&gt;
+&lt;p&gt;One solution for that problem is &lt;a
+href=&#34;https://github.com/pypa/cibuildwheel&#34;&gt;cibuildwheel&lt;/a&gt;. The
+summary of it is that the Python Packaging Authoritry (PyPA) curates a
+Docker image that will for sure have an older &lt;code&gt;libc&lt;/code&gt; version.
+You build inside of it, your wheel gets a &lt;code&gt;manylinux_2_28&lt;/code&gt; or
+equivalent suffix instead of &lt;code&gt;linux_x86_64&lt;/code&gt;, everyone is
+happy. But that is not what I did!&lt;/p&gt;
+&lt;p&gt;Instead, I chose to use &lt;a
+href=&#34;https://github.com/rust-cross/cargo-zigbuild&#34;&gt;cargo-zigbuild&lt;/a&gt;.
+Why? Because Zig is cool and I wanted to try it. But I also found it
+more lightweight than cibuildwheel. The reasoning behind cargo-zigbuild
+is as follows: Zig has a great linker, it ships with libc headers, why
+not use it? You get easier cross-compilation as a bonus as well.&lt;/p&gt;
+&lt;p&gt;If you thought that it was unusual for &lt;code&gt;celq&lt;/code&gt; to be in
+PyPI, wait until you discover that both the Zig compiler and
+cargo-zigbuild are there. All these together allows us to conjure a
+single &lt;code&gt;uv&lt;/code&gt; command to compile the binary:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb6&#34;&gt;&lt;pre
+class=&#34;sourceCode bash&#34;&gt;&lt;code class=&#34;sourceCode bash&#34;&gt;&lt;span id=&#34;cb6-1&#34;&gt;&lt;a href=&#34;#cb6-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;ex&#34;&gt;uvx&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--from&lt;/span&gt; maturin==1.11.5 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-2&#34;&gt;&lt;a href=&#34;#cb6-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;--with&lt;/span&gt; ziglang==0.15.1 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-3&#34;&gt;&lt;a href=&#34;#cb6-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;--with&lt;/span&gt; cargo-zigbuild==0.21.1 &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-4&#34;&gt;&lt;a href=&#34;#cb6-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    maturin build &lt;span class=&#34;at&#34;&gt;--release&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--target&lt;/span&gt; x86_64-unknown-linux-gnu &lt;span class=&#34;dt&#34;&gt;\&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb6-5&#34;&gt;&lt;a href=&#34;#cb6-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;    &lt;span class=&#34;at&#34;&gt;--zig&lt;/span&gt; &lt;span class=&#34;at&#34;&gt;--compatibility&lt;/span&gt; manylinux_2_28&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That command creates an environment with maturin, Zig,
+cargo-zigbuild, and tells maturin to use Zig targeting glibc 2.28. That
+solves our problem.&lt;/p&gt;
+&lt;p&gt;If you want to see the complete picture, check &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/.github/workflows/release_pypi.yml&#34;&gt;release_pypi.yml&lt;/a&gt;
+for the complete setup with GitHub actions and trusted publishers. The
+file covers aarch64 and musl that I skipped for brevity, but overall
+&lt;code&gt;uv build&lt;/code&gt; and the Zig incantation are enough.&lt;/p&gt;
+&lt;h2 id=&#34;npm&#34;&gt;NPM&lt;/h2&gt;
+&lt;p&gt;Compared to PyPI, NPM has even less restrictions. It is kind of the
+wild west, as long as you comply with the ToS you can probably upload
+any package to NPM.&lt;/p&gt;
+&lt;p&gt;There is prior art: firstly the &lt;a
+href=&#34;https://axodotdev.github.io/cargo-dist/book/&#34;&gt;&lt;code&gt;dist&lt;/code&gt;&lt;/a&gt;
+tool. I ended up not choosing &lt;code&gt;dist&lt;/code&gt; because I wanted to
+understand how things worked. But it is the most mindless way to get
+your Rust binary in NPM. The tool should do nearly everything for
+you.&lt;/p&gt;
+&lt;p&gt;Secondly, there is &lt;a
+href=&#34;https://blog.orhun.dev/packaging-rust-for-npm/&#34;&gt;orhun’s blog&lt;/a&gt;.
+It is the best blog on the subject in my opinion. If I rewrote it I
+would be doing a disservice, so if you are interested go read the
+original. What I will focus on is explaining how the trick works.&lt;/p&gt;
+&lt;p&gt;Orhun’s strategy for &lt;code&gt;git-cliff&lt;/code&gt; was as follows:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Create platform specific packages
+e.g. &lt;code&gt;@namespace/placeholder-linux-x64&lt;/code&gt; or
+&lt;code&gt;@namespace/placeholder-darwin-arm64&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Create a &lt;code&gt;@namespace/placeholder&lt;/code&gt; package glueing it all
+together&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The code for &lt;code&gt;@namespace/placeholder&lt;/code&gt; is a thin JavaScript
+shim. The JS code will essentially find your binary in
+&lt;code&gt;node_modules&lt;/code&gt; from the platform specific package
+(e.g. &lt;code&gt;@namespace/placeholder-linux-x64&lt;/code&gt;) and forward the
+arguments to the binary. That is it.&lt;/p&gt;
+&lt;p&gt;You can take a look at &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/npm/celq/src/index.ts&#34;&gt;index.ts&lt;/a&gt;
+for the shim code and &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/.github/workflows/release_npm.yml&#34;&gt;release_npm.yml&lt;/a&gt;
+for the GitHub Actions.&lt;/p&gt;
+&lt;p&gt;I will disclaim that I modified Orhun’s code slightly to make
+&lt;code&gt;celq&lt;/code&gt; dogfood &lt;code&gt;celq&lt;/code&gt;. Yes, I use my own CLI tool
+to fill in a &lt;code&gt;package.json&lt;/code&gt; template of sorts. See &lt;a
+href=&#34;https://github.com/IvanIsCoding/celq/blob/main/npm/celq/package.json.cel&#34;&gt;&lt;code&gt;package.json.cel&lt;/code&gt;&lt;/a&gt;
+if you are curious.&lt;/p&gt;
+&lt;p&gt;Another thing I learned is: the &lt;code&gt;optionalDependencies&lt;/code&gt;
+fields controls the platform-specific binaries. If you ever need to
+delete macOS x64 or add a future platform like Linux loong64, that is
+the place to do it.&lt;/p&gt;
+&lt;h2 id=&#34;github-actions&#34;&gt;GitHub Actions&lt;/h2&gt;
+&lt;p&gt;Last but not least, let’s cover GitHub Actions. It is a popular CI/CD
+option, so again you might be interested in making your software
+available in that kind of environment.&lt;/p&gt;
+&lt;p&gt;The ultimate goal for &lt;code&gt;celq&lt;/code&gt; was to have this kind of
+Action:&lt;/p&gt;
+&lt;div class=&#34;sourceCode&#34; id=&#34;cb7&#34;&gt;&lt;pre
+class=&#34;sourceCode yaml&#34;&gt;&lt;code class=&#34;sourceCode yaml&#34;&gt;&lt;span id=&#34;cb7-1&#34;&gt;&lt;a href=&#34;#cb7-1&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;kw&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;at&#34;&gt; &lt;/span&gt;&lt;span class=&#34;fu&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;at&#34;&gt; Example Celq Action&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-2&#34;&gt;&lt;a href=&#34;#cb7-2&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;at&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;fu&#34;&gt;id&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;at&#34;&gt; exampleID&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-3&#34;&gt;&lt;a href=&#34;#cb7-3&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;at&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;fu&#34;&gt;uses&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;at&#34;&gt; get-celq/celq-action@main&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-4&#34;&gt;&lt;a href=&#34;#cb7-4&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;at&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;fu&#34;&gt;with&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;:&lt;/span&gt;&lt;/span&gt;
+&lt;span id=&#34;cb7-5&#34;&gt;&lt;a href=&#34;#cb7-5&#34; aria-hidden=&#34;true&#34; tabindex=&#34;-1&#34;&gt;&lt;/a&gt;&lt;span class=&#34;at&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;fu&#34;&gt;cmd&lt;/span&gt;&lt;span class=&#34;kw&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;at&#34;&gt; celq &amp;#39;this.exampleID&amp;#39; &amp;lt; example.json&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The action runs a one-off command and it stores the result in a
+variable (&lt;code&gt;steps.exampleID.outputs.result&lt;/code&gt;). For permanently
+installing a binary, we’ll cover &lt;code&gt;cargo binstall&lt;/code&gt; + &lt;a
+href=&#34;https://github.com/taiki-e/install-action&#34;&gt;install-action&lt;/a&gt; in
+the next blog post.&lt;/p&gt;
+&lt;p&gt;There are two ways of writing GitHub Actions. The first one is with
+Docker. Perhaps it would have been a more natural way of doing this, but
+this is not how things happened.&lt;/p&gt;
+&lt;p&gt;The second way is to write JavaScript. Don’t ask me why, but GitHub
+Actions are all Node.js based. This is how the NPM section discussed
+previously comes into play. My strategy was:&lt;/p&gt;
+&lt;ol type=&#34;1&#34;&gt;
+&lt;li&gt;Make a Node.js action&lt;/li&gt;
+&lt;li&gt;Inside the Node.js action, call
+&lt;code&gt;npx -y @namespace/placeholder $COMMAND&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Profit&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;It turns out that strategy works. I asked Gemini to vibe-code it for
+me, &lt;a
+href=&#34;https://github.com/get-celq/celq-action/blob/main/index.js&#34;&gt;index.js&lt;/a&gt;
+came out, it works.&lt;/p&gt;
+&lt;p&gt;Also, you did not ask but: I wrote this blog and celq’s documentation
+by hand. This was more of a vibe engineered project, it’s not a Level 8
+fully autonomous thing. At least I tested the binary and deferred most
+logic to established libraries (i.e. &lt;code&gt;serde_json&lt;/code&gt;,
+&lt;code&gt;cel-rust&lt;/code&gt;).&lt;/p&gt;
+&lt;h2 id=&#34;whats-next&#34;&gt;What’s Next&lt;/h2&gt;
+&lt;p&gt;If you found this blog post interesting, stay tuned for the next one.
+It will cover Linux and macOS. There’s GitHub releases, there’s bash
+scripts that are piped to &lt;code&gt;curl&lt;/code&gt;, there’s Homebrew, how
+&lt;code&gt;cargo binstall&lt;/code&gt; leads to another GitHub Actions integration,
+and more.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

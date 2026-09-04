@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Ivan Carvalho">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Self-distributing a Rust CLI on FreeBSD and Nix">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://ivaniscoding.github.io/posts/rustpackaging3/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/atom-one-dark.min.css" crossorigin="anonymous" title="hl-light">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/atom-one-dark.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu_81c19ee2f26835dd.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu_2f1f00b57803fd83.png">
+
+  <link rel="canonical" href="https://ivaniscoding.github.io/posts/rustpackaging3/">
+
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Ivan Carvalho">
+  <meta property="og:url" content="https://ivaniscoding.github.io/posts/rustpackaging3/">
+  <meta property="og:title" content="Trying to support FreeBSD and Nix for my Rust CLI: Lessons Learned | Ivan Carvalho">
+  <meta property="og:description" content="Self-distributing a Rust CLI on FreeBSD and Nix"><meta property="og:image" content="https://ivaniscoding.github.io/img/social_preview.png">
+  <meta property="twitter:image" content="https://ivaniscoding.github.io/img/social_preview.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2026-02-09T10:00:00-05:00">
+    
+    <meta property="article:modified_time" content="2026-02-09T10:00:00-05:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Trying to support FreeBSD and Nix for my Rust CLI: Lessons Learned | Ivan Carvalho</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Ivan Carvalho</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Ivan Carvalho</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Trying to support FreeBSD and Nix for my Rust CLI: Lessons Learned</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Feb 9, 2026
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/rust/">Rust</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>Have you ever been curious about how Rust software is packaged with
+Nix? Did you ever want to ship binaries for FreeBSD? No? Well, I
+did.</p>
+<p>In this post, bear with me as we explore:</p>
+<ul>
+<li>Building from source for FreeBSD, OpenBSD, and NetBSD</li>
+<li>Cross-compiling for FreeBSD x86-64 and aarch64</li>
+<li>Ways of writing Nix derivations for Rust</li>
+<li>Generating a Guix package from crates.io</li>
+</ul>
+<p>As a reminder, this is a series of posts I made about packaging my
+Rust CLI:</p>
+<ul>
+<li><a href="/posts/rustpackaging2">Part 2: Linux and macOS</a></li>
+<li>Part 3: FreeBSD, Nix, Guix (this post)</li>
+<li><a href="/posts/rustpackaging4">Part 4: Windows and
+multi-platform</a></li>
+</ul>
+<p>There is also a Part 1, but let’s put it this way: it was written for
+another audience. If you are a Nix or BSD user, you might find it
+vile.</p>
+<p>One of the reasons why I wrote this post was to share what I learned
+writing <a href="https://github.com/IvanIsCoding/celq">celq</a>. It is a
+small tool that can query JSON, TOML, and YAML from the command line. Go
+check it out!</p>
+<h2 id="disclaimers">Disclaimers</h2>
+<p>Firstly, I have titled this post with the word “trying” because I did
+not have much of a clue of what I was doing before I tried doing it. If
+you find issues, reach out and I will try to fix them.</p>
+<p>Secondly, this post focuses on self-distribution. Do not immediately
+submit ports to FreeBSD Ports or packages to Nixpkgs just because you
+can. There is a cost for the maintainers to keep the builds running. Let
+things happen organically: if users like your software, they will send a
+recipe themselves. As long as you make the software easy to build, you
+did your part.</p>
+<h2 id="freebsd-from-source">FreeBSD from Source</h2>
+<p>I have always been fond of <a
+href="https://www.freebsd.org/">FreeBSD</a>, so I wanted my code to
+support it. It might seem obvious, but the first step for supporting a
+new platform is to test your code there! It can be as simple as:</p>
+<ol type="1">
+<li>Install Rust and other dependencies/toolchains</li>
+<li>Run <code>cargo build</code></li>
+<li>Run <code>cargo test</code></li>
+</ol>
+<p>There are two ways of doing the first step. One can install Rust from
+the FreeBSD packages with <code>pkg install rust</code> or
+<code>rust-nightly</code>. The alternative is installing
+<code>rustup-init</code> from the repository and then downloading the
+rest of the toolchain with rustup, as is usually done on other
+platforms.</p>
+<p>Afterward, the second step is to verify the code builds. In general,
+this step will go smoothly for Rust code, but there could be some
+friction, especially with system libraries or libraries that make
+low-level syscalls specific to Linux. This step is either trivial or
+requires investigation when the build fails.</p>
+<p>Lastly, tests. This is similar to the previous step in the sense that
+tests either pass smoothly or identify problems that require manual
+fixes. Running tests can catch assumptions on Linux runtime behavior
+that don’t transfer to FreeBSD.</p>
+<p>These steps need to run somewhere, so a few options for CI are:</p>
+<ul>
+<li><a href="https://cirrus-ci.org/">Cirrus CI</a></li>
+<li><a href="https://github.com/vmactions/freebsd-vm">GitHub Actions
+with virtualization</a></li>
+<li>Self-hosted runners with FreeBSD</li>
+</ul>
+<p>I ended up using Cirrus CI as they offered first-class FreeBSD
+support. Their free tier was sufficient for my project, but their
+pay-as-you-go model seemed reasonable. I set it up to only run full
+builds on commits to main that change Rust files to help lower the
+resource usage. GitHub Actions do not support native FreeBSD runners,
+but there are many actions wrapping QEMU around. I use those for smaller
+tasks we will discuss later on.</p>
+<p>Following these steps ensures that your project plays nicely with the
+<a
+href="https://docs.freebsd.org/en/books/porters-handbook/special/#using-cargo">Rust
+section of the Porter’s handbook</a>. It will simplify the life of any
+future port maintainer.</p>
+<h2 id="cross-compiling-freebsd-binaries">Cross-compiling FreeBSD
+binaries</h2>
+<p>Next, let’s talk about pre-built binaries. FreeBSD users can always
+install from source as discussed previously, but for convenience, it is
+still interesting to provide binaries.</p>
+<p>Even if you are not keen on keeping a FreeBSD CI, cross-compilation
+to FreeBSD from Linux has become easier recently. <a
+href="https://github.com/rust-cross/cargo-zigbuild">cargo-zigbuild</a>,
+which we discussed during Part 1, has reduced the friction.</p>
+<p>The idea behind cargo-zigbuild is as follows: Zig has a great linker
+and it ships with the FreeBSD libc headers. That would be handy for
+cross-compilation! Indeed, take a look at this command:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> zigbuild <span class="at">--locked</span> <span class="at">--release</span> <span class="at">--target</span> x86_64-unknown-freebsd</span></code></pre></div>
+<p>Because Linux runners are more abundant, I found it easier to set up
+Zig and cargo-zigbuild with the <code>x86_64-unknown-freebsd</code>
+target than spinning up QEMU in GitHub Actions.</p>
+<p>For aarch64 binaries, the story is slightly different as
+<code>aarch64-unknown-freebsd</code> is a tier 3 target. If you just
+copy the setup from x86-64, you will end up with an error message like
+this:</p>
+<pre><code>error: component &#39;rust-std&#39; for target &#39;aarch64-unknown-freebsd&#39; is unavailable for download for channel &#39;1.89.0&#39;</code></pre>
+<p>The easiest solution for cross-compilation is to switch to Rust
+nightly and use the unstable <a
+href="https://doc.rust-lang.org/cargo/reference/unstable.html#build-std">build-std</a>
+feature:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> +nightly zigbuild <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--target</span> aarch64-unknown-freebsd <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-Z</span> build-std=std,panic_abort <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-Z</span> build-std-features=panic_immediate_abort</span></code></pre></div>
+<p>The above command requires the <code>rust-src</code> component from
+rustup and takes longer as it needs to compile std. But it gets the job
+done.</p>
+<h2 id="openbsd-and-netbsd">OpenBSD and NetBSD</h2>
+<p>I will briefly discuss OpenBSD and NetBSD, but I will disclose I have
+never used them on a daily basis.</p>
+<p>If you want to support these systems, I strongly recommend following
+the build-from-source approach discussed previously. Install Rust with
+the package manager, run
+<code>cargo build</code>/<code>cargo test</code> to catch bugs, and act
+accordingly to close bugs.</p>
+<p>I was not convinced pre-built binaries would add much value for these
+platforms. Nevertheless, testing OpenBSD/NetBSD in CI via virtualization
+goes a long way toward preventing regressions for future port
+maintainers.</p>
+<h2 id="nix-from-your-repository">Nix from your repository</h2>
+<p><a href="https://nixos.org/">NixOS</a> is one Linux distribution that
+is different from others. Nix can also be used outside of NixOS like in
+<a href="https://github.com/nix-community/home-manager">Home
+Manager</a>. For those not familiar with it, Nix uses a declarative
+build system with a functional programming language.</p>
+<p>In contrast to the previous blog post where we shipped pre-built
+binaries for Linux, Nix users expect a Nix derivation. The derivations
+make the system state reproducible and easier to inspect.</p>
+<p>There are multiple ways of writing Rust derivations for Nix. At the
+time of writing, I learned that the <a
+href="https://wiki.nixos.org/wiki/Rust">NixOS wiki listed seven
+different methods</a>. I used the built-in
+<code>buildRustPackage</code>, although <code>crane</code> seems to be a
+popular option as well.</p>
+<p>For me, the best way to learn the derivation was to go check how
+other Rust CLIs did it in Nixpkgs. I looked at <a
+href="https://github.com/NixOS/nixpkgs/blob/279fa8a4bc2f79f255d406ab24929b1e9fd1821d/pkgs/by-name/ja/jaq/package.nix">jaq’s
+entry</a>, because celq was inspired by jaq.</p>
+<p>The tweaks I made were:</p>
+<h3 id="automatically-reading-the-version">Automatically reading the
+version</h3>
+<p>Nix can read your <code>Cargo.toml</code>! You can write the file
+once and forget it, there is no risk that the version will get out of
+sync.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="va">cargoToml</span> <span class="op">=</span> <span class="bu">builtins</span>.fromTOML <span class="op">(</span><span class="bu">builtins</span>.readFile Cargo.toml<span class="op">);</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">in</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>rustPlatform.buildRustPackage <span class="op">(</span><span class="va">finalAttrs</span><span class="op">:</span> <span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">pname</span> <span class="op">=</span> <span class="st">&quot;celq&quot;</span><span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">version</span> <span class="op">=</span> cargoToml.package.version<span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="referring-to-the-local-source">Referring to the local
+source</h3>
+<p>It is possible to refer to the source of your library without
+<code>fetchFromGitHub</code> or <code>fetchCrate</code>. That minimizes
+the burden of updating <code>sha256</code> checksum field during
+updates.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>src = lib.cleanSource <span class="ss">./.</span>;</span></code></pre></div>
+<h3 id="avoiding-cargohash">Avoiding cargoHash</h3>
+<p>The concept of having <code>Cargo.lock</code> published with your
+crate fits nicely with the idea of reproducible builds for Nix. If you
+specify:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode nix"><code class="sourceCode nix"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cargoLock = <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">lockFile</span> <span class="op">=</span> <span class="ss">./Cargo.lock</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">allowBuiltinFetchGit</span> <span class="op">=</span> <span class="cn">true</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span></code></pre></div>
+<p>You avoid the need to update <code>cargoHash</code> each time you
+modify your dependencies.</p>
+<h3 id="in-practice">In practice</h3>
+<p>You can take a look at <a
+href="https://github.com/IvanIsCoding/celq/blob/main/nix/celq_dev.nix">celq_dev.nix</a>
+and <a
+href="https://github.com/IvanIsCoding/celq/blob/main/flake.nix">flake.nix</a>
+to see the end result, but I managed to achieve this:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">nix</span> run github:IvanIsCoding/celq#dev <span class="at">--</span> <span class="at">--version</span></span></code></pre></div>
+<p>My <code>dev</code> derivation runs the code from the latest commit
+from main. It also doesn’t need to be updated, which makes it
+low-maintenance.</p>
+<h2 id="nix-from-crates.io">Nix from crates.io</h2>
+<p>Now that we’ve discussed the first derivation, let’s dive into the
+second derivation, which was the one I wrote first.. I talked with some
+Nix users and the previous one is the more idiomatic one.</p>
+<p>With that being said, I found this derivation useful as it can be
+tweaked to package any tool published in crates.io. Mentally, it was
+also comforting to have a derivation pinned to a published, stable
+version in case I messed up the state of the <code>main</code> during
+development.</p>
+<p>You can see the derivation in <a
+href="https://github.com/IvanIsCoding/celq/blob/main/nix/celq.nix">celq.nix</a>.
+It “undoes” some of the conveniences we discussed previously:</p>
+<ul>
+<li><code>version</code> needs to be manually specified</li>
+<li><code>sha256</code> for the source from crates.io needs to be
+specified</li>
+<li><code>cargoHash</code> needs to be specified and updated for each
+version</li>
+</ul>
+<p>Keeping these three fields up-to-date can be slightly annoying, in
+particular <code>cargoHash</code> as it is kind of hard to calculate the
+hash without running <code>nix</code> first. Nevertheless, the code runs
+with <code>nix run github:IvanIsCoding/celq</code> and it will not break
+as long as I point it to a stable crates.io release.</p>
+<h2 id="guix">Guix</h2>
+<p>Last but not least, <a href="https://guix.gnu.org/">Guix</a>. This is
+another package manager based in functional programming. The language
+though is different: Guix uses <a
+href="https://en.wikipedia.org/wiki/GNU_Guile">Guile</a>.</p>
+<p>I must say that Guix does have excellent documentation. To package
+<code>celq</code> for Guix, I followed the steps from the <a
+href="https://guix.gnu.org/cookbook/en/guix-cookbook.html">cookbook</a>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">guix</span> import crate celq</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">guix</span> import <span class="at">--insert</span><span class="op">=</span>packages/celq.scm <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>      crate <span class="at">--lockfile</span><span class="op">=</span>../celq-repo/Cargo.lock celq</span></code></pre></div>
+<p>This generated <a
+href="https://github.com/get-celq/celq-channel/blob/main/packages/celq.scm">celq.scm</a>,
+which can conveniently be distributed on a custom <a
+href="https://guix.gnu.org/cookbook/en/html_node/Channels.html">Guix
+channel</a>.</p>
+<p>I found the Guix tooling interesting because the file did convert
+<code>Cargo.lock</code> ahead of time, so there were many statements
+like this:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode guile"><code class="sourceCode scheme"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(<span class="ex">define</span><span class="fu"> rust-cel-0.11.6</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  (crate-source <span class="st">&quot;cel&quot;</span> <span class="st">&quot;0.11.6&quot;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;0pyrqas0r64wykydfmgqfjyb1c14x4w07mafk6fmakzvhb8b7plf&quot;</span>))</span></code></pre></div>
+<p>Unfortunately, the Rust version that shipped with Guix was not recent
+enough to compile my dependencies. This was fixable with some
+interesting tricks. Guix can patch <code>Cargo.toml</code>, so naturally
+I tried to lower the MSRV:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode guile"><code class="sourceCode scheme"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>substitute* <span class="st">&quot;Cargo.toml&quot;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                <span class="co">;; Patch rust-version</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                ((<span class="st">&quot;rust-version = </span><span class="ch">\&quot;</span><span class="st">[^</span><span class="ch">\&quot;</span><span class="st">]+</span><span class="ch">\&quot;</span><span class="st">&quot;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                 <span class="st">&quot;rust-version = </span><span class="ch">\&quot;</span><span class="st">1.85</span><span class="ch">\&quot;</span><span class="st">&quot;</span>)</span></code></pre></div>
+<p>I applied the same strategy to downgrade the dependencies, reran
+<code>guix import crate</code> based on a <code>Cargo.lock</code> with
+downgraded dependencies, and kept going. Eventually, things compiled
+after a couple of attempts.</p>
+<p>I do not plan to keep my Guix channel up-to-date, as I have not found
+a programmatic way of applying the patches after updates. Nevertheless,
+I enjoyed going through the process and getting a successful build.</p>
+<h2 id="whats-next">What’s Next</h2>
+<p>The last post of this series will cover Windows. It will also discuss
+multi-platform tools I have not got a chance to cover such as Mise. In
+addition to some practical topics like Scoop, I will also cover less
+practical experiments like targeting MS-DOS and Windows 98. Stay
+tuned.</p>
+
+    </div>
+
+    
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rust/">rust</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="portrait mr-3" src="/authors/authors/avatar_hu_e6b5933c51c7da19.jpg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="https://ivaniscoding.github.io/">Ivan Carvalho</a></h5>
+      <h6 class="card-subtitle">Software Developer</h6>
+      <p class="card-text">Always looking for a challenge!</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/ivan-carvalho/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/IvanIsCoding" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/posts/rustpackaging2/">Homebrew and One-Line Installers for My Rust CLI: Lessons Learned</a></li>
+      
+      <li><a href="/posts/rustpackaging1/">I packaged my Rust CLI to too many places, here&#39;s what I learned</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <script src="/js/academic.min.abdd766c2ff9ae04ed4871c941357ca8.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
