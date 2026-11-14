@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Ivan Carvalho">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Publishing Rust binaries to PyPI and NPM">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://ivaniscoding.github.io/posts/rustpackaging1/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/atom-one-dark.min.css" crossorigin="anonymous" title="hl-light">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/atom-one-dark.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu_81c19ee2f26835dd.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu_2f1f00b57803fd83.png">
+
+  <link rel="canonical" href="https://ivaniscoding.github.io/posts/rustpackaging1/">
+
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Ivan Carvalho">
+  <meta property="og:url" content="https://ivaniscoding.github.io/posts/rustpackaging1/">
+  <meta property="og:title" content="I packaged my Rust CLI to too many places, here&#39;s what I learned | Ivan Carvalho">
+  <meta property="og:description" content="Publishing Rust binaries to PyPI and NPM"><meta property="og:image" content="https://ivaniscoding.github.io/img/social_preview.png">
+  <meta property="twitter:image" content="https://ivaniscoding.github.io/img/social_preview.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2026-01-25T13:00:00-08:00">
+    
+    <meta property="article:modified_time" content="2026-01-25T13:00:00-08:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>I packaged my Rust CLI to too many places, here&#39;s what I learned | Ivan Carvalho</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Ivan Carvalho</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Ivan Carvalho</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>I packaged my Rust CLI to too many places, here&#39;s what I learned</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Jan 25, 2026
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/rust/">Rust</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>Have you ever had the urge to make your software available in all
+distribution channels? Did you ever create over 10 different
+installation methods for a tool no one uses (yet)? No? Well I did.</p>
+<p>If you stick around until the end, you will learn how I packaged my
+Rust CLI to an obnoxious number of places. This is the first post of a
+series about packaging my Rust CLI. I am planning to split it into four
+parts:</p>
+<ul>
+<li>Part 1: PyPI, NPM, and GitHub Actions (this post)</li>
+<li><a href="/posts/rustpackaging2">Part 2: Linux and macOS</a></li>
+<li><a href="/posts/rustpackaging3">Part 3: FreeBSD, Nix, Guix</a></li>
+<li><a href="/posts/rustpackaging4">Part 4: Windows and
+multi-platform</a></li>
+</ul>
+<p>One of the reasons I am writing this post is to promote <a
+href="https://github.com/IvanIsCoding/celq">celq</a>. It’s a tool that
+can query JSON, YAML, and TOML. The quickest way to describe it is: it’s
+like if jq met <a href="https://cel.dev/">CEL</a>. Go check it out!</p>
+<p>Even if you don’t want to install celq, you can try the <a
+href="https://celq-playground.github.io/">playground</a> on your
+browser!</p>
+<p>To get things started, I’ll start with the most “exotic” options: the
+Python Package Index (PyPI) and NPM. I will also cover GitHub Actions,
+which will tie with the NPM section.</p>
+<p>PyPI and NPM can be puzzling choices for some readers. After all,
+there’s not a single line of Python or JavaScript code in my binary.
+Nevertheless, the CLI is available <a
+href="https://pypi.org/project/celq/">for Python</a> and <a
+href="https://www.npmjs.com/package/celq">JavaScript</a> developers.</p>
+<h2 id="why">Why?</h2>
+<p>You might be asking: why is this piece of software available in so
+many distribution channels? At this point, the answer is for the sake of
+it. I wanted to push the number to the limit. I have not yet reached the
+limit, but I am at a point where the ROI for each additional channel is
+fairly small.</p>
+<p>Nevertheless, there is a reason for distributing pre-built binaries.
+Users don’t want to spend time compiling your code. Especially in CI
+where they do it hundreds of times a day! In addition, sometimes users
+won’t even have the compiler for your language installed.</p>
+<p>Another way of putting it is: convenience. Users want a convenient
+way to download your binary, they don’t want friction. This is where
+Python and JavaScript come in.</p>
+<p>As of 2025, JavaScript and Python topped nearly all programming
+language ranks. It is reasonable to assume that Python and JS developers
+would have some of the following tools already installed:</p>
+<ul>
+<li><a href="https://docs.astral.sh/uv/"><code>uv</code></a></li>
+<li><a
+href="https://en.wikipedia.org/wiki/Pip_(package_manager)"><code>pip</code></a>
+or <a href="https://github.com/pypa/pipx"><code>pipx</code></a></li>
+<li><code>npm</code> and <code>npx</code> (it comes with Node.js after
+all)</li>
+<li><a href="https://pnpm.io/"><code>pnpm</code></a></li>
+<li><a href="https://github.com/yarnpkg"><code>yarn</code></a></li>
+</ul>
+<p>If you package your Rust CLI for PyPI and NPM, you will unblock an
+almost frictionless way for users to run your tool.
+<code>uvx celq</code> and <code>npx celq</code> should just download the
+binary somewhere and run it.</p>
+<p><code>yarn install celq</code> and <code>pip install celq</code>
+might require a few extra steps, but overall it is still a simple way of
+installing software. I am not saying it is the best way of installing
+software (it isn’t). But it gets the job done.</p>
+<p>Also, in my defense: <code>celq</code> is tangentially useful for
+Python and JavaScript developers.</p>
+<p>Have you ever wondered what versions <code>uv</code> resolves for a
+project? Well, <code>celq</code> can query it. Let’s take for example
+<code>jupyter</code> related packages:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uvx</span> celq <span class="at">--from-toml</span> <span class="at">-p</span> <span class="st">&#39;this.package.filter(p, p.name.contains(&quot;jupyter&quot;))&#39;</span> <span class="op">&lt;</span> uv.lock</span></code></pre></div>
+<p><code>uv.lock</code> is a TOML file, <code>celq</code> can process
+TOML. The same argument applies for <code>package-lock.json</code>!</p>
+<p>Now that the motivation is clearer, let’s see what the process
+entails.</p>
+<h2 id="python">Python</h2>
+<p>To publish binaries for PyPI, we will use many tools written in Rust.
+The first one is <code>uv</code> which we discussed previously. More
+specifically, we’ll be interested in the <a
+href="https://docs.astral.sh/uv/guides/package/#publishing-your-package"><code>uv publish</code></a>
+subcommand of <code>uv</code>.</p>
+<p>The other immediate tool is <a
+href="https://www.maturin.rs/">maturin</a>. Maturin is mostly known for
+building Python extensions in Rust. But it works for Rust binaries as
+well.</p>
+<p>The only thing you will need is a <code>pyproject.toml</code> file.
+You need to put it somewhere. For my project, I made a <code>pypi</code>
+folder and put it in <code>pypi/pyproject.toml</code>. But putting it at
+the root of your repository works too.</p>
+<p>There are lots of metadata in the file, but the core of it is:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode toml"><code class="sourceCode toml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[project]</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">&quot;placeholder&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">requires-python</span> <span class="op">=</span> <span class="st">&quot;&gt;=3.10&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="dt">description</span> <span class="op">=</span> <span class="st">&quot;TODO&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="dt">readme</span> <span class="op">=</span> <span class="op">{</span><span class="dt">file</span><span class="op"> =</span> <span class="st">&quot;README.md&quot;</span><span class="op">, </span><span class="dt">content-type</span><span class="op"> =</span> <span class="st">&quot;text/markdown&quot;</span><span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="dt">license-files</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;FILLME&quot;</span><span class="op">]</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="dt">dynamic</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;version&quot;</span><span class="op">]</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">[build-system]</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="dt">requires</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;maturin&gt;=1.9,&lt;2&quot;</span><span class="op">]</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="dt">build-backend</span> <span class="op">=</span> <span class="st">&quot;maturin&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.maturin]</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="dt">bindings</span> <span class="op">=</span> <span class="st">&quot;bin&quot;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="dt">manifest-path</span> <span class="op">=</span> <span class="st">&quot;../Cargo.toml&quot;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="dt">module-name</span> <span class="op">=</span> <span class="st">&quot;placeholder&quot;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="dt">locked</span> <span class="op">=</span> <span class="cn">true</span></span></code></pre></div>
+<p>That is it. Compared to NPM, this one is fairly simple. Of course
+your <code>Cargo.toml</code> might be in a different path or your
+workspace might have multiple binaries. Mine didn’t so I didn’t have to
+take care of it. But if you have to, just check <a
+href="https://www.maturin.rs/config.html">maturin’s documentation</a>
+because they support it all.</p>
+<p>After all is setup, you can build a Python wheel locally. Just run
+this command in the same directory as your
+<code>pyproject.toml</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> build <span class="at">--wheel</span></span></code></pre></div>
+<p>Under the hood, <code>uv</code> will end up calling
+<code>maturin</code> and give you a <code>.whl</code> file somewhere.
+Assuming you have a <a href="https://pypi.org/help/#apitoken">PyPI API
+token</a>, you can upload the wheel with:</p>
+<pre><code>uv publish  some/path/placeholder.whl</code></pre>
+<p>I could tell you that is all there is to it. If you are on macOS,
+Windows, or Alpine Linux the above command works. But that would be a
+lie.</p>
+<p>If you are running a moderately recent Linux distribution that
+doesn’t use musl, you’ll get the following error:</p>
+<pre><code>Binary wheel &#39;placeholder-0.0.1-py3-none-linux_x86_64.whl&#39; has an unsupported platform tag &#39;linux_x86_64&#39;.</code></pre>
+<p>This comes from the thoughtful decision of the PyPI maintainers to
+make binaries published in PyPI compatible with older Linux
+distributions. The TL;DR for folks that just want to publish software
+is: if you build on a Linux distro that is too new, it might include
+newer libc symbols. If you try to execute the binary on an older distro,
+things could break!</p>
+<p>One solution for that problem is <a
+href="https://github.com/pypa/cibuildwheel">cibuildwheel</a>. The
+summary of it is that the Python Packaging Authoritry (PyPA) curates a
+Docker image that will for sure have an older <code>libc</code> version.
+You build inside of it, your wheel gets a <code>manylinux_2_28</code> or
+equivalent suffix instead of <code>linux_x86_64</code>, everyone is
+happy. But that is not what I did!</p>
+<p>Instead, I chose to use <a
+href="https://github.com/rust-cross/cargo-zigbuild">cargo-zigbuild</a>.
+Why? Because Zig is cool and I wanted to try it. But I also found it
+more lightweight than cibuildwheel. The reasoning behind cargo-zigbuild
+is as follows: Zig has a great linker, it ships with libc headers, why
+not use it? You get easier cross-compilation as a bonus as well.</p>
+<p>If you thought that it was unusual for <code>celq</code> to be in
+PyPI, wait until you discover that both the Zig compiler and
+cargo-zigbuild are there. All these together allows us to conjure a
+single <code>uv</code> command to compile the binary:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uvx</span> <span class="at">--from</span> maturin==1.11.5 <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--with</span> ziglang==0.15.1 <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--with</span> cargo-zigbuild==0.21.1 <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    maturin build <span class="at">--release</span> <span class="at">--target</span> x86_64-unknown-linux-gnu <span class="dt">\</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--zig</span> <span class="at">--compatibility</span> manylinux_2_28</span></code></pre></div>
+<p>That command creates an environment with maturin, Zig,
+cargo-zigbuild, and tells maturin to use Zig targeting glibc 2.28. That
+solves our problem.</p>
+<p>If you want to see the complete picture, check <a
+href="https://github.com/IvanIsCoding/celq/blob/main/.github/workflows/release_pypi.yml">release_pypi.yml</a>
+for the complete setup with GitHub actions and trusted publishers. The
+file covers aarch64 and musl that I skipped for brevity, but overall
+<code>uv build</code> and the Zig incantation are enough.</p>
+<h2 id="npm">NPM</h2>
+<p>Compared to PyPI, NPM has even less restrictions. It is kind of the
+wild west, as long as you comply with the ToS you can probably upload
+any package to NPM.</p>
+<p>There is prior art: firstly the <a
+href="https://axodotdev.github.io/cargo-dist/book/"><code>dist</code></a>
+tool. I ended up not choosing <code>dist</code> because I wanted to
+understand how things worked. But it is the most mindless way to get
+your Rust binary in NPM. The tool should do nearly everything for
+you.</p>
+<p>Secondly, there is <a
+href="https://blog.orhun.dev/packaging-rust-for-npm/">orhun’s blog</a>.
+It is the best blog on the subject in my opinion. If I rewrote it I
+would be doing a disservice, so if you are interested go read the
+original. What I will focus on is explaining how the trick works.</p>
+<p>Orhun’s strategy for <code>git-cliff</code> was as follows:</p>
+<ul>
+<li>Create platform specific packages
+e.g. <code>@namespace/placeholder-linux-x64</code> or
+<code>@namespace/placeholder-darwin-arm64</code></li>
+<li>Create a <code>@namespace/placeholder</code> package glueing it all
+together</li>
+</ul>
+<p>The code for <code>@namespace/placeholder</code> is a thin JavaScript
+shim. The JS code will essentially find your binary in
+<code>node_modules</code> from the platform specific package
+(e.g. <code>@namespace/placeholder-linux-x64</code>) and forward the
+arguments to the binary. That is it.</p>
+<p>You can take a look at <a
+href="https://github.com/IvanIsCoding/celq/blob/main/npm/celq/src/index.ts">index.ts</a>
+for the shim code and <a
+href="https://github.com/IvanIsCoding/celq/blob/main/.github/workflows/release_npm.yml">release_npm.yml</a>
+for the GitHub Actions.</p>
+<p>I will disclaim that I modified Orhun’s code slightly to make
+<code>celq</code> dogfood <code>celq</code>. Yes, I use my own CLI tool
+to fill in a <code>package.json</code> template of sorts. See <a
+href="https://github.com/IvanIsCoding/celq/blob/main/npm/celq/package.json.cel"><code>package.json.cel</code></a>
+if you are curious.</p>
+<p>Another thing I learned is: the <code>optionalDependencies</code>
+fields controls the platform-specific binaries. If you ever need to
+delete macOS x64 or add a future platform like Linux loong64, that is
+the place to do it.</p>
+<h2 id="github-actions">GitHub Actions</h2>
+<p>Last but not least, let’s cover GitHub Actions. It is a popular CI/CD
+option, so again you might be interested in making your software
+available in that kind of environment.</p>
+<p>The ultimate goal for <code>celq</code> was to have this kind of
+Action:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Example Celq Action</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">id</span><span class="kw">:</span><span class="at"> exampleID</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> get-celq/celq-action@main</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">cmd</span><span class="kw">:</span><span class="at"> celq &#39;this.exampleID&#39; &lt; example.json</span></span></code></pre></div>
+<p>The action runs a one-off command and it stores the result in a
+variable (<code>steps.exampleID.outputs.result</code>). For permanently
+installing a binary, we’ll cover <code>cargo binstall</code> + <a
+href="https://github.com/taiki-e/install-action">install-action</a> in
+the next blog post.</p>
+<p>There are two ways of writing GitHub Actions. The first one is with
+Docker. Perhaps it would have been a more natural way of doing this, but
+this is not how things happened.</p>
+<p>The second way is to write JavaScript. Don’t ask me why, but GitHub
+Actions are all Node.js based. This is how the NPM section discussed
+previously comes into play. My strategy was:</p>
+<ol type="1">
+<li>Make a Node.js action</li>
+<li>Inside the Node.js action, call
+<code>npx -y @namespace/placeholder $COMMAND</code></li>
+<li>Profit</li>
+</ol>
+<p>It turns out that strategy works. I asked Gemini to vibe-code it for
+me, <a
+href="https://github.com/get-celq/celq-action/blob/main/index.js">index.js</a>
+came out, it works.</p>
+<p>Also, you did not ask but: I wrote this blog and celq’s documentation
+by hand. This was more of a vibe engineered project, it’s not a Level 8
+fully autonomous thing. At least I tested the binary and deferred most
+logic to established libraries (i.e. <code>serde_json</code>,
+<code>cel-rust</code>).</p>
+<h2 id="whats-next">What’s Next</h2>
+<p>If you found this blog post interesting, stay tuned for the next one.
+It will cover Linux and macOS. There’s GitHub releases, there’s bash
+scripts that are piped to <code>curl</code>, there’s Homebrew, how
+<code>cargo binstall</code> leads to another GitHub Actions integration,
+and more.</p>
+
+    </div>
+
+    
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rust/">rust</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="portrait mr-3" src="/authors/authors/avatar_hu_e6b5933c51c7da19.jpg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="https://ivaniscoding.github.io/">Ivan Carvalho</a></h5>
+      <h6 class="card-subtitle">Software Developer</h6>
+      <p class="card-text">Always looking for a challenge!</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/ivan-carvalho/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/IvanIsCoding" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <script src="/js/academic.min.abdd766c2ff9ae04ed4871c941357ca8.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
